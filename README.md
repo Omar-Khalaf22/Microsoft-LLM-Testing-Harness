@@ -4,10 +4,8 @@ USF Senior Capstone project with Microsoft for Fall 2026.
 
 ## Project Overview
 
-This project will design, build, and deploy an extensible web-based testing harness for large language models (LLMs). The application is intended to support repeatable tests and test suites against configurable OpenAI-compatible model endpoints, capture run results and metadata, support objective and subjective evaluation, and provide an interface for reviewing and comparing model performance.
+This project will design, build, and deploy an extensible web-based testing harness for LLMs. The application is intended to support repeatable tests and test suites against configurable OpenAI compatible model endpoints, capture run results and metadata, support objective and subjective evaluation, and provide an interface for reviewing and comparing model performance.
 
-The project is based in part on concepts from Brad Lawrence's existing `ai-server` evaluation workflow:
-https://github.com/bradrlaw/ai-server
 
 ## Core Required Capabilities
 
@@ -19,32 +17,31 @@ https://github.com/bradrlaw/ai-server
 - Capture prompts, model responses, configuration, timestamps, latency/usage data when available, scores, evaluator input, and errors in structured JSON.
 - Provide a documented method to import/load JSON results into PostgreSQL.
 - Provide an HTML-based interface for managing tests, starting runs, reviewing results, entering subjective scores, and comparing models.
-- Deploy the completed application to Microsoft Azure while staying within the provided resource budget.
+- Deploy the completed application to Microsoft Azure while staying within the provided $100/month budget.
 - Provide deployment automation and project documentation.
 
 ## Project Status
 
-**Phase:** Discovery / architecture planning
+**Phase:** Discovery/architecture planning
 
-The team is currently validating requirements with the Microsoft mentor, studying the existing `ai-server/evals` workflow, defining the initial architecture, and assigning primary technical ownership areas.
+The team is currently validating requirements with the Microsoft mentors, studying the existing `ai-server/evals` workflow made by Brad, defining the initial architecture, and assigning primary technical ownership areas.
 
-Technology choices in this repository should be treated as **TBD until the team agrees on the stack and confirms any relevant preferences with the Microsoft mentor**.
 
 ## Proposed Team Workstreams
 
-1. **Backend & LLM Integration** — model endpoints, test execution, backend APIs, run metadata, error handling.
-2. **Evaluation & Test Framework** — test/rubric structure, objective scoring, subjective scoring, test versioning, AI-assisted test creation.
-3. **Frontend & UX** — test management, run configuration, results/history, model comparison, human scoring interface.
-4. **Cloud, Database & DevOps** — PostgreSQL/data model, JSON import/load workflow, Azure deployment, secrets/configuration, deployment automation.
+1. **Backend & LLM Integration**: model endpoints, test execution, backend APIs, run metadata, error handling.
+2. **Evaluation & Test Framework**: test/rubric structure, objective scoring, subjective scoring, test versioning, AI-assisted test creation.
+3. **Frontend & UX**: test management, run configuration, results/history, model comparison, human scoring interface.
+4. **Cloud, Database & DevOps**: PostgreSQL/data model, JSON import/load workflow, Azure deployment, secrets/configuration, deployment automation.
 
 These are primary ownership areas, not silos. Architecture, requirements, reviews, documentation, integration, and final testing are shared responsibilities.
 
-## Repository Structure
+## Repo Structure
 
 ```text
 .
 ├── backend/            # Backend APIs, model execution, scoring integration
-├── frontend/           # Web application / user interface
+├── frontend/           # Web app/user interface
 ├── database/           # PostgreSQL schema, migrations, import/load utilities
 ├── deployment/         # Azure deployment and automation
 ├── examples/           # Representative LLM tests and scoring rubrics
