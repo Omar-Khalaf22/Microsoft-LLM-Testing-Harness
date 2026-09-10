@@ -1,6 +1,6 @@
 # Preliminary Architecture
 
-> Status: exploratory. This document is intentionally technology-agnostic until the team confirms requirements and selects the implementation stack.
+> Status: exploratory. This document is intentionally unconfirmed until the team confirms requirements and selects the implementation stack.
 
 ## High-Level Flow
 
