@@ -12,6 +12,13 @@ The project is a modular monolith with three parts:
 
 For local development, Docker Compose runs PostgreSQL only. The backend and frontend run directly on the developer's machine.
 
+## Documentation
+
+- [Architecture](docs/architecture.md)
+- [Data model](docs/data-model.md)
+- [Requirements](docs/requirements.md)
+- [Contributing](CONTRIBUTING.md)
+
 ## Prerequisites
 
 - Python 3.12

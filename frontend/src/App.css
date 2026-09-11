@@ -50,4 +50,3 @@ h1 {
 [data-status="checking"] { color: #7a5c00; }
 [data-status="ok"] { color: #08783e; }
 [data-status="unavailable"] { color: #b42318; }
-

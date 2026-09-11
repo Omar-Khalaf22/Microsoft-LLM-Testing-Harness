@@ -1,5 +1,8 @@
 # Python
-backend/.venv/
+.venv/
+venv/
+env/
+ENV/
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -7,18 +10,19 @@ __pycache__/
 *.egg-info/
 
 # Frontend
-frontend/node_modules/
-frontend/dist/
+node_modules/
+dist/
 *.tsbuildinfo
 
 # Environment files
 .env
 .env.*
 !.env.example
+.pypirc
+.streamlit/secrets.toml
 
 # Editors and operating systems
 .idea/
 .vscode/
 .DS_Store
 Thumbs.db
-
