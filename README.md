@@ -1,79 +1,107 @@
-# Microsoft LLM Testing Harness
+# LLM Testing Harness
 
-USF Senior Capstone project with Microsoft for Fall 2026.
+LLM Testing Harness is a senior capstone project for creating and reviewing repeatable LLM evaluations. This repository currently contains only the Phase 0 application foundation; model calls, evaluation tasks, scoring, and run orchestration have not been implemented.
 
-## Project Overview
+## Architecture
 
-This project will design, build, and deploy an extensible web-based testing harness for LLMs. The application is intended to support repeatable tests and test suites against configurable OpenAI compatible model endpoints, capture run results and metadata, support objective and subjective evaluation, and provide an interface for reviewing and comparing model performance.
+The project is a modular monolith with three parts:
 
+- A React and TypeScript browser frontend.
+- A Python and FastAPI REST backend.
+- PostgreSQL as the future application system of record.
 
-## Core Required Capabilities
+For local development, Docker Compose runs PostgreSQL only. The backend and frontend run directly on the developer's machine.
 
-- Create, refine, version, store, and execute tests.
-- Use an LLM to assist with developing prompts, expected behaviors, edge cases, and evaluation criteria while preserving human review and approval.
-- Execute individual tests or suites against configurable OpenAI-compatible endpoints and models.
-- Automatically calculate objective scores where practical.
-- Support subjective human ratings and evaluator notes when objective scoring is insufficient.
-- Capture prompts, model responses, configuration, timestamps, latency/usage data when available, scores, evaluator input, and errors in structured JSON.
-- Provide a documented method to import/load JSON results into PostgreSQL.
-- Provide an HTML-based interface for managing tests, starting runs, reviewing results, entering subjective scores, and comparing models.
-- Deploy the completed application to Microsoft Azure while staying within the provided $100/month budget.
-- Provide deployment automation and project documentation.
+## Prerequisites
 
-## Project Status
+- Python 3.12
+- Node.js 22 or later and npm
+- Docker with Docker Compose
 
-**Phase:** Discovery/architecture planning
+## Environment setup
 
-The team is currently validating requirements with the Microsoft mentors, studying the existing `ai-server/evals` workflow made by Brad, defining the initial architecture, and assigning primary technical ownership areas.
+Copy `.env.example` to `.env`. The example values match `docker-compose.yml` and are intended only for local development.
 
-
-## Proposed Team Workstreams
-
-1. **Backend & LLM Integration**: model endpoints, test execution, backend APIs, run metadata, error handling.
-2. **Evaluation & Test Framework**: test/rubric structure, objective scoring, subjective scoring, test versioning, AI-assisted test creation.
-3. **Frontend & UX**: test management, run configuration, results/history, model comparison, human scoring interface.
-4. **Cloud, Database & DevOps**: PostgreSQL/data model, JSON import/load workflow, Azure deployment, secrets/configuration, deployment automation.
-
-These are primary ownership areas, not silos. Architecture, requirements, reviews, documentation, integration, and final testing are shared responsibilities.
-
-## Repo Structure
+The frontend uses `http://localhost:8000` by default. To use another backend address, create `frontend/.env.local` containing:
 
 ```text
-.
-├── backend/            # Backend APIs, model execution, scoring integration
-├── frontend/           # Web app/user interface
-├── database/           # PostgreSQL schema, migrations, import/load utilities
-├── deployment/         # Azure deployment and automation
-├── examples/           # Representative LLM tests and scoring rubrics
-├── tests/              # Automated tests for this application
-├── docs/
-│   ├── architecture.md
-│   ├── requirements.md
-│   ├── decisions/
-│   └── meeting-notes/
-├── .env.example
-├── .gitignore
-└── CONTRIBUTING.md
+VITE_API_BASE_URL=http://localhost:8000
 ```
 
-## Team Workflow
+## Start PostgreSQL
 
-- `main` should remain stable.
-- Development work should happen on short-lived feature branches.
-- Suggested branch names include `feature/model-endpoints`, `feature/test-schema`, `feature/results-dashboard`, and `feature/postgres-schema`.
-- Open a pull request before merging significant changes into `main`.
-- At least one teammate should review a pull request when practical.
-- Track implementation work and blockers with GitHub Issues.
+From the repository root:
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the working conventions.
+```shell
+docker compose up -d postgres
+```
 
-## Documentation
+Stop it with `docker compose down`. The named `postgres_data` volume preserves database data between container restarts.
 
-- [Requirements](docs/requirements.md)
-- [Preliminary Architecture](docs/architecture.md)
-- [Architecture Decision Records](docs/decisions/README.md)
-- [Meeting Notes](docs/meeting-notes/README.md)
+## Backend setup
 
-## Security Note
+From the `backend` directory, create and activate a virtual environment:
 
-Never commit API keys, passwords, database credentials, Azure secrets, or other sensitive values. Use environment variables or approved secret-management mechanisms. `.env` files are intentionally excluded from version control.
+```shell
+python -m venv .venv
+```
+
+```powershell
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+```
+
+```shell
+# macOS or Linux
+source .venv/bin/activate
+```
+
+Install the application and development dependencies:
+
+```shell
+python -m pip install -e ".[dev]"
+```
+
+Then apply migrations and start the API:
+
+```shell
+alembic upgrade head
+uvicorn app.main:app --reload
+```
+
+The health endpoint is available at `http://localhost:8000/health`.
+
+## Frontend setup
+
+From the `frontend` directory:
+
+```shell
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`. The page calls the backend health endpoint and displays its status.
+
+## Verification
+
+Run backend tests and checks from `backend`:
+
+```shell
+pytest
+ruff check .
+ruff format --check .
+```
+
+Run the frontend build validation from `frontend`:
+
+```shell
+npm run build
+```
+
+Validate the Compose configuration from the repository root:
+
+```shell
+docker compose config
+```
+
+The backend health tests do not need a running PostgreSQL instance. Database integration tests will be added when Phase 1 introduces application data.
