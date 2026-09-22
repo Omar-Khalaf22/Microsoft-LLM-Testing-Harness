@@ -1,8 +1,4 @@
-"""Test-first contract for the inline Run service and router.
-
-Target modules intentionally do not exist yet. Imports happen in fixtures so each
-missing dependency is reported as a setup error, without hiding existing tests.
-"""
+"""Contract and integration tests for the inline Run service and API."""
 
 from unittest.mock import Mock
 
@@ -217,3 +213,49 @@ def test_real_app_exposes_post_runs(monkeypatch, request_model, executor, execut
         assert response.json() == execution_result.to_dict()
         executor.execute.assert_called_once_with(EvaluationRequest(**request_model.model_dump()))
     assert app.dependency_overrides == original_overrides
+
+
+@pytest.mark.parametrize("body", [{}, {"prompt": None}, {"prompt": "   "}, []])
+def test_invalid_body_skips_default_executor_construction(monkeypatch, body):
+    from app.routes import runs
+
+    monkeypatch.setenv("LLM_PROVIDER", "openai")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    provider = Mock(wraps=runs.OpenAICompatibleProvider)
+    repository = Mock(side_effect=AssertionError("Unexpected storage construction"))
+    executor_constructor = Mock(side_effect=AssertionError("Unexpected executor construction"))
+    monkeypatch.setattr(runs, "OpenAICompatibleProvider", provider)
+    monkeypatch.setattr(runs, "JsonResultRepository", repository)
+    monkeypatch.setattr(runs, "TestExecutor", executor_constructor)
+    app = FastAPI()
+    app.include_router(runs.router)
+
+    with TestClient(app) as real_dependency_client:
+        response = real_dependency_client.post("/runs", json=body)
+
+    assert response.status_code == 422
+    provider.assert_not_called()
+    repository.assert_not_called()
+    executor_constructor.assert_not_called()
+
+
+def test_valid_body_with_missing_api_key_returns_sanitized_500(monkeypatch, request_model):
+    from app.routes import runs
+
+    monkeypatch.setenv("LLM_PROVIDER", "openai")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    provider = Mock(wraps=runs.OpenAICompatibleProvider)
+    repository = Mock(side_effect=AssertionError("Unexpected storage construction"))
+    monkeypatch.setattr(runs, "OpenAICompatibleProvider", provider)
+    monkeypatch.setattr(runs, "JsonResultRepository", repository)
+    app = FastAPI()
+    app.include_router(runs.router)
+
+    with TestClient(app) as real_dependency_client:
+        response = real_dependency_client.post("/runs", json=request_model.model_dump(mode="json"))
+
+    assert response.status_code == 500
+    assert response.json() == {"detail": "The run could not be completed."}
+    provider.assert_called_once()
+    assert provider.call_args.kwargs["api_key"] == ""
+    repository.assert_not_called()

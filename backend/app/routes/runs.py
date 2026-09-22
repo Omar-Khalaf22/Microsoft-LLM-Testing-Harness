@@ -15,9 +15,10 @@ from app.services.run_service import create_run
 router = APIRouter()
 
 
-def get_executor() -> TestExecutor:
+def get_executor(request: RunCreateRequest) -> TestExecutor:
     """Use process environment like the demo, with a separate API result file.
 
+    The body parameter requires validation before this dependency runs.
     Construction is request-scoped. The existing repository lock does not protect
     this temporary file across requests/processes; concurrent storage needs follow-up.
     These environment variables are not currently part of app.config.Settings.
