@@ -40,7 +40,9 @@ class EvaluationTests(unittest.TestCase):
             ["error"],
         )
         self.assertEqual(score, 90)
-        forbidden_result = next(item for item in criteria if item.name == "Forbidden terms")
+        forbidden_result = next(
+            item for item in criteria if item.name == "Forbidden terms"
+        )
         self.assertFalse(forbidden_result.passed)
 
     def test_end_to_end_execution_and_storage(self) -> None:

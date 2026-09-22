@@ -23,7 +23,9 @@ class TestExecutor:
 
     def execute(self, request: TestRequest) -> TestResult:
         started = perf_counter()
-        generated = self.provider.generate(request.prompt, request.model, request.temperature)
+        generated = self.provider.generate(
+            request.prompt, request.model, request.temperature
+        )
         score, criteria = score_response(
             request.prompt,
             generated.text,

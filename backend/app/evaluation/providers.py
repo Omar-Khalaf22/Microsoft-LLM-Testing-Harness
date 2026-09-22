@@ -58,7 +58,9 @@ class OpenAICompatibleProvider:
 
     def __init__(self, api_key: str, base_url: str):
         if not api_key:
-            raise RuntimeError("An API key is required for the OpenAI compatible provider.")
+            raise RuntimeError(
+                "An API key is required for the OpenAI compatible provider."
+            )
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
 

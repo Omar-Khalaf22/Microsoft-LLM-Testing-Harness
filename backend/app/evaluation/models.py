@@ -29,7 +29,9 @@ class TestRequest:
             raise ValidationError("Prompt must be 10,000 characters or fewer.")
 
         keywords = _parse_terms(data.get("expected_keywords", []), "Expected keywords")
-        forbidden_terms = _parse_terms(data.get("forbidden_terms", []), "Forbidden terms")
+        forbidden_terms = _parse_terms(
+            data.get("forbidden_terms", []), "Forbidden terms"
+        )
 
         try:
             temperature = float(data.get("temperature", 0.2))
