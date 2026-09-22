@@ -1,0 +1,35 @@
+{
+  "run_id": "run_001",
+  "test_id": "json_test_001",
+  "test_version": 1,
+  "model": {
+    "model_id": "local_model_001",
+    "name": "local-model-name"
+  },
+  "status": "completed",
+  "configuration": {
+    "temperature": 0,
+    "max_tokens": 300
+  },
+  "input": {
+    "prompt": "Return the following customer information as JSON with exactly the fields \"name\" and \"age\": John is 25 years old."
+  },
+  "response": {
+    "content": "{\"name\":\"John\",\"age\":25}"
+  },
+  "evaluations": [
+    {
+      "method": "valid_json",
+      "passed": true,
+      "score": 1.0
+    }
+  ],
+  "metrics": {
+    "latency_ms": 1240,
+    "input_tokens": 18,
+    "output_tokens": 12
+  },
+  "started_at": "2026-09-19T18:00:00Z",
+  "completed_at": "2026-09-19T18:00:01.240Z",
+  "error": null
+}

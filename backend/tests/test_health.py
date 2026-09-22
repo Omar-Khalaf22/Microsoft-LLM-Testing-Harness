@@ -1,13 +1,6 @@
-import os
-
 from fastapi.testclient import TestClient
 
-os.environ.setdefault(
-    "DATABASE_URL",
-    "postgresql+psycopg://llm_harness:test@localhost:5432/llm_harness_test",
-)
-
-from app.main import app  # noqa: E402
+from app.main import app
 
 client = TestClient(app)
 
