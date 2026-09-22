@@ -11,9 +11,7 @@ from app.evaluation.scoring import score_response
 
 class EvaluationTests(unittest.TestCase):
     def test_request_validation(self) -> None:
-        request = TestRequest.from_dict(
-            {"prompt": "Hello", "expected_keywords": "one, two"}
-        )
+        request = TestRequest.from_dict({"prompt": "Hello", "expected_keywords": "one, two"})
         self.assertEqual(request.expected_keywords, ["one", "two"])
         with self.assertRaises(ValidationError):
             TestRequest.from_dict({"prompt": ""})
@@ -40,18 +38,14 @@ class EvaluationTests(unittest.TestCase):
             ["error"],
         )
         self.assertEqual(score, 90)
-        forbidden_result = next(
-            item for item in criteria if item.name == "Forbidden terms"
-        )
+        forbidden_result = next(item for item in criteria if item.name == "Forbidden terms")
         self.assertFalse(forbidden_result.passed)
 
     def test_end_to_end_execution_and_storage(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             repository = JsonResultRepository(Path(directory) / "results.jsonl")
             executor = TestExecutor(DemoProvider(), repository)
-            request = TestRequest.from_dict(
-                {"prompt": "Explain an API", "minimum_length": 20}
-            )
+            request = TestRequest.from_dict({"prompt": "Explain an API", "minimum_length": 20})
             result = executor.execute(request)
             self.assertEqual(result.status, "completed")
             self.assertEqual(result.provider, "local_demo")

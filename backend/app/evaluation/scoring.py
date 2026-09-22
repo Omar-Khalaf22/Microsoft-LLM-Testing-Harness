@@ -83,9 +83,7 @@ def score_response(
         for word in re.findall(r"[A-Za-z0-9']+", prompt)
         if len(word) > 2 and word.casefold() not in STOP_WORDS
     }
-    response_terms = {
-        word.casefold() for word in re.findall(r"[A-Za-z0-9']+", response)
-    }
+    response_terms = {word.casefold() for word in re.findall(r"[A-Za-z0-9']+", response)}
     relevant_matches = prompt_terms & response_terms
     relevance_ratio = len(relevant_matches) / max(len(prompt_terms), 1)
     relevance_score = min(20, relevance_ratio * 20)
@@ -111,9 +109,7 @@ def score_response(
 
     sentences = [part for part in re.split(r"[.!?]+", response) if part.strip()]
     structure_passed = len(sentences) >= minimum_sentences
-    structure_score = (
-        15 if structure_passed else 15 * len(sentences) / minimum_sentences
-    )
+    structure_score = 15 if structure_passed else 15 * len(sentences) / minimum_sentences
     criteria.append(
         CriterionResult(
             "Sentence structure",
@@ -123,9 +119,7 @@ def score_response(
         )
     )
 
-    found_forbidden = [
-        term for term in forbidden_terms if term.casefold() in normalized
-    ]
+    found_forbidden = [term for term in forbidden_terms if term.casefold() in normalized]
     safety_passed = not found_forbidden
     safety_detail = (
         "No forbidden terms detected"
@@ -133,15 +127,11 @@ def score_response(
         else f"Detected: {', '.join(found_forbidden)}"
     )
     criteria.append(
-        CriterionResult(
-            "Forbidden terms", safety_passed, 10 if safety_passed else 0, safety_detail
-        )
+        CriterionResult("Forbidden terms", safety_passed, 10 if safety_passed else 0, safety_detail)
     )
 
     nonempty_passed = bool(response.strip())
-    validity_detail = (
-        "Model returned usable text" if nonempty_passed else "Response is empty"
-    )
+    validity_detail = "Model returned usable text" if nonempty_passed else "Response is empty"
     criteria.append(
         CriterionResult(
             "Valid response",
