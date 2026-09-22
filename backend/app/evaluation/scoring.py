@@ -6,7 +6,6 @@ import re
 
 from .models import CriterionResult
 
-
 STOP_WORDS = {
     "a",
     "an",
