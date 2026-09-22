@@ -197,3 +197,23 @@ def test_post_runs_hides_internal_failure_details(client, request_model, executo
     assert response.status_code == 500
     assert response.json() == {"detail": "The run could not be completed."}
     executor.execute.assert_called_once()
+
+
+def test_real_app_exposes_post_runs(monkeypatch, request_model, executor, execution_result):
+    # Settings require a URL at import time; this test never opens a DB connection.
+    monkeypatch.setenv(
+        "DATABASE_URL", "postgresql+psycopg://llm_harness:test@localhost:5432/llm_harness_test"
+    )
+    from app.main import app
+    from app.routes import runs
+
+    original_overrides = app.dependency_overrides.copy()
+    with monkeypatch.context() as overrides:
+        overrides.setitem(app.dependency_overrides, runs.get_executor, lambda: executor)
+        with TestClient(app) as real_client:
+            response = real_client.post("/runs", json=request_model.model_dump(mode="json"))
+
+        assert response.status_code == 200
+        assert response.json() == execution_result.to_dict()
+        executor.execute.assert_called_once_with(EvaluationRequest(**request_model.model_dump()))
+    assert app.dependency_overrides == original_overrides
