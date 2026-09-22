@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LLM Testing Harness</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div>
+        <p class="eyebrow">CAPSTONE PROTOTYPE V3</p>
+        <h1>LLM Testing Harness</h1>
+        <p class="subtitle">Run prompts, evaluate responses, and inspect structured test results.</p>
+      </div>
+      <div class="status"><span></span> System ready</div>
+    </header>
+
+    <main>
+      <section class="panel input-panel">
+        <div class="section-title"><span>01</span><h2>Configure test</h2></div>
+        <form id="test-form">
+          <label for="prompt">Test prompt</label>
+          <textarea id="prompt" required>Explain why structured JSON results are useful in an LLM testing system.</textarea>
+          <div class="grid">
+            <div>
+              <label for="keywords">Expected keywords</label>
+              <input id="keywords" value="testing, JSON, metadata" placeholder="comma, separated, terms">
+            </div>
+            <div>
+              <label for="model">Model</label>
+              <select id="model">
+                <option value="demo-strong-v1">GPT 4.1 Simulation</option>
+                <option value="demo-partial-v1">GPT 4 Simulation</option>
+                <option value="demo-failing-v1">GPT 3.1 Simulation</option>
+              </select>
+            </div>
+            <div>
+              <label for="temperature">Temperature <output id="temp-value">0.2</output></label>
+              <input id="temperature" type="range" min="0" max="2" step="0.1" value="0.2">
+            </div>
+            <div>
+              <label for="minimum-length">Minimum characters</label>
+              <input id="minimum-length" type="number" min="0" value="80">
+            </div>
+            <div>
+              <label for="minimum-sentences">Minimum sentences</label>
+              <input id="minimum-sentences" type="number" min="1" max="20" value="3">
+            </div>
+            <div>
+              <label for="forbidden-terms">Forbidden terms</label>
+              <input id="forbidden-terms" value="error, unavailable" placeholder="comma, separated, terms">
+            </div>
+          </div>
+          <div class="button-row">
+            <button id="run-button" type="submit"><span>Run one test</span><span class="arrow">→</span></button>
+            <button id="suite-button" class="secondary" type="button"><span>Run 3 case suite</span><span class="arrow">▦</span></button>
+          </div>
+          <p id="error" role="alert"></p>
+        </form>
+      </section>
+
+      <section class="panel result-panel">
+        <div class="section-title"><span>02</span><h2>Latest result</h2></div>
+        <div id="empty-state" class="empty-state"><div class="pulse"></div><p>Run a test to see the execution result.</p></div>
+        <div id="result" hidden>
+          <div class="result-summary">
+            <div class="score-ring"><strong id="score">0</strong><small>/100</small></div>
+            <div><span id="badge" class="badge">PASS</span><h3 id="result-title">Test completed</h3><p id="metadata"></p></div>
+          </div>
+          <div class="response-box"><label>Model response</label><p id="response"></p></div>
+          <div id="criteria" class="criteria"></div>
+          <details><summary>Structured JSON result</summary><pre id="json-result"></pre></details>
+        </div>
+      </section>
+
+      <section class="panel history-panel">
+        <div class="section-title"><span>03</span><h2>Recent executions</h2></div>
+        <div id="history"><p class="muted">No saved executions yet.</p></div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
