@@ -173,6 +173,9 @@ h1 {
 .evaluation-list [data-passed="true"] { color: #08783e; }
 .evaluation-list [data-passed="false"] { color: #b42318; }
 
+.run-card-section strong[data-passed="true"] { color: #08783e; }
+.run-card-section strong[data-passed="false"] { color: #b42318; }
+
 .metrics-grid {
   margin: 0;
   display: grid;
@@ -187,4 +190,76 @@ h1 {
 
 .metrics-grid dd {
   margin: 0;
+}
+
+.run-form {
+  padding: 1.5rem;
+  border: 1px solid #dce3ec;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  box-shadow: 0 0.5rem 1.5rem rgb(24 33 47 / 6%);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.run-form h2 {
+  margin: 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  color: #506176;
+  font-weight: 600;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.field input,
+.field textarea {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #dce3ec;
+  border-radius: 0.5rem;
+  font: inherit;
+  color: #18212f;
+  resize: vertical;
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: 2px solid #2f6fed;
+  outline-offset: 1px;
+}
+
+.run-form button[type="submit"] {
+  align-self: flex-start;
+  padding: 0.65rem 1.25rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: #2f6fed;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.run-form button[type="submit"]:hover {
+  background: #2559c2;
+}
+
+.run-form button[type="submit"]:disabled {
+  background: #9db4e0;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .field-row {
+    grid-template-columns: 1fr;
+  }
 }

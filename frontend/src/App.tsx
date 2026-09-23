@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 
-import { checkHealth } from "./api";
+import { checkHealth, type RunResponse } from "./api";
+import RunForm from "./RunForm";
 import RunResults from "./RunResults";
 
 type HealthState = "checking" | "ok" | "unavailable";
 
 function App() {
   const [health, setHealth] = useState<HealthState>("checking");
+  const [runs, setRuns] = useState<RunResponse[]>([]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -27,6 +29,10 @@ function App() {
     return () => controller.abort();
   }, []);
 
+  function handleRunCreated(run: RunResponse) {
+    setRuns((previous) => [run, ...previous]);
+  }
+
   return (
     <main>
       <div className="page">
@@ -38,7 +44,8 @@ function App() {
           </p>
         </section>
 
-        <RunResults />
+        <RunForm onRunCreated={handleRunCreated} />
+        <RunResults runs={runs} />
       </div>
     </main>
   );

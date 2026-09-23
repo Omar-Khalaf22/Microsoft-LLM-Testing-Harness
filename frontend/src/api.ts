@@ -1,49 +1,50 @@
+// Faithful to the confirmed backend/app/schemas/runs.py contract on pranjal-runs.
+// Do not add fields/endpoints here that aren't confirmed against the real API.
+
 export const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
-// Provisional endpoint path. Update VITE_RUNS_ENDPOINT (or the default below)
-// once Pranjal's run-results API route is finalized.
-const runsEndpointPath = import.meta.env.VITE_RUNS_ENDPOINT ?? "/runs";
-
-export interface ModelResponse {
-  content: string;
-  rawResponseJson?: unknown;
+export interface RunCreateRequest {
+  prompt: string;
+  model: string;
+  temperature: number;
+  expected_keywords: string[];
+  minimum_length: number;
+  minimum_sentences: number;
+  forbidden_terms: string[];
 }
 
-export interface ObjectiveEvaluation {
-  criterionId: string;
-  criterionLabel?: string;
-  score: number;
-  maxScore?: number;
+export interface CriterionResult {
+  name: string;
   passed: boolean;
-}
-
-export interface SubjectiveEvaluation {
-  criterionId: string;
-  criterionLabel?: string;
-  evaluatorId: string;
   score: number;
-  maxScore?: number;
-  notes?: string;
+  detail: string;
 }
 
-export interface RunMetrics {
+export interface RunResponse {
+  id: string;
   status: string;
-  startedAt?: string;
-  completedAt?: string;
-  latencyMs?: number;
-  promptTokens?: number;
-  completionTokens?: number;
-  errorMessage?: string;
-}
-
-export interface TestRunResult {
-  runId: string;
-  testName?: string;
-  modelName?: string;
-  metrics: RunMetrics;
-  response: ModelResponse | null;
-  objectiveEvaluations: ObjectiveEvaluation[];
-  subjectiveEvaluations: SubjectiveEvaluation[];
+  prompt: string;
+  model: string;
+  provider: string;
+  response: string;
+  score: number;
+  passed: boolean;
+  criteria: CriterionResult[];
+  latency_ms: number;
+  created_at: string;
+  metadata: {
+    requested_model: string;
+    temperature: number;
+    expected_keywords: string[];
+    minimum_length: number;
+    minimum_sentences: number;
+    forbidden_terms: string[];
+    usage: {
+      input_tokens: number;
+      output_tokens: number;
+    };
+    schema_version: string;
+  };
 }
 
 export async function checkHealth(signal?: AbortSignal): Promise<boolean> {
@@ -58,14 +59,29 @@ export async function checkHealth(signal?: AbortSignal): Promise<boolean> {
   );
 }
 
-export async function fetchRunResults(signal?: AbortSignal): Promise<TestRunResult[]> {
-  const response = await fetch(`${apiBaseUrl}${runsEndpointPath}`, { signal });
+export async function runEvaluation(
+  request: RunCreateRequest,
+  signal?: AbortSignal,
+): Promise<RunResponse> {
+  const response = await fetch(`${apiBaseUrl}/runs`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+    signal,
+  });
+
   if (!response.ok) {
-    throw new Error(`Failed to fetch run results: ${response.status} ${response.statusText}`);
+    let detail = response.statusText;
+    try {
+      const body: unknown = await response.json();
+      if (typeof body === "object" && body !== null && "detail" in body) {
+        detail = String((body as { detail: unknown }).detail);
+      }
+    } catch {
+      // Response body wasn't JSON; fall back to statusText.
+    }
+    throw new Error(`Run failed: ${detail}`);
   }
-  const body: unknown = await response.json();
-  if (!Array.isArray(body)) {
-    throw new Error("Unexpected run results response: expected an array");
-  }
-  return body as TestRunResult[];
+
+  return (await response.json()) as RunResponse;
 }
