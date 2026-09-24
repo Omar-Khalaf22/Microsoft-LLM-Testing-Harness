@@ -32,6 +32,7 @@ def run_service():
 @pytest.fixture
 def request_model():
     return RunCreateRequest(
+        test_name="Secure JSON storage",
         prompt="Explain secure JSON storage",
         model="requested-model",
         temperature=0.7,
@@ -96,6 +97,7 @@ def test_service_adapts_all_inputs_and_executes_once(run_service, request_model,
 
     executor.execute.assert_called_once_with(
         EvaluationRequest(
+            test_name="Secure JSON storage",
             prompt="Explain secure JSON storage",
             model="requested-model",
             temperature=0.7,
@@ -144,18 +146,26 @@ def test_post_runs_returns_completed_result(client, request_model, executor, exe
     "body",
     [
         {},
-        {"prompt": None},
-        {"prompt": "   "},
-        {"prompt": "x" * 10_001},
-        {"prompt": "Hello", "temperature": 2.1},
-        {"prompt": "Hello", "minimum_length": -1},
-        {"prompt": "Hello", "minimum_sentences": 0},
-        {"prompt": "Hello", "expected_keywords": "JSON, metadata"},
-        {"prompt": "Hello", "forbidden_terms": ["x"] * 21},
+        {"prompt": "Hello"},
+        {"prompt": "Hello", "test_name": "   "},
+        {"prompt": "Hello", "test_name": "x" * 101},
+        {"prompt": "Hello", "test_name": "Valid", "test_version": 0},
+        {"prompt": None, "test_name": "Valid"},
+        {"prompt": "   ", "test_name": "Valid"},
+        {"prompt": "x" * 10_001, "test_name": "Valid"},
+        {"prompt": "Hello", "test_name": "Valid", "temperature": 2.1},
+        {"prompt": "Hello", "test_name": "Valid", "minimum_length": -1},
+        {"prompt": "Hello", "test_name": "Valid", "minimum_sentences": 0},
+        {"prompt": "Hello", "test_name": "Valid", "expected_keywords": "JSON, metadata"},
+        {"prompt": "Hello", "test_name": "Valid", "forbidden_terms": ["x"] * 21},
         [],
     ],
     ids=[
         "missing-prompt",
+        "missing-name",
+        "blank-name",
+        "long-name",
+        "invalid-version",
         "null-prompt",
         "blank-prompt",
         "long-prompt",

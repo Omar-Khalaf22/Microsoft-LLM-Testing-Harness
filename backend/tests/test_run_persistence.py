@@ -12,6 +12,7 @@ def test_run_result_round_trip() -> None:
         "run_id": "pytest_run_001",
         "test_id": "pytest_json_test",
         "test_version": 1,
+        "test_name": "Pytest JSON test",
         "model": {
             "model_id": "pytest_model",
             "name": "pytest-model",
@@ -59,6 +60,7 @@ def test_run_result_round_trip() -> None:
             test_version = TestDefinitionVersion(
                 test=test,
                 version=1,
+                name="Pytest JSON test",
                 prompt=expected_result["input"]["prompt"],
                 evaluation_definition={"method": "valid_json"},
             )

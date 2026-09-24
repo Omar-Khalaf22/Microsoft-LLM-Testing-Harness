@@ -22,8 +22,16 @@ class PostgresResultRepository:
     def __init__(self, session_factory: sessionmaker[Session]):
         self.session_factory = session_factory
 
-    def save(self, result: TestResult, *, test_id: str | None = None) -> TestResult:
-        """Save a run and create a new version only if its test definition changed."""
+    def save(
+        self,
+        result: TestResult,
+        *,
+        test_id: str | None = None,
+        test_name: str | None = None,
+        test_version: int | None = None,
+    ) -> TestResult:
+        """Save a run and version its name, prompt, and scoring definition."""
+        name = (test_name or result.prompt[:100]).strip()
         definition = {
             "expected_keywords": result.metadata["expected_keywords"],
             "minimum_length": result.metadata["minimum_length"],
@@ -33,7 +41,7 @@ class PostgresResultRepository:
 
         with self.session_factory.begin() as session:
             if test_id is None:
-                test = Test(id=f"test_{uuid4().hex}", name=result.prompt[:100])
+                test = Test(id=f"test_{uuid4().hex}", name=name)
                 session.add(test)
                 session.flush()
             else:
@@ -49,21 +57,33 @@ class PostgresResultRepository:
                 .order_by(TestVersion.version.desc())
                 .limit(1)
             )
+            selected = latest
+            if test_version is not None:
+                selected = session.scalar(
+                    select(TestVersion).where(
+                        TestVersion.test_id == test.id,
+                        TestVersion.version == test_version,
+                    )
+                )
+                if selected is None:
+                    raise UnknownTestError("The selected test version no longer exists.")
             if (
-                latest is None
-                or latest.prompt != result.prompt
-                or latest.evaluation_definition != definition
+                selected is None
+                or selected.name != name
+                or selected.prompt != result.prompt
+                or selected.evaluation_definition != definition
             ):
                 version = TestVersion(
                     test_id=test.id,
                     version=1 if latest is None else latest.version + 1,
+                    name=name,
                     prompt=result.prompt,
                     evaluation_definition=definition,
                 )
                 session.add(version)
                 session.flush()
             else:
-                version = latest
+                version = selected
 
             model = session.get(Model, result.model)
             if model is None:
@@ -71,7 +91,12 @@ class PostgresResultRepository:
                 session.add(model)
                 session.flush()
 
-            metadata = {**result.metadata, "test_id": test.id, "test_version": version.version}
+            metadata = {
+                **result.metadata,
+                "test_id": test.id,
+                "test_version": version.version,
+                "test_name": version.name,
+            }
             usage = metadata.get("usage", {})
             save_run_result(
                 session,
@@ -147,6 +172,9 @@ class PostgresResultRepository:
                 },
                 "schema_version": "imported",
             }
+        # Names for older runs come from the relational version, including rows
+        # backfilled by migration 0003. Do not rely on old metadata having a name.
+        metadata = {**metadata, "test_name": saved["test_name"]}
         score = configuration.get("overall_score")
         if score is None:
             score = (

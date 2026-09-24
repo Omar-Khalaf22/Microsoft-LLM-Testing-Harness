@@ -45,6 +45,7 @@ def seed_prototype_data() -> None:
                 TestVersion(
                     test_id=TEST_ID,
                     version=TEST_VERSION,
+                    name="Valid customer JSON",
                     prompt=PROMPT,
                     evaluation_definition={"method": "valid_json"},
                 )

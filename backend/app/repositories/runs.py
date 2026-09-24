@@ -134,6 +134,7 @@ def get_run_result(
         "run_id": run.id,
         "test_id": run.test_version.test_id,
         "test_version": run.test_version.version,
+        "test_name": run.test_version.name,
         "model": {
             "model_id": run.model.id,
             "name": run.model.name,

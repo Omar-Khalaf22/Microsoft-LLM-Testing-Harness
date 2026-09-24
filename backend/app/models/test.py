@@ -60,6 +60,7 @@ class TestVersion(Base):
         nullable=False,
     )
     version: Mapped[int] = mapped_column(Integer, nullable=False)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
     prompt: Mapped[str] = mapped_column(Text, nullable=False)
     evaluation_definition: Mapped[dict[str, Any]] = mapped_column(
         JSONB,

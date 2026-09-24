@@ -20,6 +20,8 @@ class TestRequest:
     minimum_sentences: int = 2
     forbidden_terms: list[str] = field(default_factory=list)
     test_id: str | None = None
+    test_name: str | None = None
+    test_version: int | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> TestRequest:

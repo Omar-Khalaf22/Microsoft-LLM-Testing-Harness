@@ -11,7 +11,14 @@ from .models import TestResult
 
 
 class ResultRepository(Protocol):
-    def save(self, result: TestResult, *, test_id: str | None = None) -> TestResult | None: ...
+    def save(
+        self,
+        result: TestResult,
+        *,
+        test_id: str | None = None,
+        test_name: str | None = None,
+        test_version: int | None = None,
+    ) -> TestResult | None: ...
 
     def recent(self, limit: int = 10) -> list[dict[str, Any]]: ...
 
@@ -22,7 +29,14 @@ class JsonResultRepository:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.lock = Lock()
 
-    def save(self, result: TestResult, *, test_id: str | None = None) -> None:
+    def save(
+        self,
+        result: TestResult,
+        *,
+        test_id: str | None = None,
+        test_name: str | None = None,
+        test_version: int | None = None,
+    ) -> None:
         with self.lock, self.path.open("a", encoding="utf-8") as file:
             file.write(json.dumps(result.to_dict(), ensure_ascii=False) + "\n")
 

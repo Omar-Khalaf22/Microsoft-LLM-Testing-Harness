@@ -3,6 +3,7 @@
 export const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
 export interface RunCreateRequest {
+  test_name: string;
   prompt: string;
   model: string;
   temperature: number;
@@ -11,6 +12,7 @@ export interface RunCreateRequest {
   minimum_sentences: number;
   forbidden_terms: string[];
   test_id?: string;
+  test_version?: number;
 }
 
 export interface CriterionResult {
@@ -46,6 +48,7 @@ export interface RunResponse {
     schema_version: string;
     test_id?: string;
     test_version?: number;
+    test_name: string;
   };
 }
 
@@ -63,7 +66,7 @@ async function responseError(response: Response): Promise<Error> {
 }
 
 export async function listRuns(signal?: AbortSignal): Promise<RunResponse[]> {
-  const response = await fetch(`${apiBaseUrl}/runs?limit=20`, { signal });
+  const response = await fetch(`${apiBaseUrl}/runs?limit=100`, { signal });
   if (!response.ok) {
     throw await responseError(response);
   }

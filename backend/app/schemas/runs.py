@@ -12,6 +12,9 @@ class RunCreateRequest(BaseModel):
 
     model_config = ConfigDict(strict=True, extra="forbid")
 
+    test_name: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)
+    ]
     prompt: Annotated[
         str, StringConstraints(strip_whitespace=True, min_length=1, max_length=10_000)
     ]
@@ -22,6 +25,7 @@ class RunCreateRequest(BaseModel):
     minimum_sentences: int = Field(default=2, ge=1, le=20)
     forbidden_terms: list[NonemptyText] = Field(default_factory=list, max_length=20)
     test_id: NonemptyText | None = None
+    test_version: int | None = Field(default=None, ge=1)
 
 
 class CriterionResultResponse(BaseModel):

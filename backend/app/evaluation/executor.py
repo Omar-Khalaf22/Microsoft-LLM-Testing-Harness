@@ -58,7 +58,15 @@ class TestExecutor:
         )
         # SQL storage enriches the result with its saved test identity/version.
         # The standalone JSONL demo keeps returning the original result.
-        return self.repository.save(result, test_id=request.test_id) or result
+        return (
+            self.repository.save(
+                result,
+                test_id=request.test_id,
+                test_name=request.test_name,
+                test_version=request.test_version,
+            )
+            or result
+        )
 
     def recent_results(self, limit: int = 10) -> list[dict]:
         return self.repository.recent(limit)

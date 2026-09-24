@@ -33,6 +33,7 @@ def test_api_history_survives_reload_and_versions_change_only_with_definition() 
     app.dependency_overrides[runs.get_result_repository] = lambda: repository
 
     request = {
+        "test_name": "JSON check",
         "prompt": f"Explain JSON testing {uuid4().hex}",
         "model": "demo-strong-v1",
         "temperature": 0.2,
@@ -49,6 +50,7 @@ def test_api_history_survives_reload_and_versions_change_only_with_definition() 
             first = first_response.json()
             test_id = first["metadata"]["test_id"]
             assert first["metadata"]["test_version"] == 1
+            assert first["metadata"]["test_name"] == "JSON check"
 
             # Identical rules and prompt, different run configuration.
             repeat_response = client.post(
@@ -65,16 +67,41 @@ def test_api_history_survives_reload_and_versions_change_only_with_definition() 
             revised = revised_response.json()
             assert revised["metadata"]["test_version"] == 2
 
+            renamed_response = client.post(
+                "/runs",
+                json={
+                    **request,
+                    "test_id": test_id,
+                    "test_name": "JSON check revised",
+                    "expected_keywords": ["metadata"],
+                },
+            )
+            assert renamed_response.status_code == 200
+            renamed = renamed_response.json()
+            assert renamed["metadata"]["test_version"] == 3
+            assert renamed["metadata"]["test_name"] == "JSON check revised"
+
+            # Loading the first version from history should rerun that version,
+            # even after later revisions exist.
+            old_version_response = client.post(
+                "/runs", json={**request, "test_id": test_id, "test_version": 1}
+            )
+            assert old_version_response.status_code == 200
+            old_version = old_version_response.json()
+            assert old_version["metadata"]["test_version"] == 1
+            assert old_version["metadata"]["test_name"] == "JSON check"
+
         # A fresh repository/client session reads PostgreSQL rather than React state.
         with TestClient(app) as reloaded_client:
             history_response = reloaded_client.get("/runs?limit=20")
             assert history_response.status_code == 200
             history = history_response.json()
             saved = {run["id"]: run for run in history}
-            for run in [first, repeat, revised]:
+            for run in [first, repeat, revised, renamed, old_version]:
                 assert saved[run["id"]] == run
             assert saved[first["id"]]["metadata"]["test_version"] == 1
             assert saved[revised["id"]]["metadata"]["test_version"] == 2
+            assert saved[renamed["id"]]["metadata"]["test_version"] == 3
 
             unknown = reloaded_client.post(
                 "/runs", json={**request, "test_id": f"missing_{uuid4().hex}"}
@@ -107,6 +134,7 @@ def test_imported_run_can_be_displayed_in_history() -> None:
                 Version(
                     test_id=test_id,
                     version=1,
+                    name="Imported JSON check",
                     prompt="Return JSON",
                     evaluation_definition={"method": "valid_json"},
                 )
@@ -134,6 +162,7 @@ def test_imported_run_can_be_displayed_in_history() -> None:
         imported = next(row for row in result if row["id"] == run_id)
         assert imported["score"] == 100
         assert imported["metadata"]["schema_version"] == "imported"
+        assert imported["metadata"]["test_name"] == "Imported JSON check"
         assert "test_id" not in imported["metadata"]
     finally:
         _clean_test(test_id)

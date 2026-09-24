@@ -16,6 +16,8 @@ def create_run(request: RunCreateRequest, *, executor: TestExecutor) -> RunRespo
         minimum_sentences=request.minimum_sentences,
         forbidden_terms=request.forbidden_terms,
         test_id=request.test_id,
+        test_name=request.test_name,
+        test_version=request.test_version,
     )
     result = executor.execute(evaluation_request)
     return RunResponse.model_validate(result.to_dict())

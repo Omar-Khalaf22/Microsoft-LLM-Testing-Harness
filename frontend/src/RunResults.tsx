@@ -1,116 +1,73 @@
 import type { RunResponse } from "./api";
 
-function RunCard({
-  run,
-  onUseTest,
-}: {
-  run: RunResponse;
-  onUseTest: (run: RunResponse) => void;
-}) {
-  const usage = run.metadata.usage;
+function RunResults({ run }: { run: RunResponse | null }) {
+  const usage = run?.metadata.usage;
 
   return (
-    <article className="run-card">
-      <header className="run-card-header">
-        <div>
-          <h3>{run.prompt}</h3>
-          <p className="run-card-subtitle">
-            {run.model} · {run.provider}
-            {run.metadata.test_version && ` · Test v${run.metadata.test_version}`}
-          </p>
-        </div>
-        <span className="status-badge" data-run-status={run.status}>
-          {run.status}
-        </span>
-      </header>
-
-      <section className="run-card-section">
-        <h4>Response</h4>
-        <pre className="run-response">{run.response}</pre>
-      </section>
-
-      <section className="run-card-section">
-        <h4>Evaluation</h4>
-        <p>
-          Score: <strong data-passed={run.passed}>{run.score}</strong> (
-          {run.passed ? "passed" : "failed"})
-        </p>
-        {run.criteria.length > 0 && (
-          <ul className="evaluation-list">
-            {run.criteria.map((criterion) => (
-              <li key={criterion.name}>
-                <span>{criterion.name}</span>
-                <span data-passed={criterion.passed}>
-                  {criterion.score} ({criterion.passed ? "passed" : "failed"}) — {criterion.detail}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section className="run-card-section">
-        <h4>Run metrics</h4>
-        <dl className="metrics-grid">
-          <dt>Latency</dt>
-          <dd>{run.latency_ms} ms</dd>
-          {usage?.input_tokens !== undefined && (
-            <>
-              <dt>Input tokens</dt>
-              <dd>{usage.input_tokens}</dd>
-            </>
-          )}
-          {usage?.output_tokens !== undefined && (
-            <>
-              <dt>Output tokens</dt>
-              <dd>{usage.output_tokens}</dd>
-            </>
-          )}
-          <dt>Created</dt>
-          <dd>{new Date(run.created_at).toLocaleString()}</dd>
-        </dl>
-      </section>
-      {run.metadata.test_id && (
-        <button type="button" className="use-test-button" onClick={() => onUseTest(run)}>
-          Load this test into the form
-        </button>
-      )}
-    </article>
-  );
-}
-
-function RunResults({
-  runs,
-  loading,
-  error,
-  onRefresh,
-  onUseTest,
-}: {
-  runs: RunResponse[];
-  loading: boolean;
-  error: string;
-  onRefresh: () => void;
-  onUseTest: (run: RunResponse) => void;
-}) {
-  return (
-    <section className="run-results">
-      <div className="run-results-header">
-        <h2>Test run results</h2>
-        <button type="button" onClick={onRefresh} disabled={loading}>
-          {loading ? "Loading…" : "Refresh saved runs"}
-        </button>
+    <section className="panel result-panel" aria-label="Selected run result">
+      <div className="section-title">
+        <span className="section-number">02</span>
+        <h2>{run ? "Saved result" : "Latest result"}</h2>
       </div>
-      {error && <p className="error-text">Saved runs could not be loaded: {error}</p>}
-
-      {loading && runs.length === 0 ? (
-        <p className="muted">Loading saved runs…</p>
-      ) : runs.length === 0 ? (
-        <p className="muted">No saved runs yet — submit a prompt above to test a model.</p>
+      {!run ? (
+        <div className="empty-state">
+          <div className="pulse" aria-hidden="true" />
+          <p>Run a test or open a saved run to see its results.</p>
+        </div>
       ) : (
-        <div className="run-card-list">
-          {runs.map((run) => (
-            <RunCard key={run.id} run={run} onUseTest={onUseTest} />
-          ))}
+        <div className="result-body">
+          <div className="result-summary">
+            <div className="score-ring" aria-label={`Score ${run.score} out of 100`}>
+              <strong>{run.score}</strong>
+              <small>/100</small>
+            </div>
+            <div className="result-summary-text">
+              <span className={`badge ${run.passed ? "" : "fail"}`}>
+                {run.passed ? "PASS" : "REVIEW"}
+              </span>
+              <h3>{run.metadata.test_name || "Untitled test"}</h3>
+              <p>{run.model} · {run.latency_ms} ms · {run.provider}</p>
+            </div>
+          </div>
+
+          <div className="response-box">
+            <h4>Model response</h4>
+            <p>{run.response || "No response was saved."}</p>
+          </div>
+
+          <div className="criteria-list">
+            {run.criteria.map((criterion) => (
+              <div className="criterion" key={criterion.name}>
+                <span className={`mark ${criterion.passed ? "" : "fail"}`} aria-hidden="true">
+                  {criterion.passed ? "✓" : "×"}
+                </span>
+                <div>
+                  <strong>{criterion.name}</strong>
+                  <p>{criterion.detail}</p>
+                </div>
+                <span className="points">{criterion.score}</span>
+              </div>
+            ))}
+          </div>
+
+          <dl className="run-metrics">
+            <div><dt>Run</dt><dd>{run.id.slice(0, 8)}</dd></div>
+            {run.metadata.test_version && (
+              <div><dt>Version</dt><dd>{run.metadata.test_version}</dd></div>
+            )}
+            {usage?.input_tokens !== undefined && (
+              <div><dt>Input tokens</dt><dd>{usage.input_tokens}</dd></div>
+            )}
+            {usage?.output_tokens !== undefined && (
+              <div><dt>Output tokens</dt><dd>{usage.output_tokens}</dd></div>
+            )}
+            <div><dt>Saved</dt><dd>{new Date(run.created_at).toLocaleString()}</dd></div>
+          </dl>
+
+          <details className="json-details">
+            <summary>Structured JSON result</summary>
+            <pre>{JSON.stringify(run, null, 2)}</pre>
+          </details>
         </div>
       )}
     </section>
