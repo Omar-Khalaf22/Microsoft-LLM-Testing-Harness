@@ -1,6 +1,6 @@
 # LLM Testing Harness
 
-LLM Testing Harness is a senior capstone project for creating and reviewing repeatable LLM evaluations. This repository currently contains only the Phase 0 application foundation; model calls, evaluation tasks, scoring, and run orchestration have not been implemented.
+LLM Testing Harness is a senior capstone project for creating and reviewing repeatable LLM evaluations. The Week 5 prototype runs an inline prompt against a demo or OpenAI-compatible provider, scores it, and saves the test version and run in PostgreSQL.
 
 ## Architecture
 
@@ -8,7 +8,7 @@ The project is a modular monolith with three parts:
 
 - A React and TypeScript browser frontend.
 - A Python and FastAPI REST backend.
-- PostgreSQL as the future application system of record.
+- PostgreSQL as the application system of record for API runs and test versions.
 
 For local development, Docker Compose runs PostgreSQL only. The backend and frontend run directly on the developer's machine.
 
@@ -78,6 +78,8 @@ uvicorn app.main:app --reload
 
 The health endpoint is available at `http://localhost:8000/health`.
 
+The API defaults to a deterministic local demo provider (`LLM_PROVIDER=demo`), so no model key is needed for a local walkthrough. `POST /runs` executes and commits a run, and `GET /runs?limit=20` returns saved results. Every new test gets a stable ID and version 1. Loading a saved test in the UI and changing its prompt or scoring rules creates the next version; changing its model or temperature keeps the test version and creates another run. The returned `metadata.test_id` and `metadata.test_version` identify what was saved.
+
 ## Frontend setup
 
 From the `frontend` directory:
@@ -87,7 +89,9 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:5173`. The page calls the backend health endpoint and displays its status.
+Open `http://localhost:5173`. Run a test, refresh the browser, and check that the saved result remains visible. Use **Load this test into the form** to create a new run or revision, or **Start a new test** to create an unrelated test.
+
+Run the React page with the FastAPI server above. The separate `backend/demo.py` and `backend/demo_static` demo still use their original JSONL file and do not write to PostgreSQL.
 
 ## Verification
 
@@ -111,4 +115,4 @@ Validate the Compose configuration from the repository root:
 docker compose config
 ```
 
-The backend health tests do not need a running PostgreSQL instance. Database integration tests will be added when Phase 1 introduces application data.
+The backend run persistence and history tests require a migrated PostgreSQL instance. The CI job starts Postgres and applies migrations before running them.

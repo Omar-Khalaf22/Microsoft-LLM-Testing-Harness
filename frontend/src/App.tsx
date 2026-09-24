@@ -1,28 +1,38 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+import { checkHealth, listRuns, type RunResponse } from "./api";
+import RunForm from "./RunForm";
+import RunResults from "./RunResults";
 
 type HealthState = "checking" | "ok" | "unavailable";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
-
 function App() {
   const [health, setHealth] = useState<HealthState>("checking");
+  const [runs, setRuns] = useState<RunResponse[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState("");
+  const [selectedRun, setSelectedRun] = useState<RunResponse | null>(null);
+  const [editorKey, setEditorKey] = useState(0);
+
+  const refreshHistory = useCallback(async (signal?: AbortSignal) => {
+    setHistoryLoading(true);
+    setHistoryError("");
+    try {
+      setRuns(await listRuns(signal));
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setHistoryError(error instanceof Error ? error.message : "Could not load saved runs");
+    } finally {
+      if (!signal?.aborted) setHistoryLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    async function checkBackend() {
+    async function loadHealth() {
       try {
-        const response = await fetch(`${apiBaseUrl}/health`, {
-          signal: controller.signal,
-        });
-        const body: unknown = await response.json();
-        const isHealthy =
-          response.ok &&
-          typeof body === "object" &&
-          body !== null &&
-          "status" in body &&
-          body.status === "ok";
-
+        const isHealthy = await checkHealth(controller.signal);
         setHealth(isHealthy ? "ok" : "unavailable");
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") {
@@ -32,19 +42,51 @@ function App() {
       }
     }
 
-    void checkBackend();
+    void loadHealth();
+    void refreshHistory(controller.signal);
     return () => controller.abort();
-  }, []);
+  }, [refreshHistory]);
+
+  function handleRunCreated(run: RunResponse) {
+    setRuns((previous) => [run, ...previous]);
+    setSelectedRun(run);
+  }
+
+  function handleUseTest(run: RunResponse) {
+    setSelectedRun(run);
+    setEditorKey((previous) => previous + 1);
+  }
+
+  function handleNewTest() {
+    setSelectedRun(null);
+    setEditorKey((previous) => previous + 1);
+  }
 
   return (
     <main>
-      <section className="status-card">
-        <p className="eyebrow">Phase 0 foundation</p>
-        <h1>LLM Testing Harness</h1>
-        <p>
-          Backend status: <strong data-status={health}>{health}</strong>
-        </p>
-      </section>
+      <div className="page">
+        <section className="status-card">
+          <p className="eyebrow">Week 5 prototype</p>
+          <h1>LLM Testing Harness</h1>
+          <p>
+            Backend status: <strong data-status={health}>{health}</strong>
+          </p>
+        </section>
+
+        <RunForm
+          key={editorKey}
+          initialRun={selectedRun}
+          onNewTest={handleNewTest}
+          onRunCreated={handleRunCreated}
+        />
+        <RunResults
+          runs={runs}
+          loading={historyLoading}
+          error={historyError}
+          onRefresh={() => void refreshHistory()}
+          onUseTest={handleUseTest}
+        />
+      </div>
     </main>
   );
 }

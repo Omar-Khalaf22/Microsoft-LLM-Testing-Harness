@@ -5,9 +5,15 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from threading import Lock
-from typing import Any
+from typing import Any, Protocol
 
 from .models import TestResult
+
+
+class ResultRepository(Protocol):
+    def save(self, result: TestResult, *, test_id: str | None = None) -> TestResult | None: ...
+
+    def recent(self, limit: int = 10) -> list[dict[str, Any]]: ...
 
 
 class JsonResultRepository:
@@ -16,7 +22,7 @@ class JsonResultRepository:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.lock = Lock()
 
-    def save(self, result: TestResult) -> None:
+    def save(self, result: TestResult, *, test_id: str | None = None) -> None:
         with self.lock, self.path.open("a", encoding="utf-8") as file:
             file.write(json.dumps(result.to_dict(), ensure_ascii=False) + "\n")
 

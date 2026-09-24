@@ -225,7 +225,7 @@ def test_invalid_body_skips_default_executor_construction(monkeypatch, body):
     repository = Mock(side_effect=AssertionError("Unexpected storage construction"))
     executor_constructor = Mock(side_effect=AssertionError("Unexpected executor construction"))
     monkeypatch.setattr(runs, "OpenAICompatibleProvider", provider)
-    monkeypatch.setattr(runs, "JsonResultRepository", repository)
+    monkeypatch.setattr(runs, "PostgresResultRepository", repository)
     monkeypatch.setattr(runs, "TestExecutor", executor_constructor)
     app = FastAPI()
     app.include_router(runs.router)
@@ -247,7 +247,7 @@ def test_valid_body_with_missing_api_key_returns_sanitized_500(monkeypatch, requ
     provider = Mock(wraps=runs.OpenAICompatibleProvider)
     repository = Mock(side_effect=AssertionError("Unexpected storage construction"))
     monkeypatch.setattr(runs, "OpenAICompatibleProvider", provider)
-    monkeypatch.setattr(runs, "JsonResultRepository", repository)
+    monkeypatch.setattr(runs, "PostgresResultRepository", repository)
     app = FastAPI()
     app.include_router(runs.router)
 

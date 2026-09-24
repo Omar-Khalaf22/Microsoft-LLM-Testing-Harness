@@ -8,7 +8,7 @@ NonemptyText = Annotated[str, StringConstraints(strip_whitespace=True, min_lengt
 
 
 class RunCreateRequest(BaseModel):
-    """Only inputs supported by the current executor; no persisted task references."""
+    """Inline inputs; an optional test ID revises a previously saved test."""
 
     model_config = ConfigDict(strict=True, extra="forbid")
 
@@ -21,6 +21,7 @@ class RunCreateRequest(BaseModel):
     minimum_length: int = Field(default=40, ge=0, le=10_000)
     minimum_sentences: int = Field(default=2, ge=1, le=20)
     forbidden_terms: list[NonemptyText] = Field(default_factory=list, max_length=20)
+    test_id: NonemptyText | None = None
 
 
 class CriterionResultResponse(BaseModel):
@@ -40,7 +41,7 @@ class RunResponse(BaseModel):
     """
 
     id: str
-    status: Literal["completed"]
+    status: Literal["pending", "running", "completed", "failed"]
     prompt: str
     model: str
     provider: str

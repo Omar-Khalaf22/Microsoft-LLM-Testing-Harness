@@ -19,6 +19,7 @@ class TestRequest:
     minimum_length: int = 40
     minimum_sentences: int = 2
     forbidden_terms: list[str] = field(default_factory=list)
+    test_id: str | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> TestRequest:
@@ -56,6 +57,7 @@ class TestRequest:
             minimum_length=minimum_length,
             minimum_sentences=minimum_sentences,
             forbidden_terms=forbidden_terms[:20],
+            test_id=str(data["test_id"]).strip() if data.get("test_id") else None,
         )
 
 

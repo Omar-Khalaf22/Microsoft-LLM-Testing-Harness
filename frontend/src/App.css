@@ -17,14 +17,19 @@ body {
 }
 
 main {
-  display: grid;
   min-height: 100vh;
-  place-items: center;
   padding: 2rem;
 }
 
+.page {
+  width: min(100%, 60rem);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
 .status-card {
-  width: min(100%, 34rem);
   padding: 2.5rem;
   border: 1px solid #dce3ec;
   border-radius: 1rem;
@@ -50,3 +55,243 @@ h1 {
 [data-status="checking"] { color: #7a5c00; }
 [data-status="ok"] { color: #08783e; }
 [data-status="unavailable"] { color: #b42318; }
+
+.run-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.run-results-header h2 {
+  margin: 0;
+}
+
+.run-results-header button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #dce3ec;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.run-results-header button:hover {
+  background: #f0f4f9;
+}
+
+.muted {
+  color: #506176;
+}
+
+.error-text {
+  color: #b42318;
+}
+
+.run-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.run-card {
+  padding: 1.5rem;
+  border: 1px solid #dce3ec;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  box-shadow: 0 0.5rem 1.5rem rgb(24 33 47 / 6%);
+}
+
+.run-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.run-card-header h3 {
+  margin: 0;
+}
+
+.run-card-subtitle {
+  margin: 0.25rem 0 0;
+  color: #506176;
+  font-size: 0.875rem;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: #eef2f7;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.run-card-section {
+  margin-top: 1rem;
+}
+
+.run-card-section h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #506176;
+}
+
+.run-response {
+  margin: 0;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background: #f4f7fb;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.9rem;
+}
+
+.evaluation-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.evaluation-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.evaluation-list [data-passed="true"] { color: #08783e; }
+.evaluation-list [data-passed="false"] { color: #b42318; }
+
+.run-card-section strong[data-passed="true"] { color: #08783e; }
+.run-card-section strong[data-passed="false"] { color: #b42318; }
+
+.metrics-grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 1rem;
+  font-size: 0.9rem;
+}
+
+.metrics-grid dt {
+  color: #506176;
+}
+
+.metrics-grid dd {
+  margin: 0;
+}
+
+.run-form {
+  padding: 1.5rem;
+  border: 1px solid #dce3ec;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  box-shadow: 0 0.5rem 1.5rem rgb(24 33 47 / 6%);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.run-form h2 {
+  margin: 0;
+}
+
+.run-form-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.test-version-note {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.new-test-button,
+.use-test-button {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #dce3ec;
+  border-radius: 0.5rem;
+  background: white;
+  color: #2559c2;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.use-test-button {
+  margin-top: 1rem;
+}
+
+.new-test-button:hover,
+.use-test-button:hover {
+  background: #f0f4f9;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  color: #506176;
+  font-weight: 600;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.field input,
+.field textarea {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #dce3ec;
+  border-radius: 0.5rem;
+  font: inherit;
+  color: #18212f;
+  resize: vertical;
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: 2px solid #2f6fed;
+  outline-offset: 1px;
+}
+
+.run-form button[type="submit"] {
+  align-self: flex-start;
+  padding: 0.65rem 1.25rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: #2f6fed;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.run-form button[type="submit"]:hover {
+  background: #2559c2;
+}
+
+.run-form button[type="submit"]:disabled {
+  background: #9db4e0;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,14 +1,15 @@
-"""HTTP boundary for the temporary inline-input Run workflow."""
+"""HTTP boundary for running tests and reading saved run history."""
 
 import os
-from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
+from app.database import SessionLocal
 from app.evaluation.executor import TestExecutor
 from app.evaluation.providers import DemoProvider, OpenAICompatibleProvider
-from app.evaluation.repository import JsonResultRepository
+from app.models import Test
+from app.repositories.prototype_runs import PostgresResultRepository, UnknownTestError
 from app.schemas.runs import RunCreateRequest, RunResponse
 from app.services.run_service import create_run
 
@@ -16,11 +17,9 @@ router = APIRouter()
 
 
 def get_executor(request: RunCreateRequest) -> TestExecutor:
-    """Use process environment like the demo, with a separate API result file.
+    """Choose the provider and store API runs in PostgreSQL.
 
     The body parameter requires validation before this dependency runs.
-    Construction is request-scoped. The existing repository lock does not protect
-    this temporary file across requests/processes; concurrent storage needs follow-up.
     These environment variables are not currently part of app.config.Settings.
     """
     try:
@@ -34,11 +33,25 @@ def get_executor(request: RunCreateRequest) -> TestExecutor:
             )
         else:
             raise ValueError("Unsupported provider configuration")
-        path = Path(__file__).resolve().parents[2] / "data" / "api_results.jsonl"
-        return TestExecutor(provider, JsonResultRepository(path))
+        return TestExecutor(provider, PostgresResultRepository(SessionLocal))
     except Exception:
         # Dependency errors occur before the route function's error boundary.
         raise HTTPException(status_code=500, detail="The run could not be completed.") from None
+
+
+def get_result_repository() -> PostgresResultRepository:
+    return PostgresResultRepository(SessionLocal)
+
+
+@router.get("/runs", response_model=list[RunResponse])
+def list_runs(
+    repository: Annotated[PostgresResultRepository, Depends(get_result_repository)],
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+) -> list[RunResponse]:
+    try:
+        return [RunResponse.model_validate(row) for row in repository.recent(limit)]
+    except Exception:
+        raise HTTPException(status_code=500, detail="Saved runs could not be loaded.") from None
 
 
 @router.post("/runs", response_model=RunResponse, status_code=200)
@@ -46,8 +59,21 @@ def post_run(
     request: RunCreateRequest,
     executor: Annotated[TestExecutor, Depends(get_executor)],
 ) -> RunResponse:
+    if request.test_id:
+        try:
+            with SessionLocal() as session:
+                if session.get(Test, request.test_id) is None:
+                    raise HTTPException(
+                        status_code=404, detail="The selected test no longer exists."
+                    )
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(status_code=500, detail="The run could not be completed.") from None
     try:
         return create_run(request, executor=executor)
+    except UnknownTestError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from None
     except Exception:
         # Includes raw provider parsing errors and service response-validation errors.
         raise HTTPException(status_code=500, detail="The run could not be completed.") from None

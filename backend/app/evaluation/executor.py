@@ -8,7 +8,7 @@ from uuid import uuid4
 
 from .models import TestRequest, TestResult
 from .providers import DemoProvider, OpenAICompatibleProvider
-from .repository import JsonResultRepository
+from .repository import ResultRepository
 from .scoring import score_response
 
 
@@ -16,7 +16,7 @@ class TestExecutor:
     def __init__(
         self,
         provider: DemoProvider | OpenAICompatibleProvider,
-        repository: JsonResultRepository,
+        repository: ResultRepository,
     ):
         self.provider = provider
         self.repository = repository
@@ -56,8 +56,9 @@ class TestExecutor:
                 "schema_version": "1.0",
             },
         )
-        self.repository.save(result)
-        return result
+        # SQL storage enriches the result with its saved test identity/version.
+        # The standalone JSONL demo keeps returning the original result.
+        return self.repository.save(result, test_id=request.test_id) or result
 
     def recent_results(self, limit: int = 10) -> list[dict]:
         return self.repository.recent(limit)
