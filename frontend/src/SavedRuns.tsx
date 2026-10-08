@@ -67,7 +67,7 @@ function SavedRuns({
               ↻
             </button>
           </div>
-          <p className="sidebar-hint">Double-click to load a run. Press Enter on a selected item.</p>
+          <p className="sidebar-hint">Select a saved run to load its prompt, scoring points, and result.</p>
           {error && <p className="sidebar-error" role="alert">Could not load runs: {error}</p>}
           {loading && runs.length === 0 ? (
             <p className="sidebar-empty">Loading saved runs…</p>
@@ -82,10 +82,11 @@ function SavedRuns({
                     type="button"
                     aria-pressed={selectedRunId === run.id}
                     aria-label={`Load ${run.metadata.test_name || "Untitled test"}, run from ${formatDate(run.created_at)}`}
-                    onDoubleClick={() => onOpenRun(run)}
+                    onClick={() => onOpenRun(run)}
                     onKeyDown={(event) => handleKeyDown(event, run)}
                   >
                     <span className="saved-run-name">{run.metadata.test_name || "Untitled test"}</span>
+                    <span className="saved-run-version">Version {run.metadata.test_version ?? "imported"}</span>
                     <span className="saved-run-details">
                       {formatDate(run.created_at)} · {run.score}/100
                     </span>

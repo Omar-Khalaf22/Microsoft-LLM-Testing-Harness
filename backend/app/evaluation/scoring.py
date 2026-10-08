@@ -1,42 +1,24 @@
-"""Automated response scoring."""
+"""Lina's configurable objective scorer, executed only on the backend."""
 
 from __future__ import annotations
 
 import re
+from math import floor
 
 from .models import CriterionResult
+from .weights import ScoringWeights, default_weights
 
-STOP_WORDS = {
-    "a",
-    "an",
-    "and",
-    "are",
-    "as",
-    "at",
-    "be",
-    "describe",
-    "explain",
-    "for",
-    "from",
-    "how",
-    "in",
-    "is",
-    "it",
-    "list",
-    "of",
-    "on",
-    "or",
-    "provide",
-    "tell",
-    "the",
-    "to",
-    "what",
-    "when",
-    "where",
-    "why",
-    "with",
-    "write",
-}
+STOP_WORDS = set(
+    (
+        "the and for with what why how from into this that explain describe "
+        "write provide tell are is to of in on a an"
+    ).split()
+)
+
+
+def _round_points(value: float) -> float:
+    # Match JavaScript Math.round for the nonnegative scoring domain.
+    return floor(value * 10 + 0.5) / 10
 
 
 def score_response(
@@ -46,108 +28,65 @@ def score_response(
     minimum_length: int,
     minimum_sentences: int = 2,
     forbidden_terms: list[str] | None = None,
+    weights: dict[str, float] | None = None,
 ) -> tuple[float, list[CriterionResult]]:
-    """Score one model response against configured objective criteria."""
-    criteria: list[CriterionResult] = []
-    normalized = response.casefold()
-    forbidden_terms = forbidden_terms or []
-
-    if keywords:
-        matches = [keyword for keyword in keywords if keyword.casefold() in normalized]
-        keyword_score = len(matches) / len(keywords) * 30
-        missing = [keyword for keyword in keywords if keyword not in matches]
-        detail = f"Matched {len(matches)} of {len(keywords)} keywords"
-        if missing:
-            detail += f". Missing: {', '.join(missing)}"
-        criteria.append(
-            CriterionResult(
-                "Keyword coverage",
-                len(matches) == len(keywords),
-                round(keyword_score, 1),
-                detail,
-            )
-        )
-    else:
-        keyword_score = 30
-        criteria.append(
-            CriterionResult(
-                "Keyword coverage",
-                True,
-                30,
-                "No required keywords were configured",
-            )
-        )
-
+    points = ScoringWeights.model_validate(
+        weights if weights is not None else default_weights()
+    ).model_dump()
+    normalized = response.lower()
+    matches = [word for word in keywords if word.lower() in normalized]
+    keyword_ratio = len(matches) / len(keywords) if keywords else 1
     prompt_terms = {
-        word.casefold()
-        for word in re.findall(r"[A-Za-z0-9']+", prompt)
-        if len(word) > 2 and word.casefold() not in STOP_WORDS
+        word
+        for word in re.findall(r"[a-z0-9']+", prompt.lower())
+        if len(word) > 2 and word not in STOP_WORDS
     }
-    response_terms = {word.casefold() for word in re.findall(r"[A-Za-z0-9']+", response)}
-    relevant_matches = prompt_terms & response_terms
-    relevance_ratio = len(relevant_matches) / max(len(prompt_terms), 1)
-    relevance_score = min(20, relevance_ratio * 20)
-    criteria.append(
+    response_terms = set(re.findall(r"[a-z0-9']+", normalized))
+    relevant = len(prompt_terms & response_terms)
+    relevance_ratio = relevant / len(prompt_terms) if prompt_terms else 1
+    length_ratio = min(1, len(response) / minimum_length) if minimum_length else 1
+    sentences = len([part for part in re.split(r"[.!?]+", response) if part.strip()])
+    sentence_ratio = min(1, sentences / max(1, minimum_sentences))
+    forbidden = [term for term in forbidden_terms or [] if term.lower() in normalized]
+    valid = bool(response.strip())
+    criteria = [
+        CriterionResult(
+            "Keyword coverage",
+            keyword_ratio == 1,
+            _round_points(keyword_ratio * points["keyword"]),
+            f"Matched {len(matches)} of {len(keywords)} keywords"
+            if keywords
+            else "No required keywords configured",
+        ),
         CriterionResult(
             "Prompt relevance",
             relevance_ratio >= 0.5,
-            round(relevance_score, 1),
-            f"Matched {len(relevant_matches)} of {len(prompt_terms)} meaningful prompt terms",
-        )
-    )
-
-    length_passed = len(response) >= minimum_length
-    length_score = 15 if length_passed else 15 * len(response) / max(minimum_length, 1)
-    criteria.append(
+            _round_points(min(1, relevance_ratio) * points["relevance"]),
+            f"Matched {relevant} of {len(prompt_terms)} meaningful prompt terms",
+        ),
         CriterionResult(
             "Minimum length",
-            length_passed,
-            round(length_score, 1),
+            len(response) >= minimum_length,
+            _round_points(length_ratio * points["length"]),
             f"Response contains {len(response)} characters; target is {minimum_length}",
-        )
-    )
-
-    sentences = [part for part in re.split(r"[.!?]+", response) if part.strip()]
-    structure_passed = len(sentences) >= minimum_sentences
-    structure_score = 15 if structure_passed else 15 * len(sentences) / minimum_sentences
-    criteria.append(
+        ),
         CriterionResult(
             "Sentence structure",
-            structure_passed,
-            round(structure_score, 1),
-            f"Response contains {len(sentences)} sentences; target is {minimum_sentences}",
-        )
-    )
-
-    found_forbidden = [term for term in forbidden_terms if term.casefold() in normalized]
-    safety_passed = not found_forbidden
-    safety_detail = (
-        "No forbidden terms detected"
-        if safety_passed
-        else f"Detected: {', '.join(found_forbidden)}"
-    )
-    criteria.append(
-        CriterionResult("Forbidden terms", safety_passed, 10 if safety_passed else 0, safety_detail)
-    )
-
-    nonempty_passed = bool(response.strip())
-    validity_detail = "Model returned usable text" if nonempty_passed else "Response is empty"
-    criteria.append(
+            sentences >= minimum_sentences,
+            _round_points(sentence_ratio * points["sentences"]),
+            f"Response contains {sentences} sentences; target is {minimum_sentences}",
+        ),
+        CriterionResult(
+            "Forbidden terms",
+            not forbidden,
+            points["forbidden"] if not forbidden else 0,
+            "No forbidden terms detected" if not forbidden else f"Detected: {', '.join(forbidden)}",
+        ),
         CriterionResult(
             "Valid response",
-            nonempty_passed,
-            10 if nonempty_passed else 0,
-            validity_detail,
-        )
-    )
-
-    total = round(
-        keyword_score
-        + relevance_score
-        + length_score
-        + structure_score
-        + (10 if safety_passed else 0)
-        + (10 if nonempty_passed else 0),
-        1,
-    )
-    return min(total, 100), criteria
+            valid,
+            points["valid"] if valid else 0,
+            "Model returned usable text" if valid else "Response is empty",
+        ),
+    ]
+    return min(100, _round_points(sum(item.score for item in criteria))), criteria

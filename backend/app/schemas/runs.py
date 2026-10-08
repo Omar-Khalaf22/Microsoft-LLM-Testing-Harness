@@ -2,7 +2,9 @@
 
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, JsonValue, StringConstraints
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, StringConstraints, model_validator
+
+from app.evaluation.weights import ScoringWeights
 
 NonemptyText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
@@ -24,8 +26,15 @@ class RunCreateRequest(BaseModel):
     minimum_length: int = Field(default=40, ge=0, le=10_000)
     minimum_sentences: int = Field(default=2, ge=1, le=20)
     forbidden_terms: list[NonemptyText] = Field(default_factory=list, max_length=20)
+    weights: ScoringWeights = Field(default_factory=ScoringWeights)
     test_id: NonemptyText | None = None
     test_version: int | None = Field(default=None, ge=1)
+
+    @model_validator(mode="after")
+    def version_requires_test(self):
+        if self.test_version is not None and self.test_id is None:
+            raise ValueError("test_version requires test_id.")
+        return self
 
 
 class CriterionResultResponse(BaseModel):

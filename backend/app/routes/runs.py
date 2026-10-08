@@ -1,14 +1,15 @@
 """HTTP boundary for running tests and reading saved run history."""
 
-import os
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import select
 
+from app.config import get_settings
 from app.database import SessionLocal
 from app.evaluation.executor import TestExecutor
 from app.evaluation.providers import DemoProvider, OpenAICompatibleProvider
-from app.models import Test
+from app.models import Test, TestVersion
 from app.repositories.prototype_runs import PostgresResultRepository, UnknownTestError
 from app.schemas.runs import RunCreateRequest, RunResponse
 from app.services.run_service import create_run
@@ -20,16 +21,16 @@ def get_executor(request: RunCreateRequest) -> TestExecutor:
     """Choose the provider and store API runs in PostgreSQL.
 
     The body parameter requires validation before this dependency runs.
-    These environment variables are not currently part of app.config.Settings.
     """
     try:
-        provider_name = os.getenv("LLM_PROVIDER", "demo").strip().lower()
+        settings = get_settings()
+        provider_name = settings.llm_provider.strip().lower()
         if provider_name == "demo":
             provider = DemoProvider()
         elif provider_name == "openai":
             provider = OpenAICompatibleProvider(
-                api_key=os.getenv("OPENAI_API_KEY", ""),
-                base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
+                api_key=settings.openai_api_key.get_secret_value().strip(),
+                base_url=settings.openai_base_url,
             )
         else:
             raise ValueError("Unsupported provider configuration")
@@ -66,6 +67,17 @@ def post_run(
                     raise HTTPException(
                         status_code=404, detail="The selected test no longer exists."
                     )
+                if request.test_version is not None:
+                    version = session.scalar(
+                        select(TestVersion.id).where(
+                            TestVersion.test_id == request.test_id,
+                            TestVersion.version == request.test_version,
+                        )
+                    )
+                    if version is None:
+                        raise HTTPException(
+                            status_code=404, detail="The selected test version no longer exists."
+                        )
         except HTTPException:
             raise
         except Exception:

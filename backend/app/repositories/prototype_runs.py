@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -10,6 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.evaluation.models import TestResult
+from app.evaluation.weights import default_weights
 from app.models import Model, Test, TestRun, TestVersion
 from app.repositories.runs import get_run_result, save_run_result
 
@@ -37,6 +39,7 @@ class PostgresResultRepository:
             "minimum_length": result.metadata["minimum_length"],
             "minimum_sentences": result.metadata["minimum_sentences"],
             "forbidden_terms": result.metadata["forbidden_terms"],
+            "scoring_weights": result.metadata.get("scoring_weights", default_weights()),
         }
 
         with self.session_factory.begin() as session:
@@ -71,7 +74,8 @@ class PostgresResultRepository:
                 selected is None
                 or selected.name != name
                 or selected.prompt != result.prompt
-                or selected.evaluation_definition != definition
+                or {"scoring_weights": default_weights(), **selected.evaluation_definition}
+                != definition
             ):
                 version = TestVersion(
                     test_id=test.id,
@@ -129,7 +133,7 @@ class PostgresResultRepository:
                         "input_tokens": usage.get("input_tokens", 0),
                         "output_tokens": usage.get("output_tokens", 0),
                     },
-                    "started_at": result.created_at,
+                    "started_at": metadata.get("started_at", result.created_at),
                     "completed_at": result.created_at,
                     "error": None,
                 },
@@ -203,6 +207,8 @@ class PostgresResultRepository:
                 for criterion in criteria
             ],
             "latency_ms": saved["metrics"]["latency_ms"] or 0,
-            "created_at": saved["started_at"],
+            "created_at": datetime.fromisoformat(saved["completed_at"] or saved["started_at"])
+            .astimezone(UTC)
+            .isoformat(),
             "metadata": metadata,
         }

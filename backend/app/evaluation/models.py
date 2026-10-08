@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
+from .weights import ScoringWeights, default_weights
+
 
 class ValidationError(ValueError):
     """Raised when a test request is invalid."""
@@ -19,6 +21,7 @@ class TestRequest:
     minimum_length: int = 40
     minimum_sentences: int = 2
     forbidden_terms: list[str] = field(default_factory=list)
+    weights: dict[str, float] = field(default_factory=default_weights)
     test_id: str | None = None
     test_name: str | None = None
     test_version: int | None = None
@@ -59,6 +62,9 @@ class TestRequest:
             minimum_length=minimum_length,
             minimum_sentences=minimum_sentences,
             forbidden_terms=forbidden_terms[:20],
+            weights=ScoringWeights.model_validate(
+                data.get("weights", default_weights())
+            ).model_dump(),
             test_id=str(data["test_id"]).strip() if data.get("test_id") else None,
         )
 

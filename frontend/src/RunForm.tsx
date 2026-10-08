@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { FormEvent } from "react";
 
-import { runEvaluation, type RunResponse } from "./api";
+import { defaultWeights, scoringLabels, runEvaluation, type ScoringWeights, type RunResponse } from "./api";
 
 function parseTerms(value: string): string[] {
   return value
@@ -19,6 +19,10 @@ function RunForm({
   onNewTest: () => void;
   onRunCreated: (run: RunResponse) => void;
 }) {
+  const inFlight = useRef(false);
+  const [weights, setWeights] = useState<ScoringWeights>({ ...defaultWeights, ...initialRun?.metadata.scoring_weights });
+  const total = Object.values(weights).reduce((sum, value) => sum + value, 0);
+  const weightsValid = Object.values(weights).every(value => Number.isFinite(value) && value >= 0 && value <= 100) && Math.abs(total - 100) < 1e-8;
   const testId = initialRun?.metadata.test_id;
   const [testName, setTestName] = useState(initialRun?.metadata.test_name ?? "");
   const [prompt, setPrompt] = useState(initialRun?.prompt ?? "");
@@ -30,23 +34,25 @@ function RunForm({
   const [forbiddenTerms, setForbiddenTerms] = useState(
     initialRun?.metadata.forbidden_terms.join(", ") ?? "",
   );
-  const [minimumLength, setMinimumLength] = useState(initialRun?.metadata.minimum_length ?? 0);
+  const [minimumLength, setMinimumLength] = useState(initialRun?.metadata.minimum_length ?? 80);
   const [minimumSentences, setMinimumSentences] = useState(
-    initialRun?.metadata.minimum_sentences ?? 1,
+    initialRun?.metadata.minimum_sentences ?? 3,
   );
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (!prompt.trim() || !testName.trim()) {
+    if (inFlight.current || !weightsValid || !prompt.trim() || !testName.trim()) {
       return;
     }
 
+    inFlight.current = true;
     setSubmitting(true);
     setErrorMessage("");
     try {
       const run = await runEvaluation({
+        weights,
         test_name: testName.trim(),
         prompt,
         model,
@@ -64,6 +70,7 @@ function RunForm({
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Unknown error");
     } finally {
+      inFlight.current = false;
       setSubmitting(false);
     }
   }
@@ -104,14 +111,17 @@ function RunForm({
 
       <label className="field">
         <span>Test prompt <span className="required-mark" aria-hidden="true">*</span></span>
-        <textarea
-          value={prompt}
-          onChange={(event) => setPrompt(event.target.value)}
-          rows={4}
-          maxLength={10000}
-          placeholder="What should the model respond to?"
-          required
-        />
+        <span className="prompt-box">
+          <textarea
+            value={prompt}
+            onChange={(event) => setPrompt(event.target.value)}
+            rows={4}
+            maxLength={500}
+            placeholder="What should the model respond to?"
+            required
+          />
+          <span className="prompt-counter" aria-hidden="true">{prompt.length} / 500</span>
+        </span>
       </label>
 
       <div className="field-row">
@@ -119,16 +129,14 @@ function RunForm({
           <span>Model</span>
           <input value={model} onChange={(event) => setModel(event.target.value)} list="model-options" />
           <datalist id="model-options">
-            <option value="demo-strong-v1" />
-            <option value="demo-partial-v1" />
-            <option value="demo-failing-v1" />
+            <option value="gpt-4.1-mini" />
           </datalist>
         </label>
 
         <label className="field">
-          <span>Temperature</span>
+          <span>Temperature <output>{temperature.toFixed(1)}</output></span>
           <input
-            type="number"
+            type="range"
             min={0}
             max={2}
             step={0.1}
@@ -138,51 +146,70 @@ function RunForm({
         </label>
       </div>
 
-      <div className="field-row">
-        <label className="field">
-          <span>Expected keywords (comma separated)</span>
-          <input
-            value={expectedKeywords}
-            onChange={(event) => setExpectedKeywords(event.target.value)}
-          />
-        </label>
+      <details className="advanced-criteria">
+        <summary className="advanced-criteria-header">
+          <span>
+            <strong>Evaluation Criteria &amp; Scoring</strong>
+            <span className="advanced-criteria-description">Configure response constraints and scoring weights.</span>
+          </span>
+          <svg className="criteria-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </summary>
+        <div className="advanced-criteria-controls">
+          <div className="field-row">
+            <label className="field">
+              <span>Expected keywords (comma separated)</span>
+              <input
+                value={expectedKeywords}
+                onChange={(event) => setExpectedKeywords(event.target.value)}
+              />
+            </label>
 
-        <label className="field">
-          <span>Forbidden terms (comma separated)</span>
-          <input
-            value={forbiddenTerms}
-            onChange={(event) => setForbiddenTerms(event.target.value)}
-          />
-        </label>
-      </div>
+            <label className="field">
+              <span>Forbidden terms (comma separated)</span>
+              <input
+                value={forbiddenTerms}
+                onChange={(event) => setForbiddenTerms(event.target.value)}
+              />
+            </label>
+          </div>
 
-      <div className="field-row">
-        <label className="field">
-          <span>Minimum length</span>
-          <input
-            type="number"
-            min={0}
-            max={10000}
-            value={minimumLength}
-            onChange={(event) => setMinimumLength(Number(event.target.value))}
-          />
-        </label>
+          <div className="field-row">
+            <label className="field">
+              <span>Minimum length</span>
+              <input
+                type="number"
+                min={0}
+                max={10000}
+                value={minimumLength}
+                onChange={(event) => setMinimumLength(Number(event.target.value))}
+              />
+            </label>
 
-        <label className="field">
-          <span>Minimum sentences</span>
-          <input
-            type="number"
-            min={1}
-            max={20}
-            value={minimumSentences}
-            onChange={(event) => setMinimumSentences(Number(event.target.value))}
-          />
-        </label>
-      </div>
+            <label className="field">
+              <span>Minimum sentences</span>
+              <input
+                type="number"
+                min={1}
+                max={20}
+                value={minimumSentences}
+                onChange={(event) => setMinimumSentences(Number(event.target.value))}
+              />
+            </label>
+          </div>
 
+          <section className="scoring-box" aria-labelledby="scoring-title">
+            <div className="scoring-head"><div><h3 id="scoring-title">Scoring points</h3><p>Choose how the 100 points are divided for this run.</p></div><output className={`score-total ${weightsValid ? "" : "bad"}`}>{Number(total.toFixed(1))} / 100</output></div>
+            <div className="score-grid">{(Object.keys(scoringLabels) as (keyof ScoringWeights)[]).map(key => <label className="score-item" key={key}><span>{scoringLabels[key]}</span><input aria-label={`${scoringLabels[key]} weight`} type="number" min={0} max={100} step={0.1} value={weights[key]} onChange={event => setWeights(previous => ({...previous, [key]: Number(event.target.value)}))} /></label>)}</div>
+            <p className="score-note">Set a criterion to 0 if you do not want it counted. Total must equal 100.</p>
+            {!weightsValid && <p className="error-text" role="alert">Scoring points must total 100 before you can run the test.</p>}
+          </section>
+        </div>
+      </details>
       {errorMessage && <p className="error-text" role="alert">{errorMessage}</p>}
 
-      <button type="submit" className="primary-button" disabled={submitting}>
+      <button type="submit" className="primary-button" disabled={submitting || !weightsValid}>
         <span>{submitting ? "Running…" : "Run and save test"}</span>
         <span aria-hidden="true">→</span>
       </button>

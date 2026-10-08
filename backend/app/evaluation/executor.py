@@ -22,6 +22,7 @@ class TestExecutor:
         self.repository = repository
 
     def execute(self, request: TestRequest) -> TestResult:
+        started_at = datetime.now(UTC).isoformat()
         started = perf_counter()
         generated = self.provider.generate(request.prompt, request.model, request.temperature)
         score, criteria = score_response(
@@ -31,6 +32,7 @@ class TestExecutor:
             request.minimum_length,
             request.minimum_sentences,
             request.forbidden_terms,
+            request.weights,
         )
         latency_ms = max(1, round((perf_counter() - started) * 1000))
         result = TestResult(
@@ -53,7 +55,9 @@ class TestExecutor:
                 "minimum_sentences": request.minimum_sentences,
                 "forbidden_terms": request.forbidden_terms,
                 "usage": generated.usage,
-                "schema_version": "1.0",
+                "schema_version": "2.0",
+                "scoring_weights": request.weights,
+                "started_at": started_at,
             },
         )
         # SQL storage enriches the result with its saved test identity/version.

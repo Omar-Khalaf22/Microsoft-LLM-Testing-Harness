@@ -1,5 +1,7 @@
 """Contract and integration tests for the inline Run service and API."""
 
+import io
+import json
 from unittest.mock import Mock
 
 import pytest
@@ -20,6 +22,18 @@ def no_provider_network(monkeypatch):
         pytest.fail("Run tests must not make provider network calls")
 
     monkeypatch.setattr(providers, "urlopen", blocked)
+
+
+@pytest.fixture(autouse=True)
+def isolated_provider_settings(monkeypatch):
+    from app.config import Settings
+    from app.routes import runs
+
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://test:test@localhost/test")
+    for name in ("LLM_PROVIDER", "OPENAI_BASE_URL", "OPENAI_API_KEY"):
+        monkeypatch.delenv(name, raising=False)
+    # Exercise environment loading without reading a developer's real .env/key.
+    monkeypatch.setattr(runs, "get_settings", lambda: Settings(_env_file=None))
 
 
 @pytest.fixture
@@ -269,3 +283,141 @@ def test_valid_body_with_missing_api_key_returns_sanitized_500(monkeypatch, requ
     provider.assert_called_once()
     assert provider.call_args.kwargs["api_key"] == ""
     repository.assert_not_called()
+
+
+@pytest.mark.parametrize("mode", ["demo", " DEMO "])
+def test_demo_settings_select_local_provider_without_key(monkeypatch, mode, request_model):
+    from app.routes import runs
+
+    monkeypatch.setenv("LLM_PROVIDER", mode)
+    repository = Mock()
+    repository.save.side_effect = lambda result, **kwargs: result
+    monkeypatch.setattr(runs, "PostgresResultRepository", Mock(return_value=repository))
+    executor = runs.get_executor(request_model)
+
+    assert isinstance(executor.provider, providers.DemoProvider)
+    assert executor.repository is repository
+
+
+def test_dotenv_openai_settings_flow_through_real_executor(monkeypatch, tmp_path, request_model):
+    from app.config import Settings
+    from app.routes import runs
+
+    secret = "fake-local-key-for-test-only"
+    env_file = tmp_path / ".env"
+    env_file.write_text(
+        "LLM_PROVIDER=openai\nOPENAI_BASE_URL=https://example.invalid/v1\n"
+        f"OPENAI_API_KEY={secret}\n"
+    )
+    settings = Settings(_env_file=env_file)
+    assert secret not in repr(settings)
+    assert secret not in settings.model_dump_json()
+    monkeypatch.setattr(runs, "get_settings", lambda: settings)
+    repository = Mock()
+    repository.save.side_effect = lambda result, **kwargs: result
+    monkeypatch.setattr(runs, "PostgresResultRepository", Mock(return_value=repository))
+    provider_constructor = Mock(wraps=providers.OpenAICompatibleProvider)
+    monkeypatch.setattr(runs, "OpenAICompatibleProvider", provider_constructor)
+    opener = Mock(
+        return_value=io.BytesIO(
+            json.dumps(
+                {
+                    "choices": [{"message": {"content": "A multiplexer selects one input."}}],
+                    "model": "returned-model",
+                    "usage": {"prompt_tokens": 8, "completion_tokens": 9},
+                }
+            ).encode()
+        )
+    )
+    monkeypatch.setattr(providers, "urlopen", opener)
+    app = FastAPI()
+    app.include_router(runs.router)
+
+    with TestClient(app) as test_client:
+        response = test_client.post("/runs", json=request_model.model_dump(mode="json"))
+
+    assert response.status_code == 200
+    provider_constructor.assert_called_once_with(
+        api_key=secret, base_url="https://example.invalid/v1"
+    )
+    opener.assert_called_once()
+    outbound = opener.call_args.args[0]
+    assert outbound.full_url == "https://example.invalid/v1/chat/completions"
+    assert json.loads(outbound.data) == {
+        "model": request_model.model,
+        "messages": [{"role": "user", "content": request_model.prompt}],
+        "temperature": request_model.temperature,
+    }
+    assert outbound.get_header("Authorization") == f"Bearer {secret}"
+    assert response.json()["response"] == "A multiplexer selects one input."
+    assert response.json()["model"] == "returned-model"
+    assert response.json()["provider"] == "openai_compatible"
+    assert secret not in response.text
+    repository.save.assert_called_once()
+    assert secret not in json.dumps(repository.save.call_args.args[0].to_dict())
+
+
+def test_configured_provider_failure_hides_secret(monkeypatch, request_model):
+    from app.routes import runs
+
+    secret = "fake-sensitive-key-for-test-only"
+    monkeypatch.setenv("LLM_PROVIDER", "openai")
+    monkeypatch.setenv("OPENAI_API_KEY", secret)
+    monkeypatch.setattr(runs, "PostgresResultRepository", Mock())
+    opener = Mock(side_effect=RuntimeError(f"Sensitive upstream error: {secret}"))
+    monkeypatch.setattr(providers, "urlopen", opener)
+    app = FastAPI()
+    app.include_router(runs.router)
+
+    with TestClient(app) as test_client:
+        response = test_client.post("/runs", json=request_model.model_dump(mode="json"))
+
+    opener.assert_called_once()
+    assert response.status_code == 500
+    assert response.json() == {"detail": "The run could not be completed."}
+    assert secret not in response.text
+
+
+def test_api_key_cannot_be_configured_from_request(monkeypatch):
+    from app.routes import runs
+
+    constructor = Mock()
+    monkeypatch.setattr(runs, "DemoProvider", constructor)
+    app = FastAPI()
+    app.include_router(runs.router)
+    with TestClient(app) as test_client:
+        response = test_client.post(
+            "/runs",
+            json={
+                "test_name": "Invalid key field",
+                "prompt": "Hello",
+                "openai_api_key": "not-a-server-key",
+            },
+        )
+    assert response.status_code == 422
+    constructor.assert_not_called()
+
+
+def test_explicit_env_file_and_environment_precedence(monkeypatch, tmp_path):
+    from app.config import get_settings
+
+    env_file = tmp_path / "demo.env"
+    env_file.write_text("LLM_PROVIDER=openai\nOPENAI_API_KEY=fake-file-only\n")
+    monkeypatch.setenv("LLM_ENV_FILE", str(env_file))
+    monkeypatch.delenv("LLM_PROVIDER", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    get_settings.cache_clear()
+    try:
+        settings = get_settings()
+        assert settings.llm_provider == "openai"
+        assert settings.openai_api_key.get_secret_value() == "fake-file-only"
+        assert "fake-file-only" not in settings.model_dump_json()
+        monkeypatch.setenv("LLM_PROVIDER", "demo")
+        get_settings.cache_clear()
+        assert get_settings().llm_provider == "demo"
+        monkeypatch.delenv("LLM_PROVIDER")
+        env_file.write_text("")
+        get_settings.cache_clear()
+        assert get_settings().llm_provider == "demo"
+    finally:
+        get_settings.cache_clear()

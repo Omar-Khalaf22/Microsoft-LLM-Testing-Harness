@@ -1,7 +1,21 @@
 import type { RunResponse } from "./api";
 
+function availableNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : undefined;
+}
+
 function RunResults({ run }: { run: RunResponse | null }) {
   const usage = run?.metadata.usage;
+  const inputTokens = availableNumber(usage?.input_tokens);
+  const outputTokens = availableNumber(usage?.output_tokens);
+  const suppliedTotal = availableNumber(usage && "total_tokens" in usage ? usage.total_tokens : undefined);
+  const totalTokens = suppliedTotal ?? (
+    inputTokens !== undefined && outputTokens !== undefined ? inputTokens + outputTokens : undefined
+  );
+  const latency = availableNumber(run?.latency_ms);
+  const latencyDisplay = latency === undefined ? "\u2014" : latency < 1000
+    ? `${latency} ms` : `${(Math.round(latency / 10) / 100).toFixed(2)} s`;
+  const provider = run?.provider === "openai_compatible" ? "OpenAI" : run?.provider;
 
   return (
     <section className="panel result-panel" aria-label="Selected run result">
@@ -26,9 +40,20 @@ function RunResults({ run }: { run: RunResponse | null }) {
                 {run.passed ? "PASS" : "REVIEW"}
               </span>
               <h3>{run.metadata.test_name || "Untitled test"}</h3>
-              <p>{run.model} · {run.latency_ms} ms · {run.provider}</p>
             </div>
           </div>
+
+          <section className="execution-metrics" aria-labelledby="run-metrics-title">
+            <h4 id="run-metrics-title">Run Metrics</h4>
+            <dl className="execution-metrics-grid">
+              <div><dt>Model</dt><dd>{run.model?.trim() || "\u2014"}</dd></div>
+              <div><dt>Provider</dt><dd>{provider?.trim() || "\u2014"}</dd></div>
+              <div><dt>Latency</dt><dd>{latencyDisplay}</dd></div>
+              <div><dt>Input Tokens</dt><dd>{inputTokens ?? "\u2014"}</dd></div>
+              <div><dt>Output Tokens</dt><dd>{outputTokens ?? "\u2014"}</dd></div>
+              <div><dt>Total Tokens</dt><dd>{totalTokens ?? "\u2014"}</dd></div>
+            </dl>
+          </section>
 
           <div className="response-box">
             <h4>Model response</h4>
@@ -54,12 +79,6 @@ function RunResults({ run }: { run: RunResponse | null }) {
             <div><dt>Run</dt><dd>{run.id.slice(0, 8)}</dd></div>
             {run.metadata.test_version && (
               <div><dt>Version</dt><dd>{run.metadata.test_version}</dd></div>
-            )}
-            {usage?.input_tokens !== undefined && (
-              <div><dt>Input tokens</dt><dd>{usage.input_tokens}</dd></div>
-            )}
-            {usage?.output_tokens !== undefined && (
-              <div><dt>Output tokens</dt><dd>{usage.output_tokens}</dd></div>
             )}
             <div><dt>Saved</dt><dd>{new Date(run.created_at).toLocaleString()}</dd></div>
           </dl>

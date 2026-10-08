@@ -2,8 +2,25 @@
 
 export const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
+export interface ScoringWeights {
+  keyword: number;
+  relevance: number;
+  length: number;
+  sentences: number;
+  forbidden: number;
+  valid: number;
+}
+export const defaultWeights: ScoringWeights = {
+  keyword: 30, relevance: 20, length: 15, sentences: 15, forbidden: 10, valid: 10,
+};
+export const scoringLabels: Record<keyof ScoringWeights, string> = {
+  keyword: "Keyword coverage", relevance: "Prompt relevance", length: "Minimum length",
+  sentences: "Sentence structure", forbidden: "Forbidden terms", valid: "Valid response",
+};
+
 export interface RunCreateRequest {
   test_name: string;
+  weights: ScoringWeights;
   prompt: string;
   model: string;
   temperature: number;
@@ -46,6 +63,8 @@ export interface RunResponse {
       output_tokens: number;
     };
     schema_version: string;
+    scoring_weights?: ScoringWeights;
+    started_at?: string;
     test_id?: string;
     test_version?: number;
     test_name: string;

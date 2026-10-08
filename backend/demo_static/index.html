@@ -23,6 +23,7 @@
         <form id="test-form">
           <label for="prompt">Test prompt</label>
           <textarea id="prompt" required>Explain why structured JSON results are useful in an LLM testing system.</textarea>
+
           <div class="grid">
             <div>
               <label for="keywords">Expected keywords</label>
@@ -53,6 +54,46 @@
               <input id="forbidden-terms" value="error, unavailable" placeholder="comma, separated, terms">
             </div>
           </div>
+
+          <section class="scoring-box" aria-labelledby="scoring-title">
+            <div class="scoring-head">
+              <div>
+                <h3 id="scoring-title">Scoring points</h3>
+                <p>Choose how the 100 points are divided for this run.</p>
+              </div>
+              <div id="score-total" class="score-total">100 / 100</div>
+            </div>
+
+            <div class="score-grid">
+              <div class="score-item">
+                <label for="weight-keywords">Keyword coverage</label>
+                <input id="weight-keywords" class="weight-input" type="number" min="0" max="100" value="30">
+              </div>
+              <div class="score-item">
+                <label for="weight-relevance">Prompt relevance</label>
+                <input id="weight-relevance" class="weight-input" type="number" min="0" max="100" value="20">
+              </div>
+              <div class="score-item">
+                <label for="weight-length">Minimum length</label>
+                <input id="weight-length" class="weight-input" type="number" min="0" max="100" value="15">
+              </div>
+              <div class="score-item">
+                <label for="weight-sentences">Sentence structure</label>
+                <input id="weight-sentences" class="weight-input" type="number" min="0" max="100" value="15">
+              </div>
+              <div class="score-item">
+                <label for="weight-forbidden">Forbidden terms</label>
+                <input id="weight-forbidden" class="weight-input" type="number" min="0" max="100" value="10">
+              </div>
+              <div class="score-item">
+                <label for="weight-valid">Valid response</label>
+                <input id="weight-valid" class="weight-input" type="number" min="0" max="100" value="10">
+              </div>
+            </div>
+
+            <p class="score-note">Set a criterion to 0 if you do not want it counted. Total must equal 100.</p>
+          </section>
+
           <div class="button-row">
             <button id="run-button" type="submit"><span>Run one test</span><span class="arrow">→</span></button>
             <button id="suite-button" class="secondary" type="button"><span>Run 3 case suite</span><span class="arrow">▦</span></button>
