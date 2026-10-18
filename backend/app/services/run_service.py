@@ -15,6 +15,8 @@ def create_run(request: RunCreateRequest, *, executor: TestExecutor) -> RunRespo
         minimum_length=request.minimum_length,
         minimum_sentences=request.minimum_sentences,
         forbidden_terms=request.forbidden_terms,
+        base_system_prompt=request.base_system_prompt,
+        custom_system_prompt=request.custom_system_prompt,
         weights=request.weights.model_dump(),
         test_id=request.test_id,
         test_name=request.test_name,

@@ -26,6 +26,9 @@ class TestRequest:
     test_name: str | None = None
     test_version: int | None = None
 
+    base_system_prompt: str | None = None
+    custom_system_prompt: str | None = None
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> TestRequest:
         prompt = str(data.get("prompt", "")).strip()
@@ -53,6 +56,10 @@ class TestRequest:
         if not 1 <= minimum_sentences <= 20:
             raise ValidationError("Minimum sentences must be between 1 and 20.")
 
+        for name in ("base_system_prompt", "custom_system_prompt"):
+            if data.get(name) is not None and not isinstance(data[name], str):
+                raise ValidationError(f"{name} must be text or null.")
+
         model = str(data.get("model", "gpt-4.1-mini")).strip() or "gpt-4.1-mini"
         return cls(
             prompt=prompt,
@@ -62,6 +69,8 @@ class TestRequest:
             minimum_length=minimum_length,
             minimum_sentences=minimum_sentences,
             forbidden_terms=forbidden_terms[:20],
+            base_system_prompt=data.get("base_system_prompt"),
+            custom_system_prompt=data.get("custom_system_prompt"),
             weights=ScoringWeights.model_validate(
                 data.get("weights", default_weights())
             ).model_dump(),

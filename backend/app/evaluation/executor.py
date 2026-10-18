@@ -6,6 +6,8 @@ from datetime import UTC, datetime
 from time import perf_counter
 from uuid import uuid4
 
+from app.assistant.prompts import resolve_system_prompt
+
 from .models import TestRequest, TestResult
 from .providers import DemoProvider, OpenAICompatibleProvider
 from .repository import ResultRepository
@@ -24,7 +26,12 @@ class TestExecutor:
     def execute(self, request: TestRequest) -> TestResult:
         started_at = datetime.now(UTC).isoformat()
         started = perf_counter()
-        generated = self.provider.generate(request.prompt, request.model, request.temperature)
+        system_prompt = resolve_system_prompt(
+            request.base_system_prompt, request.custom_system_prompt
+        )
+        generated = self.provider.generate(
+            request.prompt, request.model, request.temperature, system_prompt=system_prompt
+        )
         score, criteria = score_response(
             request.prompt,
             generated.text,
@@ -48,6 +55,9 @@ class TestExecutor:
             latency_ms=latency_ms,
             created_at=datetime.now(UTC).isoformat(),
             metadata={
+                "base_system_prompt": request.base_system_prompt,
+                "custom_system_prompt": request.custom_system_prompt,
+                "resolved_system_prompt": system_prompt,
                 "requested_model": request.model,
                 "temperature": request.temperature,
                 "expected_keywords": request.expected_keywords,

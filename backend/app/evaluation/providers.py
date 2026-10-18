@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+from app.assistant.prompts import DEFAULT_SYSTEM_PROMPT
+
 
 @dataclass(frozen=True)
 class ProviderResponse:
@@ -21,7 +23,13 @@ class DemoProvider:
 
     name = "local_demo"
 
-    def generate(self, prompt: str, model: str, temperature: float) -> ProviderResponse:
+    def generate(
+        self,
+        prompt: str,
+        model: str,
+        temperature: float,
+        system_prompt: str = DEFAULT_SYSTEM_PROMPT,
+    ) -> ProviderResponse:
         words = re.findall(r"[A-Za-z0-9']+", prompt)
         topic = " ".join(words[:8]) if words else "the requested topic"
         if model == "demo-partial-v1":
@@ -62,11 +70,20 @@ class OpenAICompatibleProvider:
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
 
-    def generate(self, prompt: str, model: str, temperature: float) -> ProviderResponse:
+    def generate(
+        self,
+        prompt: str,
+        model: str,
+        temperature: float,
+        system_prompt: str = DEFAULT_SYSTEM_PROMPT,
+    ) -> ProviderResponse:
         payload = json.dumps(
             {
                 "model": model,
-                "messages": [{"role": "user", "content": prompt}],
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt},
+                ],
                 "temperature": temperature,
             }
         ).encode()

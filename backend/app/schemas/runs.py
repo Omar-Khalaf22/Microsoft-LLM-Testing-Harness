@@ -20,6 +20,8 @@ class RunCreateRequest(BaseModel):
     prompt: Annotated[
         str, StringConstraints(strip_whitespace=True, min_length=1, max_length=10_000)
     ]
+    base_system_prompt: str | None = None
+    custom_system_prompt: str | None = None
     model: NonemptyText = "gpt-4.1-mini"
     temperature: float = Field(default=0.2, ge=0, le=2, allow_inf_nan=False)
     expected_keywords: list[NonemptyText] = Field(default_factory=list, max_length=20)

@@ -8,6 +8,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from app.assistant.prompts import DEFAULT_SYSTEM_PROMPT
 from app.evaluation import providers
 from app.evaluation.executor import TestExecutor as EvaluationExecutor
 from app.evaluation.models import CriterionResult
@@ -345,7 +346,10 @@ def test_dotenv_openai_settings_flow_through_real_executor(monkeypatch, tmp_path
     assert outbound.full_url == "https://example.invalid/v1/chat/completions"
     assert json.loads(outbound.data) == {
         "model": request_model.model,
-        "messages": [{"role": "user", "content": request_model.prompt}],
+        "messages": [
+            {"role": "system", "content": DEFAULT_SYSTEM_PROMPT},
+            {"role": "user", "content": request_model.prompt},
+        ],
         "temperature": request_model.temperature,
     }
     assert outbound.get_header("Authorization") == f"Bearer {secret}"

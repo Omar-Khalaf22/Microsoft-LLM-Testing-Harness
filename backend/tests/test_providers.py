@@ -8,6 +8,7 @@ from urllib.error import HTTPError, URLError
 
 import pytest
 
+from app.assistant.prompts import DEFAULT_SYSTEM_PROMPT
 from app.evaluation import providers
 from app.evaluation.providers import DemoProvider, OpenAICompatibleProvider, ProviderResponse
 
@@ -74,7 +75,10 @@ def test_request_and_response_contract(http_response, suffix):
     assert headers["content-type"] == "application/json"
     assert json.loads(request.data) == {
         "model": "requested-model",
-        "messages": [{"role": "user", "content": "Explain JSON — briefly"}],
+        "messages": [
+            {"role": "system", "content": DEFAULT_SYSTEM_PROMPT},
+            {"role": "user", "content": "Explain JSON — briefly"},
+        ],
         "temperature": 0.7,
     }
     assert kwargs == {"timeout": 30}
