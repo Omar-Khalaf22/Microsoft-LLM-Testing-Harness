@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, JsonValue, StringConstraints
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, StringConstraints, model_validator
 
 NonemptyText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
@@ -27,6 +27,18 @@ class RunCreateRequest(BaseModel):
     scoring_weights: dict[str, int] | None = None
     test_id: NonemptyText | None = None
     test_version: int | None = Field(default=None, ge=1)
+
+    @model_validator(mode="after")
+    def validate_scoring_weights(self):
+        if self.scoring_weights is not None:
+            expected = {"keywords", "relevance", "length", "sentences", "forbidden", "nonempty"}
+            if set(self.scoring_weights) != expected:
+                raise ValueError("Exactly six scoring criteria are required")
+            if any(value < 0 for value in self.scoring_weights.values()):
+                raise ValueError("Scoring weights cannot be negative")
+            if sum(self.scoring_weights.values()) != 100:
+                raise ValueError("Scoring weights must total 100")
+        return self
 
 
 class CriterionResultResponse(BaseModel):
