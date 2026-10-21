@@ -34,12 +34,22 @@ function RunForm({
   const [minimumSentences, setMinimumSentences] = useState(
     initialRun?.metadata.minimum_sentences ?? 1,
   );
+  const [weights, setWeights] = useState<Record<string, number>>(
+    initialRun?.metadata.scoring_weights ?? {
+      keywords: 30, relevance: 20, length: 15,
+      sentences: 15, forbidden: 10, nonempty: 10,
+    },
+  );
+  const weightTotal = Object.values(weights).reduce((sum, value) => sum + value, 0);
+  const validWeights = weightTotal === 100 && Object.values(weights).every(
+    (value) => Number.isInteger(value) && value >= 0,
+  );
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (!prompt.trim() || !testName.trim()) {
+    if (!prompt.trim() || !testName.trim() || !validWeights) {
       return;
     }
 
@@ -52,6 +62,7 @@ function RunForm({
         model,
         temperature,
         expected_keywords: parseTerms(expectedKeywords),
+        scoring_weights: weights,
         forbidden_terms: parseTerms(forbiddenTerms),
         minimum_length: minimumLength,
         minimum_sentences: minimumSentences,
@@ -180,9 +191,24 @@ function RunForm({
         </label>
       </div>
 
+      <div className="field">
+        <span>Scoring points (total: {weightTotal}/100)</span>
+        <div className="field-row">
+          {Object.entries(weights).map(([key, value]) => (
+            <label className="field" key={key}>
+              <span>{key}</span>
+              <input type="number" min={0} max={100} step={1} value={value}
+                onChange={(event) => setWeights((previous) => ({
+                  ...previous, [key]: Number(event.target.value),
+                }))} />
+            </label>
+          ))}
+        </div>
+        {!validWeights && <p className="error-text">Points must total exactly 100.</p>}
+      </div>
       {errorMessage && <p className="error-text" role="alert">{errorMessage}</p>}
 
-      <button type="submit" className="primary-button" disabled={submitting}>
+      <button type="submit" className="primary-button" disabled={submitting || !validWeights}>
         <span>{submitting ? "Running…" : "Run and save test"}</span>
         <span aria-hidden="true">→</span>
       </button>
