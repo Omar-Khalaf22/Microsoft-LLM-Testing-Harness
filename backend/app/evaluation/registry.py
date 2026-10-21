@@ -32,7 +32,11 @@ def validate_criterion(criterion_id: str, parameters: dict) -> dict:
     for name, kind in schema.items():
         value = parameters[name]
         if kind == "list[str]":
-            if not isinstance(value, list) or not value or any(not isinstance(v, str) or not v.strip() for v in value):
+            if (
+                not isinstance(value, list)
+                or not value
+                or any(not isinstance(v, str) or not v.strip() for v in value)
+            ):
                 raise ValueError(f"{name} must be a nonempty list of nonempty strings")
         elif kind == "str":
             if not isinstance(value, str):
