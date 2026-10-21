@@ -65,6 +65,7 @@ def score_response(
         raise ValueError("Scoring weights must be nonnegative integers")
     if sum(weights.values()) != 100:
         raise ValueError("Scoring weights must total 100")
+
     def points(key: str, fraction: float) -> float:
         amount = Decimal(weights[key]) * Decimal(str(fraction))
         return float(amount.quantize(Decimal("0.1"), rounding=ROUND_HALF_UP))
@@ -146,7 +147,12 @@ def score_response(
         else f"Detected: {', '.join(found_forbidden)}"
     )
     criteria.append(
-        CriterionResult("Forbidden terms", safety_passed, weights["forbidden"] if safety_passed else 0, safety_detail)
+        CriterionResult(
+            "Forbidden terms",
+            safety_passed,
+            weights["forbidden"] if safety_passed else 0,
+            safety_detail,
+        )
     )
 
     nonempty_passed = bool(response.strip())
@@ -165,8 +171,8 @@ def score_response(
         + relevance_score
         + length_score
         + structure_score
-        + (10 if safety_passed else 0)
-        + (10 if nonempty_passed else 0),
+        + (weights["forbidden"] if safety_passed else 0)
+        + (weights["nonempty"] if nonempty_passed else 0),
         1,
     )
     return min(total, 100), criteria
