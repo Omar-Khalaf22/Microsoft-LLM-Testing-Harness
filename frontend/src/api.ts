@@ -11,6 +11,7 @@ export interface RunCreateRequest {
   minimum_length: number;
   minimum_sentences: number;
   forbidden_terms: string[];
+  scoring_weights?: Record<string, number>;
   test_id?: string;
   test_version?: number;
 }
@@ -46,6 +47,7 @@ export interface RunResponse {
       output_tokens: number;
     };
     schema_version: string;
+    scoring_weights?: Record<string, number>;
     test_id?: string;
     test_version?: number;
     test_name: string;
