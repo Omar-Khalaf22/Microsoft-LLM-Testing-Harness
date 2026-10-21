@@ -37,6 +37,7 @@ class PostgresResultRepository:
             "minimum_length": result.metadata["minimum_length"],
             "minimum_sentences": result.metadata["minimum_sentences"],
             "forbidden_terms": result.metadata["forbidden_terms"],
+            "scoring_weights": result.metadata.get("scoring_weights"),
         }
 
         with self.session_factory.begin() as session:
