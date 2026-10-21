@@ -1,4 +1,5 @@
 """Validated criterion execution, independent of the legacy six score fields."""
+
 from .evaluators.content import evaluate
 from .registry import validate_criterion
 
