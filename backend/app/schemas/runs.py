@@ -24,6 +24,7 @@ class RunCreateRequest(BaseModel):
     minimum_length: int = Field(default=40, ge=0, le=10_000)
     minimum_sentences: int = Field(default=2, ge=1, le=20)
     forbidden_terms: list[NonemptyText] = Field(default_factory=list, max_length=20)
+    scoring_weights: dict[str, int] | None = None
     test_id: NonemptyText | None = None
     test_version: int | None = Field(default=None, ge=1)
 
