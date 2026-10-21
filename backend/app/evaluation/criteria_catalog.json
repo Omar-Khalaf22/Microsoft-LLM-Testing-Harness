@@ -1,0 +1,1022 @@
+[
+  {
+    "id": "required_keywords",
+    "name": "required keywords",
+    "category": "content",
+    "description": "Deterministic check for required keywords",
+    "evaluator": "content",
+    "parameters": {
+      "keywords": "list[str]"
+    },
+    "status": "supported",
+    "priority": "high"
+  },
+  {
+    "id": "forbidden_keywords",
+    "name": "forbidden keywords",
+    "category": "content",
+    "description": "Deterministic check for forbidden keywords",
+    "evaluator": "content",
+    "parameters": {
+      "keywords": "list[str]"
+    },
+    "status": "supported",
+    "priority": "high"
+  },
+  {
+    "id": "required_phrases",
+    "name": "required phrases",
+    "category": "content",
+    "description": "Deterministic check for required phrases",
+    "evaluator": "content",
+    "parameters": {
+      "phrases": "list[str]"
+    },
+    "status": "supported",
+    "priority": "high"
+  },
+  {
+    "id": "forbidden_phrases",
+    "name": "forbidden phrases",
+    "category": "content",
+    "description": "Deterministic check for forbidden phrases",
+    "evaluator": "content",
+    "parameters": {
+      "phrases": "list[str]"
+    },
+    "status": "supported",
+    "priority": "high"
+  },
+  {
+    "id": "exact_match",
+    "name": "exact match",
+    "category": "content",
+    "description": "Deterministic check for exact match",
+    "evaluator": "content",
+    "parameters": {
+      "expected": "str"
+    },
+    "status": "supported",
+    "priority": "high"
+  },
+  {
+    "id": "contains_text",
+    "name": "contains text",
+    "category": "content",
+    "description": "Deterministic check for contains text",
+    "evaluator": "content",
+    "parameters": {
+      "text": "str"
+    },
+    "status": "supported",
+    "priority": "high"
+  },
+  {
+    "id": "case_insensitive_match",
+    "name": "case insensitive match",
+    "category": "content",
+    "description": "Deterministic check for case insensitive match",
+    "evaluator": "content",
+    "parameters": {
+      "expected": "str"
+    },
+    "status": "supported",
+    "priority": "high"
+  },
+  {
+    "id": "minimum_characters",
+    "name": "minimum characters",
+    "category": "content",
+    "description": "Deterministic check for minimum characters",
+    "evaluator": "content",
+    "parameters": {
+      "count": "int"
+    },
+    "status": "supported",
+    "priority": "high"
+  },
+  {
+    "id": "maximum_characters",
+    "name": "maximum characters",
+    "category": "content",
+    "description": "Deterministic check for maximum characters",
+    "evaluator": "content",
+    "parameters": {
+      "count": "int"
+    },
+    "status": "supported",
+    "priority": "high"
+  },
+  {
+    "id": "minimum_sentences",
+    "name": "minimum sentences",
+    "category": "content",
+    "description": "Deterministic check for minimum sentences",
+    "evaluator": "content",
+    "parameters": {
+      "count": "int"
+    },
+    "status": "supported",
+    "priority": "high"
+  },
+  {
+    "id": "semantic_similarity",
+    "name": "semantic similarity",
+    "category": "content",
+    "description": "Candidate evaluation of semantic similarity; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "factual_consistency",
+    "name": "factual consistency",
+    "category": "structure",
+    "description": "Candidate evaluation of factual consistency; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "citation_accuracy",
+    "name": "citation accuracy",
+    "category": "length",
+    "description": "Candidate evaluation of citation accuracy; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "hallucination_detection",
+    "name": "hallucination detection",
+    "category": "numerical",
+    "description": "Candidate evaluation of hallucination detection; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "toxicity",
+    "name": "toxicity",
+    "category": "semantic",
+    "description": "Candidate evaluation of toxicity; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "bias",
+    "name": "bias",
+    "category": "safety",
+    "description": "Candidate evaluation of bias; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "pii_leakage",
+    "name": "pii leakage",
+    "category": "instruction_following",
+    "description": "Candidate evaluation of pii leakage; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "json_schema",
+    "name": "json schema",
+    "category": "rag",
+    "description": "Candidate evaluation of json schema; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "valid_json",
+    "name": "valid json",
+    "category": "performance",
+    "description": "Candidate evaluation of valid json; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "xml_validity",
+    "name": "xml validity",
+    "category": "content",
+    "description": "Candidate evaluation of xml validity; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "markdown_format",
+    "name": "markdown format",
+    "category": "structure",
+    "description": "Candidate evaluation of markdown format; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "regex_match",
+    "name": "regex match",
+    "category": "length",
+    "description": "Candidate evaluation of regex match; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "regex_not_match",
+    "name": "regex not match",
+    "category": "numerical",
+    "description": "Candidate evaluation of regex not match; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "numeric_exact",
+    "name": "numeric exact",
+    "category": "semantic",
+    "description": "Candidate evaluation of numeric exact; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "numeric_tolerance",
+    "name": "numeric tolerance",
+    "category": "safety",
+    "description": "Candidate evaluation of numeric tolerance; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "word_count_min",
+    "name": "word count min",
+    "category": "instruction_following",
+    "description": "Candidate evaluation of word count min; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "word_count_max",
+    "name": "word count max",
+    "category": "rag",
+    "description": "Candidate evaluation of word count max; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "required_sections",
+    "name": "required sections",
+    "category": "performance",
+    "description": "Candidate evaluation of required sections; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "language_detection",
+    "name": "language detection",
+    "category": "content",
+    "description": "Candidate evaluation of language detection; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "sentiment_alignment",
+    "name": "sentiment alignment",
+    "category": "structure",
+    "description": "Candidate evaluation of sentiment alignment; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "tone_consistency",
+    "name": "tone consistency",
+    "category": "length",
+    "description": "Candidate evaluation of tone consistency; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "reading_level",
+    "name": "reading level",
+    "category": "numerical",
+    "description": "Candidate evaluation of reading level; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "source_attribution",
+    "name": "source attribution",
+    "category": "semantic",
+    "description": "Candidate evaluation of source attribution; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "context_relevance",
+    "name": "context relevance",
+    "category": "safety",
+    "description": "Candidate evaluation of context relevance; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "answer_relevance",
+    "name": "answer relevance",
+    "category": "instruction_following",
+    "description": "Candidate evaluation of answer relevance; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "faithfulness",
+    "name": "faithfulness",
+    "category": "rag",
+    "description": "Candidate evaluation of faithfulness; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "context_precision",
+    "name": "context precision",
+    "category": "performance",
+    "description": "Candidate evaluation of context precision; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "context_recall",
+    "name": "context recall",
+    "category": "content",
+    "description": "Candidate evaluation of context recall; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "retrieval_hit_rate",
+    "name": "retrieval hit rate",
+    "category": "structure",
+    "description": "Candidate evaluation of retrieval hit rate; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "retrieval_mrr",
+    "name": "retrieval mrr",
+    "category": "length",
+    "description": "Candidate evaluation of retrieval mrr; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "latency_budget",
+    "name": "latency budget",
+    "category": "numerical",
+    "description": "Candidate evaluation of latency budget; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "token_budget",
+    "name": "token budget",
+    "category": "semantic",
+    "description": "Candidate evaluation of token budget; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "cost_budget",
+    "name": "cost budget",
+    "category": "safety",
+    "description": "Candidate evaluation of cost budget; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "tool_call_accuracy",
+    "name": "tool call accuracy",
+    "category": "instruction_following",
+    "description": "Candidate evaluation of tool call accuracy; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "tool_selection",
+    "name": "tool selection",
+    "category": "rag",
+    "description": "Candidate evaluation of tool selection; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "function_argument_validation",
+    "name": "function argument validation",
+    "category": "performance",
+    "description": "Candidate evaluation of function argument validation; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "refusal_accuracy",
+    "name": "refusal accuracy",
+    "category": "content",
+    "description": "Candidate evaluation of refusal accuracy; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "safety_policy",
+    "name": "safety policy",
+    "category": "structure",
+    "description": "Candidate evaluation of safety policy; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "prompt_injection_resistance",
+    "name": "prompt injection resistance",
+    "category": "length",
+    "description": "Candidate evaluation of prompt injection resistance; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "instruction_priority",
+    "name": "instruction priority",
+    "category": "numerical",
+    "description": "Candidate evaluation of instruction priority; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "completeness",
+    "name": "completeness",
+    "category": "semantic",
+    "description": "Candidate evaluation of completeness; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "conciseness",
+    "name": "conciseness",
+    "category": "safety",
+    "description": "Candidate evaluation of conciseness; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "clarity",
+    "name": "clarity",
+    "category": "instruction_following",
+    "description": "Candidate evaluation of clarity; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "coherence",
+    "name": "coherence",
+    "category": "rag",
+    "description": "Candidate evaluation of coherence; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "grammar",
+    "name": "grammar",
+    "category": "performance",
+    "description": "Candidate evaluation of grammar; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "spelling",
+    "name": "spelling",
+    "category": "content",
+    "description": "Candidate evaluation of spelling; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "format_compliance",
+    "name": "format compliance",
+    "category": "structure",
+    "description": "Candidate evaluation of format compliance; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "list_length",
+    "name": "list length",
+    "category": "length",
+    "description": "Candidate evaluation of list length; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "table_structure",
+    "name": "table structure",
+    "category": "numerical",
+    "description": "Candidate evaluation of table structure; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "schema_required_keys",
+    "name": "schema required keys",
+    "category": "semantic",
+    "description": "Candidate evaluation of schema required keys; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "schema_forbidden_keys",
+    "name": "schema forbidden keys",
+    "category": "safety",
+    "description": "Candidate evaluation of schema forbidden keys; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "json_field_type",
+    "name": "json field type",
+    "category": "instruction_following",
+    "description": "Candidate evaluation of json field type; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "json_field_value",
+    "name": "json field value",
+    "category": "rag",
+    "description": "Candidate evaluation of json field value; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "json_array_min_length",
+    "name": "json array min length",
+    "category": "performance",
+    "description": "Candidate evaluation of json array min length; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "json_array_max_length",
+    "name": "json array max length",
+    "category": "content",
+    "description": "Candidate evaluation of json array max length; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "email_format",
+    "name": "email format",
+    "category": "structure",
+    "description": "Candidate evaluation of email format; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "url_format",
+    "name": "url format",
+    "category": "length",
+    "description": "Candidate evaluation of url format; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "date_format",
+    "name": "date format",
+    "category": "numerical",
+    "description": "Candidate evaluation of date format; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "code_syntax",
+    "name": "code syntax",
+    "category": "semantic",
+    "description": "Candidate evaluation of code syntax; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "code_execution",
+    "name": "code execution",
+    "category": "safety",
+    "description": "Candidate evaluation of code execution; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "unit_test_pass",
+    "name": "unit test pass",
+    "category": "instruction_following",
+    "description": "Candidate evaluation of unit test pass; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "sql_syntax",
+    "name": "sql syntax",
+    "category": "rag",
+    "description": "Candidate evaluation of sql syntax; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "translation_accuracy",
+    "name": "translation accuracy",
+    "category": "performance",
+    "description": "Candidate evaluation of translation accuracy; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "summarization_coverage",
+    "name": "summarization coverage",
+    "category": "content",
+    "description": "Candidate evaluation of summarization coverage; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "entity_extraction",
+    "name": "entity extraction",
+    "category": "structure",
+    "description": "Candidate evaluation of entity extraction; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "named_entity_accuracy",
+    "name": "named entity accuracy",
+    "category": "length",
+    "description": "Candidate evaluation of named entity accuracy; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "keyword_density",
+    "name": "keyword density",
+    "category": "numerical",
+    "description": "Candidate evaluation of keyword density; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "duplicate_detection",
+    "name": "duplicate detection",
+    "category": "semantic",
+    "description": "Candidate evaluation of duplicate detection; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "repetition_penalty",
+    "name": "repetition penalty",
+    "category": "safety",
+    "description": "Candidate evaluation of repetition penalty; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "answerability",
+    "name": "answerability",
+    "category": "instruction_following",
+    "description": "Candidate evaluation of answerability; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "uncertainty_calibration",
+    "name": "uncertainty calibration",
+    "category": "rag",
+    "description": "Candidate evaluation of uncertainty calibration; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "confidence_alignment",
+    "name": "confidence alignment",
+    "category": "performance",
+    "description": "Candidate evaluation of confidence alignment; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "contradiction_detection",
+    "name": "contradiction detection",
+    "category": "content",
+    "description": "Candidate evaluation of contradiction detection; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "multi_turn_consistency",
+    "name": "multi turn consistency",
+    "category": "structure",
+    "description": "Candidate evaluation of multi turn consistency; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "memory_consistency",
+    "name": "memory consistency",
+    "category": "length",
+    "description": "Candidate evaluation of memory consistency; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "privacy_compliance",
+    "name": "privacy compliance",
+    "category": "numerical",
+    "description": "Candidate evaluation of privacy compliance; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "copyright_compliance",
+    "name": "copyright compliance",
+    "category": "semantic",
+    "description": "Candidate evaluation of copyright compliance; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "profanity_detection",
+    "name": "profanity detection",
+    "category": "safety",
+    "description": "Candidate evaluation of profanity detection; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "jailbreak_resistance",
+    "name": "jailbreak resistance",
+    "category": "instruction_following",
+    "description": "Candidate evaluation of jailbreak resistance; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "reasoning_consistency",
+    "name": "reasoning consistency",
+    "category": "rag",
+    "description": "Candidate evaluation of reasoning consistency; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "mathematical_correctness",
+    "name": "mathematical correctness",
+    "category": "performance",
+    "description": "Candidate evaluation of mathematical correctness; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "numeric_range",
+    "name": "numeric range",
+    "category": "content",
+    "description": "Candidate evaluation of numeric range; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "numeric_units",
+    "name": "numeric units",
+    "category": "structure",
+    "description": "Candidate evaluation of numeric units; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "source_freshness",
+    "name": "source freshness",
+    "category": "length",
+    "description": "Candidate evaluation of source freshness; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "citation_presence",
+    "name": "citation presence",
+    "category": "numerical",
+    "description": "Candidate evaluation of citation presence; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "required_links",
+    "name": "required links",
+    "category": "semantic",
+    "description": "Candidate evaluation of required links; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "markdown_links",
+    "name": "markdown links",
+    "category": "safety",
+    "description": "Candidate evaluation of markdown links; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "html_safety",
+    "name": "html safety",
+    "category": "instruction_following",
+    "description": "Candidate evaluation of html safety; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "response_language",
+    "name": "response language",
+    "category": "rag",
+    "description": "Candidate evaluation of response language; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  },
+  {
+    "id": "response_time",
+    "name": "response time",
+    "category": "performance",
+    "description": "Candidate evaluation of response time; design and validation pending",
+    "evaluator": null,
+    "parameters": {},
+    "status": "planned",
+    "priority": "research"
+  }
+]
