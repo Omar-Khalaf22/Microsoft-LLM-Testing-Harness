@@ -19,6 +19,7 @@ class TestRequest:
     minimum_length: int = 40
     minimum_sentences: int = 2
     forbidden_terms: list[str] = field(default_factory=list)
+    scoring_weights: dict[str, int] | None = None
     test_id: str | None = None
     test_name: str | None = None
     test_version: int | None = None
