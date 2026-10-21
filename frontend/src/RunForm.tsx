@@ -1,7 +1,23 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 
-import { defaultWeights, scoringLabels, runEvaluation, type ScoringWeights, type RunResponse } from "./api";
+import {
+  defaultWeights,
+  scoringLabels,
+  runEvaluation,
+  suggestCriteria,
+  type RunCreateRequest,
+  type ScoringWeights,
+  type RunResponse,
+} from "./api";
+import CriteriaSuggestions, {
+  approvedCriteria,
+  criteriaIssues,
+  acceptedDrafts,
+  toDrafts,
+  type AssistantStatus,
+  type SuggestionDraft,
+} from "./CriteriaSuggestions";
 
 function parseTerms(value: string): string[] {
   return value
@@ -41,9 +57,55 @@ function RunForm({
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const [objective, setObjective] = useState("");
+  const [assistantStatus, setAssistantStatus] = useState<AssistantStatus>("idle");
+  const [assistantError, setAssistantError] = useState("");
+  const [drafts, setDrafts] = useState<SuggestionDraft[]>([]);
+  const [ignored, setIgnored] = useState(0);
+  const generation = useRef(0);
+  const assistantRequest = useRef<AbortController | null>(null);
+
+  useEffect(() => () => assistantRequest.current?.abort(), []);
+
+  // Approved criteria replace the standard six-criterion scoring while any are accepted.
+  const usingCriteria = acceptedDrafts(drafts).length > 0;
+  const issues = criteriaIssues(drafts);
+  const scoringReady = usingCriteria ? issues.length === 0 : weightsValid;
+  const canGenerate = objective.trim() !== "" && prompt.trim() !== "" && assistantStatus !== "loading";
+
+  async function handleGenerate() {
+    if (!canGenerate) {
+      return;
+    }
+    assistantRequest.current?.abort();
+    const controller = new AbortController();
+    assistantRequest.current = controller;
+
+    setAssistantStatus("loading");
+    setAssistantError("");
+    try {
+      const result = await suggestCriteria(
+        { objective: objective.trim(), test_prompt: prompt },
+        controller.signal,
+      );
+      if (controller.signal.aborted) return;
+      generation.current += 1;
+      setDrafts(toDrafts(result.suggestions, generation.current));
+      setIgnored(result.invalid);
+      setAssistantStatus("loaded");
+    } catch (error) {
+      if (controller.signal.aborted || (error instanceof DOMException && error.name === "AbortError")) {
+        return;
+      }
+      // Keep any earlier suggestions so a failed regeneration does not discard the user's work.
+      setAssistantError(error instanceof Error ? error.message : "Could not generate criteria.");
+      setAssistantStatus("error");
+    }
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (inFlight.current || !weightsValid || !prompt.trim() || !testName.trim()) {
+    if (inFlight.current || !scoringReady || !prompt.trim() || !testName.trim()) {
       return;
     }
 
@@ -51,21 +113,27 @@ function RunForm({
     setSubmitting(true);
     setErrorMessage("");
     try {
-      const run = await runEvaluation({
-        weights,
+      const identity = {
         test_name: testName.trim(),
         prompt,
         model,
         temperature,
-        expected_keywords: parseTerms(expectedKeywords),
-        forbidden_terms: parseTerms(forbiddenTerms),
-        minimum_length: minimumLength,
-        minimum_sentences: minimumSentences,
         ...(testId ? { test_id: testId } : {}),
         ...(testId && initialRun?.metadata.test_version
           ? { test_version: initialRun.metadata.test_version }
           : {}),
-      });
+      };
+      const request: RunCreateRequest = usingCriteria
+        ? { ...identity, criteria: approvedCriteria(drafts) }
+        : {
+            ...identity,
+            weights,
+            expected_keywords: parseTerms(expectedKeywords),
+            forbidden_terms: parseTerms(forbiddenTerms),
+            minimum_length: minimumLength,
+            minimum_sentences: minimumSentences,
+          };
+      const run = await runEvaluation(request);
       onRunCreated(run);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Unknown error");
@@ -146,6 +214,64 @@ function RunForm({
         </label>
       </div>
 
+      <section className="scoring-box" style={{ marginTop: 0 }} aria-labelledby="assistant-title">
+        <div className="scoring-head">
+          <div>
+            <h3 id="assistant-title">Suggested criteria</h3>
+            <p>Describe what you are testing and let the assistant recommend how to score it.</p>
+          </div>
+        </div>
+        <label className="field">
+          <span>Testing objective</span>
+          <textarea
+            value={objective}
+            onChange={(event) => setObjective(event.target.value)}
+            rows={2}
+            maxLength={500}
+            placeholder="e.g. The answer must explain what a multiplexer does and mention select lines."
+            style={{ minHeight: 70 }}
+          />
+        </label>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", margin: "10px 0" }}>
+          <button
+            type="button"
+            className="new-test-button"
+            onClick={() => void handleGenerate()}
+            disabled={!canGenerate}
+          >
+            {assistantStatus === "loading"
+              ? "Generating…"
+              : drafts.length > 0
+                ? "Regenerate criteria"
+                : "Generate criteria"}
+          </button>
+          {!prompt.trim() && objective.trim() && (
+            <span className="muted" style={{ fontSize: 12 }}>
+              Enter the test prompt first; the assistant needs it.
+            </span>
+          )}
+        </div>
+        <CriteriaSuggestions
+          status={assistantStatus}
+          error={assistantError}
+          drafts={drafts}
+          ignored={ignored}
+          onChange={(next) => {
+            setDrafts(next);
+            if (assistantStatus === "error") {
+              setAssistantStatus("loaded");
+              setAssistantError("");
+            }
+          }}
+        />
+      </section>
+
+      {usingCriteria ? (
+        <p className="muted test-version-note">
+          Standard scoring is paused while approved criteria are in use. Reject or undo every
+          accepted criterion to return to it.
+        </p>
+      ) : (
       <details className="advanced-criteria">
         <summary className="advanced-criteria-header">
           <span>
@@ -207,9 +333,10 @@ function RunForm({
           </section>
         </div>
       </details>
+      )}
       {errorMessage && <p className="error-text" role="alert">{errorMessage}</p>}
 
-      <button type="submit" className="primary-button" disabled={submitting || !weightsValid}>
+      <button type="submit" className="primary-button" disabled={submitting || !scoringReady}>
         <span>{submitting ? "Running…" : "Run and save test"}</span>
         <span aria-hidden="true">→</span>
       </button>
