@@ -71,6 +71,6 @@ def test_dispatcher_rejects_duplicate_ids():
             "hello",
             [
                 {"id": "exact_match", "parameters": {"expected": "hello"}, "weight": 50},
-            {"id": "exact_match", "parameters": {"expected": "hello"}, "weight": 50},
+                {"id": "exact_match", "parameters": {"expected": "hello"}, "weight": 50},
             ],
         )
