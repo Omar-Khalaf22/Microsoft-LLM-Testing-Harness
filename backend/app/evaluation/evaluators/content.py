@@ -34,20 +34,10 @@ def evaluate(criterion_id: str, response: str, parameters: dict) -> tuple[bool, 
             passed = len(text) >= target
         else:
             passed = len(text) <= target
-        ratio = (
-            min(1.0, len(text) / target)
-            if criterion_id == "minimum_characters" and target
-            else float(passed)
-        )
-        return (
-            passed,
-            (
-                ratio
-                if not passed and criterion_id == "minimum_characters"
-                else float(passed)
-            ),
-            f"{len(text)} characters; threshold {target}",
-        )
+        ratio = float(passed)
+        if criterion_id == "minimum_characters" and target and not passed:
+            ratio = min(1.0, len(text) / target)
+        return passed, ratio, f"{len(text)} characters; threshold {target}"
     if criterion_id == "minimum_sentences":
         count = len([part for part in re.split(r"[.!?]+", text) if part.strip()])
         target = parameters["count"]
