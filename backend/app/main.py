@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.routes.runs import router as runs_router
 
+from app.prototype2.routes import router as prototype2_router
+
 settings = get_settings()
 
 app = FastAPI(title="LLM Testing Harness API", version="0.1.0")
@@ -18,6 +20,7 @@ app.add_middleware(
 
 
 app.include_router(runs_router)
+app.include_router(prototype2_router)
 
 
 @app.get("/health")
