@@ -1,4 +1,5 @@
 """Deterministic content evaluators for approved criteria IDs."""
+
 import re
 
 
@@ -7,14 +8,17 @@ def evaluate(criterion_id: str, response: str, parameters: dict) -> tuple[bool, 
     text = response or ""
     folded = text.casefold()
     if criterion_id in {
-        "required_keywords", "forbidden_keywords", "required_phrases", "forbidden_phrases"
+        "required_keywords",
+        "forbidden_keywords",
+        "required_phrases",
+        "forbidden_phrases",
     }:
         key = "keywords" if criterion_id.endswith("keywords") else "phrases"
         terms = parameters[key]
         matches = [term for term in terms if term.casefold() in folded]
         required = criterion_id.startswith("required")
         ratio = len(matches) / len(terms) if required else 1 - len(matches) / len(terms)
-        return (ratio == 1, ratio, f"Matched {len(matches)} of {len(terms)} configured {key}")
+        return ratio == 1, ratio, f"Matched {len(matches)} of {len(terms)} configured {key}"
     if criterion_id == "exact_match":
         passed = text == parameters["expected"]
         return passed, float(passed), "Exact response comparison"
@@ -26,11 +30,10 @@ def evaluate(criterion_id: str, response: str, parameters: dict) -> tuple[bool, 
         return passed, float(passed), "Case insensitive full response comparison"
     if criterion_id in {"minimum_characters", "maximum_characters"}:
         target = parameters["count"]
-        passed = (
-            len(text) >= target
-            if criterion_id == "minimum_characters"
-            else len(text) <= target
-        )
+        if criterion_id == "minimum_characters":
+            passed = len(text) >= target
+        else:
+            passed = len(text) <= target
         ratio = (
             min(1.0, len(text) / target)
             if criterion_id == "minimum_characters" and target
@@ -38,7 +41,11 @@ def evaluate(criterion_id: str, response: str, parameters: dict) -> tuple[bool, 
         )
         return (
             passed,
-            ratio if not passed and criterion_id == "minimum_characters" else float(passed),
+            (
+                ratio
+                if not passed and criterion_id == "minimum_characters"
+                else float(passed)
+            ),
             f"{len(text)} characters; threshold {target}",
         )
     if criterion_id == "minimum_sentences":
