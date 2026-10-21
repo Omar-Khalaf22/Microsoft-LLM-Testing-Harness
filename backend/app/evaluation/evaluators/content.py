@@ -6,7 +6,9 @@ def evaluate(criterion_id: str, response: str, parameters: dict) -> tuple[bool, 
     """Return passed, normalized score and explanation."""
     text = response or ""
     folded = text.casefold()
-    if criterion_id in {"required_keywords", "forbidden_keywords", "required_phrases", "forbidden_phrases"}:
+    if criterion_id in {
+        "required_keywords", "forbidden_keywords", "required_phrases", "forbidden_phrases"
+    }:
         key = "keywords" if criterion_id.endswith("keywords") else "phrases"
         terms = parameters[key]
         matches = [term for term in terms if term.casefold() in folded]
@@ -24,9 +26,21 @@ def evaluate(criterion_id: str, response: str, parameters: dict) -> tuple[bool, 
         return passed, float(passed), "Case insensitive full response comparison"
     if criterion_id in {"minimum_characters", "maximum_characters"}:
         target = parameters["count"]
-        passed = len(text) >= target if criterion_id == "minimum_characters" else len(text) <= target
-        ratio = min(1.0, len(text) / target) if criterion_id == "minimum_characters" and target else float(passed)
-        return passed, ratio if not passed and criterion_id == "minimum_characters" else float(passed), f"{len(text)} characters; threshold {target}"
+        passed = (
+            len(text) >= target
+            if criterion_id == "minimum_characters"
+            else len(text) <= target
+        )
+        ratio = (
+            min(1.0, len(text) / target)
+            if criterion_id == "minimum_characters" and target
+            else float(passed)
+        )
+        return (
+            passed,
+            ratio if not passed and criterion_id == "minimum_characters" else float(passed),
+            f"{len(text)} characters; threshold {target}",
+        )
     if criterion_id == "minimum_sentences":
         count = len([part for part in re.split(r"[.!?]+", text) if part.strip()])
         target = parameters["count"]
