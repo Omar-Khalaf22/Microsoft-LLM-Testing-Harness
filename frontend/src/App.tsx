@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { checkHealth, listRuns, type RunResponse } from "./api";
 import RunForm from "./RunForm";
+import Prototype2Panel from "./Prototype2Panel";
 import RunResults from "./RunResults";
 import SavedRuns from "./SavedRuns";
 
@@ -99,6 +100,7 @@ function App() {
           />
           <RunResults run={selectedRun} />
         </div>
+        <Prototype2Panel />
       </main>
     </div>
   );
