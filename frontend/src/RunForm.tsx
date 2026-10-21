@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import type { FormEvent } from "react";
 
-import { defaultWeights, scoringLabels, runEvaluation, type ScoringWeights, type RunResponse } from "./api";
+import { apiBaseUrl, defaultWeights, scoringLabels, runEvaluation, type ScoringWeights, type RunResponse } from "./api";
 
 function parseTerms(value: string): string[] {
   return value
@@ -38,7 +38,28 @@ function RunForm({
   const [minimumSentences, setMinimumSentences] = useState(
     initialRun?.metadata.minimum_sentences ?? 3,
   );
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestions, setSuggestions] = useState<(keyof ScoringWeights)[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  async function suggestCriteria() {
+    setSuggesting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch(`${apiBaseUrl}/runs/suggest-criteria`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+      if (!response.ok) throw new Error("Criteria suggestions are unavailable");
+      const data = (await response.json()) as { criteria: (keyof ScoringWeights)[] };
+      setSuggestions(data.criteria);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Suggestion failed");
+    } finally {
+      setSuggesting(false);
+    }
+  }
   const [errorMessage, setErrorMessage] = useState("");
 
   async function handleSubmit(event: FormEvent) {
@@ -157,6 +178,12 @@ function RunForm({
           </svg>
         </summary>
         <div className="advanced-criteria-controls">
+          <button type="button" disabled={suggesting || !prompt.trim()} onClick={suggestCriteria}>
+            {suggesting ? "Suggesting…" : "Suggest criteria with GPT-4o mini"}
+          </button>
+          {suggestions.length > 0 && (
+            <p className="muted">Recommended: {suggestions.map(key => scoringLabels[key]).join(", ")}. Review the points below before running.</p>
+          )}
           <div className="field-row">
             <label className="field">
               <span>Expected keywords (comma separated)</span>
