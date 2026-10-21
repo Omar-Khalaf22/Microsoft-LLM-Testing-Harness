@@ -31,6 +31,7 @@ class TestExecutor:
             request.minimum_length,
             request.minimum_sentences,
             request.forbidden_terms,
+            request.scoring_weights,
         )
         latency_ms = max(1, round((perf_counter() - started) * 1000))
         result = TestResult(
@@ -53,7 +54,8 @@ class TestExecutor:
                 "minimum_sentences": request.minimum_sentences,
                 "forbidden_terms": request.forbidden_terms,
                 "usage": generated.usage,
-                "schema_version": "1.0",
+                "scoring_weights": request.scoring_weights,
+                "schema_version": "1.1",
             },
         )
         # SQL storage enriches the result with its saved test identity/version.
