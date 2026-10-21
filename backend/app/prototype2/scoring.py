@@ -59,14 +59,13 @@ class ScoringConfiguration(BaseModel):
             if criterion.id == "field_types":
                 types = parameters.get("types")
                 allowed = ("string", "number", "boolean", "object", "array", "null")
-                if (
-                    not isinstance(types, dict)
-                    or not types
-                    or not all(
+                valid_types = isinstance(types, dict) and bool(types)
+                if valid_types:
+                    valid_types = all(
                         isinstance(key, str) and key and value in allowed
                         for key, value in types.items()
                     )
-                ):
+                if not valid_types:
                     raise ValueError("field_types needs types mapping to JSON type names")
         if total != Decimal("100.00"):
             raise ValueError(f"Points must total exactly 100.00, not {total}")
@@ -127,10 +126,10 @@ def evaluate_one(criterion, response):
         return fraction, f"Found {len(matched)} of {len(keys)} required fields"
     if criterion_id == "field_types":
         types = parameters["types"]
-        matched = [
-            key for key, expected in types.items()
-            if key in data and _json_type(data[key]) == expected
-        ]
+        matched = []
+        for key, expected in types.items():
+            if key in data and _json_type(data[key]) == expected:
+                matched.append(key)
         fraction = Decimal(len(matched)) / Decimal(len(types))
         return fraction, f"{len(matched)} of {len(types)} fields have correct types"
     raise ValueError("Unsupported evaluator")
@@ -145,12 +144,13 @@ def evaluate(configuration, response):
             TWO, rounding=ROUND_HALF_UP
         )
         total += earned
-        rows.append({
+        row = {
             "id": criterion.id,
             "name": CATALOG[criterion.id][0],
             "maximum": criterion.points,
             "earned": str(earned),
             "normalized": str(fraction),
             "evidence": evidence,
-        })
+        }
+        rows.append(row)
     return {"total": str(total.quantize(TWO)), "criteria": rows}
