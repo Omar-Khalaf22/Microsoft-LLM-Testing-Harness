@@ -1,9 +1,9 @@
 """Prototype 2 registry and content evaluator tests."""
 import pytest
 
-from app.evaluation.registry import catalog, get_criterion, list_supported_criteria, validate_criterion
-from app.evaluation.validators import evaluate_selected
 from app.evaluation.evaluators.content import evaluate
+from app.evaluation.registry import catalog, list_supported_criteria, validate_criterion
+from app.evaluation.validators import evaluate_selected
 
 
 @pytest.mark.parametrize("criterion_id,params,response,passed", [
@@ -43,7 +43,9 @@ def test_reject_missing_parameters():
 
 def test_reject_invalid_weight_total():
     with pytest.raises(ValueError):
-        evaluate_selected("hello", [{"id": "exact_match", "parameters": {"expected": "hello"}, "weight": 50}])
+        evaluate_selected(
+            "hello", [{"id": "exact_match", "parameters": {"expected": "hello"}, "weight": 50}]
+        )
 
 
 def test_dispatcher_scores_selected_criteria():
