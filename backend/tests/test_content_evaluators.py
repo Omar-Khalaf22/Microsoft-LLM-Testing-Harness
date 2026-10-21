@@ -10,16 +10,16 @@ from app.evaluation.validators import evaluate_selected
 @pytest.mark.parametrize(
     "criterion_id,params,response,passed",
     [
-    ("required_keywords", {"keywords": ["alpha", "beta"]}, "alpha beta", True),
-    ("forbidden_keywords", {"keywords": ["secret"]}, "public", True),
-    ("required_phrases", {"phrases": ["hello world"]}, "hello world!", True),
-    ("forbidden_phrases", {"phrases": ["do not"]}, "please proceed", True),
-    ("exact_match", {"expected": "Yes"}, "Yes", True),
-    ("contains_text", {"text": "Yes"}, "Yes please", True),
-    ("case_insensitive_match", {"expected": "YES"}, "yes", True),
-    ("minimum_characters", {"count": 3}, "abcd", True),
-    ("maximum_characters", {"count": 4}, "abcd", True),
-    ("minimum_sentences", {"count": 2}, "First. Second.", True),
+        ("required_keywords", {"keywords": ["alpha", "beta"]}, "alpha beta", True),
+        ("forbidden_keywords", {"keywords": ["secret"]}, "public", True),
+        ("required_phrases", {"phrases": ["hello world"]}, "hello world!", True),
+        ("forbidden_phrases", {"phrases": ["do not"]}, "please proceed", True),
+        ("exact_match", {"expected": "Yes"}, "Yes", True),
+        ("contains_text", {"text": "Yes"}, "Yes please", True),
+        ("case_insensitive_match", {"expected": "YES"}, "yes", True),
+        ("minimum_characters", {"count": 3}, "abcd", True),
+        ("maximum_characters", {"count": 4}, "abcd", True),
+        ("minimum_sentences", {"count": 2}, "First. Second.", True),
     ],
 )
 def test_content_criteria(criterion_id, params, response, passed):
@@ -57,8 +57,8 @@ def test_dispatcher_scores_selected_criteria():
     score, results = evaluate_selected(
         "hello",
         [
-        {"id": "exact_match", "parameters": {"expected": "hello"}, "weight": 60},
-        {"id": "minimum_characters", "parameters": {"count": 3}, "weight": 40},
+            {"id": "exact_match", "parameters": {"expected": "hello"}, "weight": 60},
+            {"id": "minimum_characters", "parameters": {"count": 3}, "weight": 40},
         ],
     )
     assert score == 100
@@ -70,7 +70,7 @@ def test_dispatcher_rejects_duplicate_ids():
         evaluate_selected(
             "hello",
             [
-            {"id": "exact_match", "parameters": {"expected": "hello"}, "weight": 50},
+                {"id": "exact_match", "parameters": {"expected": "hello"}, "weight": 50},
             {"id": "exact_match", "parameters": {"expected": "hello"}, "weight": 50},
             ],
         )
