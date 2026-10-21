@@ -59,7 +59,8 @@ def score_response(
         "forbidden": 10,
         "nonempty": 10,
     }
-    if set(weights) != {"keywords", "relevance", "length", "sentences", "forbidden", "nonempty"}:
+    required = {"keywords", "relevance", "length", "sentences", "forbidden", "nonempty"}
+    if set(weights) != required:
         raise ValueError("Scoring weights must contain all six criteria")
     if any(type(value) is not int or value < 0 for value in weights.values()):
         raise ValueError("Scoring weights must be nonnegative integers")
@@ -69,6 +70,7 @@ def score_response(
     def points(key: str, fraction: float) -> float:
         amount = Decimal(weights[key]) * Decimal(str(fraction))
         return float(amount.quantize(Decimal("0.1"), rounding=ROUND_HALF_UP))
+
     normalized = response.casefold()
     forbidden_terms = forbidden_terms or []
 
