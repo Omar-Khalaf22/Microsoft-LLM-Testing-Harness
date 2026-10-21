@@ -1,4 +1,5 @@
 """Single source of truth for Prototype 2 criteria."""
+
 import json
 from pathlib import Path
 
