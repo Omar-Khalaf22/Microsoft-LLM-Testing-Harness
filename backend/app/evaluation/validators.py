@@ -1,6 +1,6 @@
 """Validated criterion execution, independent of the legacy six score fields."""
-from .registry import validate_criterion
 from .evaluators.content import evaluate
+from .registry import validate_criterion
 
 
 def evaluate_selected(response: str, selected: list[dict]) -> tuple[float, list[dict]]:
@@ -24,7 +24,15 @@ def evaluate_selected(response: str, selected: list[dict]) -> tuple[float, list[
             raise ValueError("Weights must be finite numbers between 0 and 100")
         passed, normalized, detail = evaluate(criterion_id, response, item["parameters"])
         score = round(normalized * weight, 1)
-        results.append({"id": criterion_id, "passed": passed, "normalized_score": normalized, "score": score, "detail": detail})
+        results.append(
+            {
+                "id": criterion_id,
+                "passed": passed,
+                "normalized_score": normalized,
+                "score": score,
+                "detail": detail,
+            }
+        )
         total += weight
     if abs(total - 100) > 1e-8:
         raise ValueError("Weights must total 100")
