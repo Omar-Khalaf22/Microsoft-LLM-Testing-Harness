@@ -157,12 +157,6 @@ function RunForm({
           </svg>
         </summary>
         <div className="advanced-criteria-controls">
-          <button type="button" disabled={suggesting || !prompt.trim()} onClick={suggestCriteria}>
-            {suggesting ? "Suggesting…" : "Suggest criteria with GPT-4o mini"}
-          </button>
-          {suggestions.length > 0 && (
-            <p className="muted">Recommended: {suggestions.map(key => scoringLabels[key]).join(", ")}. Review the points below before running.</p>
-          )}
           <div className="field-row">
             <label className="field">
               <span>Expected keywords (comma separated)</span>
