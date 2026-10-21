@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from decimal import Decimal, ROUND_HALF_UP
 
 from .models import CriterionResult
 
@@ -46,15 +47,33 @@ def score_response(
     minimum_length: int,
     minimum_sentences: int = 2,
     forbidden_terms: list[str] | None = None,
+    weights: dict[str, int] | None = None,
 ) -> tuple[float, list[CriterionResult]]:
     """Score one model response against configured objective criteria."""
     criteria: list[CriterionResult] = []
+    weights = weights or {
+        "keywords": 30,
+        "relevance": 20,
+        "length": 15,
+        "sentences": 15,
+        "forbidden": 10,
+        "nonempty": 10,
+    }
+    if set(weights) != {"keywords", "relevance", "length", "sentences", "forbidden", "nonempty"}:
+        raise ValueError("Scoring weights must contain all six criteria")
+    if any(type(value) is not int or value < 0 for value in weights.values()):
+        raise ValueError("Scoring weights must be nonnegative integers")
+    if sum(weights.values()) != 100:
+        raise ValueError("Scoring weights must total 100")
+    def points(key: str, fraction: float) -> float:
+        amount = Decimal(weights[key]) * Decimal(str(fraction))
+        return float(amount.quantize(Decimal("0.1"), rounding=ROUND_HALF_UP))
     normalized = response.casefold()
     forbidden_terms = forbidden_terms or []
 
     if keywords:
         matches = [keyword for keyword in keywords if keyword.casefold() in normalized]
-        keyword_score = len(matches) / len(keywords) * 30
+        keyword_score = points("keywords", len(matches) / len(keywords))
         missing = [keyword for keyword in keywords if keyword not in matches]
         detail = f"Matched {len(matches)} of {len(keywords)} keywords"
         if missing:
@@ -68,12 +87,12 @@ def score_response(
             )
         )
     else:
-        keyword_score = 30
+        keyword_score = weights["keywords"]
         criteria.append(
             CriterionResult(
                 "Keyword coverage",
                 True,
-                30,
+                weights["keywords"],
                 "No required keywords were configured",
             )
         )
@@ -86,7 +105,7 @@ def score_response(
     response_terms = {word.casefold() for word in re.findall(r"[A-Za-z0-9']+", response)}
     relevant_matches = prompt_terms & response_terms
     relevance_ratio = len(relevant_matches) / max(len(prompt_terms), 1)
-    relevance_score = min(20, relevance_ratio * 20)
+    relevance_score = points("relevance", min(1, relevance_ratio))
     criteria.append(
         CriterionResult(
             "Prompt relevance",
@@ -97,7 +116,7 @@ def score_response(
     )
 
     length_passed = len(response) >= minimum_length
-    length_score = 15 if length_passed else 15 * len(response) / max(minimum_length, 1)
+    length_score = points("length", min(1, len(response) / max(minimum_length, 1)))
     criteria.append(
         CriterionResult(
             "Minimum length",
@@ -109,7 +128,7 @@ def score_response(
 
     sentences = [part for part in re.split(r"[.!?]+", response) if part.strip()]
     structure_passed = len(sentences) >= minimum_sentences
-    structure_score = 15 if structure_passed else 15 * len(sentences) / minimum_sentences
+    structure_score = points("sentences", min(1, len(sentences) / minimum_sentences))
     criteria.append(
         CriterionResult(
             "Sentence structure",
@@ -127,7 +146,7 @@ def score_response(
         else f"Detected: {', '.join(found_forbidden)}"
     )
     criteria.append(
-        CriterionResult("Forbidden terms", safety_passed, 10 if safety_passed else 0, safety_detail)
+        CriterionResult("Forbidden terms", safety_passed, weights["forbidden"] if safety_passed else 0, safety_detail)
     )
 
     nonempty_passed = bool(response.strip())
@@ -136,7 +155,7 @@ def score_response(
         CriterionResult(
             "Valid response",
             nonempty_passed,
-            10 if nonempty_passed else 0,
+            weights["nonempty"] if nonempty_passed else 0,
             validity_detail,
         )
     )
