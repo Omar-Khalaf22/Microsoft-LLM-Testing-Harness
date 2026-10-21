@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 
-import { runEvaluation, type RunResponse } from "./api";
+import { apiBaseUrl, runEvaluation, type RunResponse } from "./api";
 
 function parseTerms(value: string): string[] {
   return value
@@ -44,7 +44,28 @@ function RunForm({
   const validWeights = weightTotal === 100 && Object.values(weights).every(
     (value) => Number.isInteger(value) && value >= 0,
   );
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggested, setSuggested] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  async function suggestCriteria() {
+    setSuggesting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch(`${apiBaseUrl}/runs/suggest-criteria`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+      if (!response.ok) throw new Error("GPT-4o mini suggestions are unavailable");
+      const data = (await response.json()) as { criteria: string[] };
+      setSuggested(data.criteria);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Suggestion failed");
+    } finally {
+      setSuggesting(false);
+    }
+  }
   const [errorMessage, setErrorMessage] = useState("");
 
   async function handleSubmit(event: FormEvent) {
@@ -192,6 +213,13 @@ function RunForm({
       </div>
 
       <div className="field">
+        <button type="button" disabled={suggesting || !prompt.trim()}
+          onClick={suggestCriteria}>
+          {suggesting ? "Suggesting…" : "Suggest criteria with GPT-4o mini"}
+        </button>
+        {suggested.length > 0 && <p className="muted">
+          Suggested: {suggested.join(", ")}. Review and adjust the points below.
+        </p>}
         <span>Scoring points (total: {weightTotal}/100)</span>
         <div className="field-row">
           {Object.entries(weights).map(([key, value]) => (
