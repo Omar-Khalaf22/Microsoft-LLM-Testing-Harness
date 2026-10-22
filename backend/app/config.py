@@ -8,6 +8,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     app_env: str = "development"
     database_url: str
+    assistant_model: str = Field(default="gpt-4o-mini", min_length=1)
+    assistant_timeout_seconds: float = Field(default=30, gt=0, le=120)
     llm_provider: str = "demo"
     openai_base_url: str = "https://api.openai.com/v1"
     openai_api_key: SecretStr = SecretStr("")
