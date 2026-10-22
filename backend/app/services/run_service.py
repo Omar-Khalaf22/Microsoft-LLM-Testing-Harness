@@ -5,10 +5,19 @@ from app.evaluation.models import TestRequest
 from app.schemas.runs import RunCreateRequest, RunResponse
 
 
-def create_run(request: RunCreateRequest, *, executor: TestExecutor) -> RunResponse:
+def create_run(
+    request: RunCreateRequest, *, executor: TestExecutor, recommendation: dict | None = None
+) -> RunResponse:
     """Execute once and validate the result; exceptions propagate to the caller."""
     evaluation_request = TestRequest(
         prompt=request.prompt,
+        criteria=[x.model_dump() for x in request.criteria]
+        if request.criteria is not None
+        else None,
+        objective=request.objective,
+        configuration_state=request.configuration_state,
+        recommendation_id=request.recommendation_id,
+        recommendation_snapshot=recommendation,
         model=request.model,
         temperature=request.temperature,
         expected_keywords=request.expected_keywords,

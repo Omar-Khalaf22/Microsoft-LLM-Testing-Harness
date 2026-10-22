@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     app_env: str = "development"
     database_url: str
     llm_provider: str = "demo"
+    assistant_model: str = "gpt-4o-mini"
+    assistant_timeout_seconds: float = Field(default=30.0, gt=0, le=120, allow_inf_nan=False)
     openai_base_url: str = "https://api.openai.com/v1"
     openai_api_key: SecretStr = SecretStr("")
     cors_origins: list[AnyHttpUrl] = Field(

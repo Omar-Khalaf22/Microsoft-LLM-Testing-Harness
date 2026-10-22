@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
+from .configuration import validate_selection
 from .weights import ScoringWeights, default_weights
 
 
@@ -28,6 +29,12 @@ class TestRequest:
 
     base_system_prompt: str | None = None
     custom_system_prompt: str | None = None
+
+    criteria: list[dict] | None = None
+    objective: str = ""
+    configuration_state: str | None = None
+    recommendation_id: str | None = None
+    recommendation_snapshot: dict | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> TestRequest:
@@ -60,9 +67,20 @@ class TestRequest:
             if data.get(name) is not None and not isinstance(data[name], str):
                 raise ValidationError(f"{name} must be text or null.")
 
+        selected = None
+        if data.get("criteria") is not None:
+            if data.get("configuration_state") != "approved":
+                raise ValidationError("Approve the selected criteria before execution.")
+            try:
+                selected = validate_selection(data["criteria"])
+            except ValueError as exc:
+                raise ValidationError(str(exc)) from exc
         model = str(data.get("model", "gpt-4.1-mini")).strip() or "gpt-4.1-mini"
         return cls(
             prompt=prompt,
+            criteria=selected,
+            objective=str(data.get("objective", "")),
+            configuration_state=data.get("configuration_state"),
             expected_keywords=keywords[:20],
             model=model,
             temperature=temperature,
@@ -89,9 +107,13 @@ def _parse_terms(value: Any, label: str) -> list[str]:
 @dataclass(frozen=True)
 class CriterionResult:
     name: str
-    passed: bool
-    score: float
+    passed: bool | None
+    score: float | None
     detail: str
+    criterion_id: str | None = None
+    maximum_points: float | None = None
+    normalized_score: float | None = None
+    status: str = "completed"
 
 
 @dataclass(frozen=True)
@@ -102,12 +124,12 @@ class TestResult:
     model: str
     provider: str
     response: str
-    score: float
-    passed: bool
+    score: float | None
     criteria: list[CriterionResult]
     latency_ms: int
     created_at: str
     metadata: dict[str, Any]
+    error: dict[str, str] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

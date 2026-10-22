@@ -1,1022 +1,2829 @@
 [
   {
     "id": "required_keywords",
-    "name": "required keywords",
+    "name": "Required keywords",
     "category": "content",
-    "description": "Deterministic check for required keywords",
-    "evaluator": "content",
-    "parameters": {
-      "keywords": "list[str]"
-    },
+    "description": "Case-insensitive substring coverage: matched configured keywords divided by configured keywords.",
     "status": "supported",
-    "priority": "high"
+    "priority": "P2",
+    "evaluator_type": "content",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "keywords"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "keywords": [
+        "example"
+      ]
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "forbidden_keywords",
-    "name": "forbidden keywords",
+    "name": "Forbidden keywords",
     "category": "content",
-    "description": "Deterministic check for forbidden keywords",
-    "evaluator": "content",
-    "parameters": {
-      "keywords": "list[str]"
-    },
+    "description": "Full credit only when none of the configured keywords appear, ignoring case; otherwise zero.",
     "status": "supported",
-    "priority": "high"
+    "priority": "P2",
+    "evaluator_type": "content",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "keywords"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "keywords": [
+        "example"
+      ]
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "required_phrases",
-    "name": "required phrases",
+    "name": "Required phrases",
     "category": "content",
-    "description": "Deterministic check for required phrases",
-    "evaluator": "content",
-    "parameters": {
-      "phrases": "list[str]"
-    },
+    "description": "Case-insensitive substring coverage across the configured phrases.",
     "status": "supported",
-    "priority": "high"
+    "priority": "P2",
+    "evaluator_type": "content",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "phrases": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "phrases"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "phrases": [
+        "example"
+      ]
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "forbidden_phrases",
-    "name": "forbidden phrases",
+    "name": "Forbidden phrases",
     "category": "content",
-    "description": "Deterministic check for forbidden phrases",
-    "evaluator": "content",
-    "parameters": {
-      "phrases": "list[str]"
-    },
+    "description": "Full credit only when none of the configured phrases appear, ignoring case; otherwise zero.",
     "status": "supported",
-    "priority": "high"
+    "priority": "P2",
+    "evaluator_type": "content",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "phrases": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "phrases"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "phrases": [
+        "example"
+      ]
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "exact_match",
-    "name": "exact match",
+    "name": "Exact match",
     "category": "content",
-    "description": "Deterministic check for exact match",
-    "evaluator": "content",
-    "parameters": {
-      "expected": "str"
-    },
+    "description": "Case-sensitive comparison of the entire response, preserving whitespace.",
     "status": "supported",
-    "priority": "high"
+    "priority": "P2",
+    "evaluator_type": "content",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "expected": {
+          "type": "string",
+          "maxLength": 10000
+        }
+      },
+      "required": [
+        "expected"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "expected": "example"
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "contains_text",
-    "name": "contains text",
+    "name": "Contains text",
     "category": "content",
-    "description": "Deterministic check for contains text",
-    "evaluator": "content",
-    "parameters": {
-      "text": "str"
-    },
+    "description": "Case-sensitive substring presence in the response.",
     "status": "supported",
-    "priority": "high"
+    "priority": "P2",
+    "evaluator_type": "content",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "maxLength": 10000
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "text": "example"
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "case_insensitive_match",
-    "name": "case insensitive match",
+    "name": "Case insensitive match",
     "category": "content",
-    "description": "Deterministic check for case insensitive match",
-    "evaluator": "content",
-    "parameters": {
-      "expected": "str"
-    },
+    "description": "Unicode case-folded comparison of the entire response.",
     "status": "supported",
-    "priority": "high"
+    "priority": "P2",
+    "evaluator_type": "content",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "expected": {
+          "type": "string",
+          "maxLength": 10000
+        }
+      },
+      "required": [
+        "expected"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "expected": "example"
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "minimum_characters",
-    "name": "minimum characters",
-    "category": "content",
-    "description": "Deterministic check for minimum characters",
-    "evaluator": "content",
-    "parameters": {
-      "count": "int"
-    },
+    "name": "Minimum characters",
+    "category": "length",
+    "description": "Partial credit equals character count divided by the target, capped at one; a zero target is satisfied.",
     "status": "supported",
-    "priority": "high"
+    "priority": "P2",
+    "evaluator_type": "content",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "count": 1
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "maximum_characters",
-    "name": "maximum characters",
-    "category": "content",
-    "description": "Deterministic check for maximum characters",
-    "evaluator": "content",
-    "parameters": {
-      "count": "int"
-    },
+    "name": "Maximum characters",
+    "category": "length",
+    "description": "Binary check that the complete response does not exceed the character limit.",
     "status": "supported",
-    "priority": "high"
+    "priority": "P2",
+    "evaluator_type": "content",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "count": 1
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "minimum_sentences",
-    "name": "minimum sentences",
-    "category": "content",
-    "description": "Deterministic check for minimum sentences",
-    "evaluator": "content",
-    "parameters": {
-      "count": "int"
-    },
+    "name": "Minimum sentences",
+    "category": "length",
+    "description": "Partial credit for the target count of punctuation-separated sentences; this is a heuristic.",
     "status": "supported",
-    "priority": "high"
+    "priority": "P2",
+    "evaluator_type": "content",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "count": 1
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "semantic_similarity",
-    "name": "semantic similarity",
-    "category": "content",
-    "description": "Candidate evaluation of semantic similarity; design and validation pending",
-    "evaluator": null,
+    "name": "Semantic similarity",
+    "category": "semantic",
+    "description": "Candidate: semantic similarity. Requires response, objective, reference_or_rubric, reference_output; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric",
+      "reference_output"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "factual_consistency",
-    "name": "factual consistency",
-    "category": "structure",
-    "description": "Candidate evaluation of factual consistency; design and validation pending",
-    "evaluator": null,
+    "name": "Factual consistency",
+    "category": "semantic",
+    "description": "Candidate: factual consistency. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "citation_accuracy",
-    "name": "citation accuracy",
-    "category": "length",
-    "description": "Candidate evaluation of citation accuracy; design and validation pending",
-    "evaluator": null,
+    "name": "Citation accuracy",
+    "category": "semantic",
+    "description": "Candidate: citation accuracy. Requires response, objective, reference_or_rubric, source_evidence; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric",
+      "source_evidence"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "hallucination_detection",
-    "name": "hallucination detection",
-    "category": "numerical",
-    "description": "Candidate evaluation of hallucination detection; design and validation pending",
-    "evaluator": null,
+    "name": "Hallucination detection",
+    "category": "semantic",
+    "description": "Candidate: hallucination detection. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "toxicity",
-    "name": "toxicity",
-    "category": "semantic",
-    "description": "Candidate evaluation of toxicity; design and validation pending",
-    "evaluator": null,
+    "name": "Toxicity",
+    "category": "safety",
+    "description": "Candidate: toxicity. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "reviewed_policy_or_detection_rules"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "bias",
-    "name": "bias",
+    "name": "Bias",
     "category": "safety",
-    "description": "Candidate evaluation of bias; design and validation pending",
-    "evaluator": null,
+    "description": "Candidate: bias. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "reviewed_policy_or_detection_rules"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "pii_leakage",
-    "name": "pii leakage",
-    "category": "instruction_following",
-    "description": "Candidate evaluation of pii leakage; design and validation pending",
-    "evaluator": null,
+    "name": "PII leakage",
+    "category": "safety",
+    "description": "Candidate: pii leakage. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "reviewed_policy_or_detection_rules"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "json_schema",
-    "name": "json schema",
-    "category": "rag",
-    "description": "Candidate evaluation of json schema; design and validation pending",
-    "evaluator": null,
-    "parameters": {},
-    "status": "planned",
-    "priority": "research"
+    "name": "JSON schema",
+    "category": "structure",
+    "description": "Validate against Draft 2020-12 with local fragment references only; formats remain annotations.",
+    "status": "supported",
+    "priority": "P2",
+    "evaluator_type": "structured",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": [
+            "object",
+            "boolean"
+          ]
+        }
+      },
+      "required": [
+        "schema"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "schema": {
+        "type": "object"
+      }
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "valid_json",
-    "name": "valid json",
-    "category": "performance",
-    "description": "Candidate evaluation of valid json; design and validation pending",
-    "evaluator": null,
-    "parameters": {},
-    "status": "planned",
-    "priority": "research"
+    "name": "Valid JSON",
+    "category": "structure",
+    "description": "Validate the entire response as strict JSON; reject duplicate keys and nonfinite numbers.",
+    "status": "supported",
+    "priority": "P2",
+    "evaluator_type": "structured",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {},
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "xml_validity",
-    "name": "xml validity",
-    "category": "content",
-    "description": "Candidate evaluation of xml validity; design and validation pending",
-    "evaluator": null,
+    "name": "XML validity",
+    "category": "structure",
+    "description": "Candidate: xml validity. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "markdown_format",
-    "name": "markdown format",
+    "name": "Markdown format",
     "category": "structure",
-    "description": "Candidate evaluation of markdown format; design and validation pending",
-    "evaluator": null,
+    "description": "Candidate: markdown format. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "regex_match",
-    "name": "regex match",
-    "category": "length",
-    "description": "Candidate evaluation of regex match; design and validation pending",
-    "evaluator": null,
-    "parameters": {},
-    "status": "planned",
-    "priority": "research"
+    "name": "Regex match",
+    "category": "structure",
+    "description": "Search the response for a regex match, with a 256-character pattern cap and a 50 ms match timeout.",
+    "status": "supported",
+    "priority": "P2",
+    "evaluator_type": "patterns",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "pattern"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "pattern": "[A-Z]+"
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "regex_not_match",
-    "name": "regex not match",
-    "category": "numerical",
-    "description": "Candidate evaluation of regex not match; design and validation pending",
-    "evaluator": null,
-    "parameters": {},
-    "status": "planned",
-    "priority": "research"
+    "name": "Regex not match",
+    "category": "structure",
+    "description": "Require no regex match, with the same pattern and execution limits as regex_match.",
+    "status": "supported",
+    "priority": "P2",
+    "evaluator_type": "patterns",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "pattern"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "pattern": "[A-Z]+"
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "numeric_exact",
-    "name": "numeric exact",
-    "category": "semantic",
-    "description": "Candidate evaluation of numeric exact; design and validation pending",
-    "evaluator": null,
-    "parameters": {},
-    "status": "planned",
-    "priority": "research"
+    "name": "Numeric exact",
+    "category": "numerical",
+    "description": "Compare exactly one whole-response numeric scalar with the expected number; never extract from prose.",
+    "status": "supported",
+    "priority": "P2",
+    "evaluator_type": "patterns",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "expected": {
+          "type": "number",
+          "minimum": -1e+100,
+          "maximum": 1e+100
+        }
+      },
+      "required": [
+        "expected"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "expected": 1
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "numeric_tolerance",
-    "name": "numeric tolerance",
-    "category": "safety",
-    "description": "Candidate evaluation of numeric tolerance; design and validation pending",
-    "evaluator": null,
-    "parameters": {},
-    "status": "planned",
-    "priority": "research"
+    "name": "Numeric tolerance",
+    "category": "numerical",
+    "description": "Check one whole-response numeric scalar within an absolute decimal tolerance.",
+    "status": "supported",
+    "priority": "P2",
+    "evaluator_type": "patterns",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "expected": {
+          "type": "number",
+          "minimum": -1e+100,
+          "maximum": 1e+100
+        },
+        "tolerance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1e+100
+        }
+      },
+      "required": [
+        "expected",
+        "tolerance"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "expected": 5,
+      "tolerance": 0.1
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "word_count_min",
-    "name": "word count min",
-    "category": "instruction_following",
-    "description": "Candidate evaluation of word count min; design and validation pending",
-    "evaluator": null,
-    "parameters": {},
-    "status": "planned",
-    "priority": "research"
+    "name": "Word count min",
+    "category": "length",
+    "description": "Binary minimum count using Unicode word tokens; internal apostrophes and hyphens stay in a word.",
+    "status": "supported",
+    "priority": "P2",
+    "evaluator_type": "patterns",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "count": 1
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "word_count_max",
-    "name": "word count max",
-    "category": "rag",
-    "description": "Candidate evaluation of word count max; design and validation pending",
-    "evaluator": null,
-    "parameters": {},
-    "status": "planned",
-    "priority": "research"
+    "name": "Word count max",
+    "category": "length",
+    "description": "Binary maximum count using the same documented word-token rule.",
+    "status": "supported",
+    "priority": "P2",
+    "evaluator_type": "patterns",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "count": 1
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "required_sections",
-    "name": "required sections",
-    "category": "performance",
-    "description": "Candidate evaluation of required sections; design and validation pending",
-    "evaluator": null,
-    "parameters": {},
-    "status": "planned",
-    "priority": "research"
+    "name": "Required sections",
+    "category": "structure",
+    "description": "Coverage of standalone plain or Markdown headings; ignore case and a trailing colon.",
+    "status": "supported",
+    "priority": "P2",
+    "evaluator_type": "patterns",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "sections"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "sections": [
+        "Summary",
+        "Risks"
+      ]
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "language_detection",
-    "name": "language detection",
+    "name": "Language detection",
     "category": "content",
-    "description": "Candidate evaluation of language detection; design and validation pending",
-    "evaluator": null,
+    "description": "Candidate: language detection. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "sentiment_alignment",
-    "name": "sentiment alignment",
-    "category": "structure",
-    "description": "Candidate evaluation of sentiment alignment; design and validation pending",
-    "evaluator": null,
+    "name": "Sentiment alignment",
+    "category": "semantic",
+    "description": "Candidate: sentiment alignment. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "tone_consistency",
-    "name": "tone consistency",
-    "category": "length",
-    "description": "Candidate evaluation of tone consistency; design and validation pending",
-    "evaluator": null,
+    "name": "Tone consistency",
+    "category": "semantic",
+    "description": "Candidate: tone consistency. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "reading_level",
-    "name": "reading level",
-    "category": "numerical",
-    "description": "Candidate evaluation of reading level; design and validation pending",
-    "evaluator": null,
+    "name": "Reading level",
+    "category": "length",
+    "description": "Candidate: reading level. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "source_attribution",
-    "name": "source attribution",
+    "name": "Source attribution",
     "category": "semantic",
-    "description": "Candidate evaluation of source attribution; design and validation pending",
-    "evaluator": null,
+    "description": "Candidate: source attribution. Requires response, objective, reference_or_rubric, source_evidence; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric",
+      "source_evidence"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "context_relevance",
-    "name": "context relevance",
-    "category": "safety",
-    "description": "Candidate evaluation of context relevance; design and validation pending",
-    "evaluator": null,
+    "name": "Context relevance",
+    "category": "rag",
+    "description": "Candidate: context relevance. Requires response, query, retrieved_contexts, reference_contexts_or_answer; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "query",
+      "retrieved_contexts",
+      "reference_contexts_or_answer"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "answer_relevance",
-    "name": "answer relevance",
-    "category": "instruction_following",
-    "description": "Candidate evaluation of answer relevance; design and validation pending",
-    "evaluator": null,
+    "name": "Answer relevance",
+    "category": "semantic",
+    "description": "Candidate: answer relevance. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "faithfulness",
-    "name": "faithfulness",
+    "name": "Faithfulness",
     "category": "rag",
-    "description": "Candidate evaluation of faithfulness; design and validation pending",
-    "evaluator": null,
+    "description": "Candidate: faithfulness. Requires response, query, retrieved_contexts, reference_contexts_or_answer; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "query",
+      "retrieved_contexts",
+      "reference_contexts_or_answer"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "context_precision",
-    "name": "context precision",
-    "category": "performance",
-    "description": "Candidate evaluation of context precision; design and validation pending",
-    "evaluator": null,
+    "name": "Context precision",
+    "category": "rag",
+    "description": "Candidate: context precision. Requires response, query, retrieved_contexts, reference_contexts_or_answer; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "query",
+      "retrieved_contexts",
+      "reference_contexts_or_answer"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "context_recall",
-    "name": "context recall",
-    "category": "content",
-    "description": "Candidate evaluation of context recall; design and validation pending",
-    "evaluator": null,
+    "name": "Context recall",
+    "category": "rag",
+    "description": "Candidate: context recall. Requires response, query, retrieved_contexts, reference_contexts_or_answer; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "query",
+      "retrieved_contexts",
+      "reference_contexts_or_answer"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "retrieval_hit_rate",
-    "name": "retrieval hit rate",
-    "category": "structure",
-    "description": "Candidate evaluation of retrieval hit rate; design and validation pending",
-    "evaluator": null,
+    "name": "Retrieval hit rate",
+    "category": "rag",
+    "description": "Candidate: retrieval hit rate. Requires response, query, retrieved_contexts, reference_contexts_or_answer; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "query",
+      "retrieved_contexts",
+      "reference_contexts_or_answer"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "retrieval_mrr",
-    "name": "retrieval mrr",
-    "category": "length",
-    "description": "Candidate evaluation of retrieval mrr; design and validation pending",
-    "evaluator": null,
+    "name": "Retrieval MRR",
+    "category": "rag",
+    "description": "Candidate: retrieval mrr. Requires response, query, retrieved_contexts, reference_contexts_or_answer; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "query",
+      "retrieved_contexts",
+      "reference_contexts_or_answer"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "latency_budget",
-    "name": "latency budget",
-    "category": "numerical",
-    "description": "Candidate evaluation of latency budget; design and validation pending",
-    "evaluator": null,
+    "name": "Latency budget",
+    "category": "performance",
+    "description": "Candidate: latency budget. Requires recorded_execution_metrics, configured_budget; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "recorded_execution_metrics",
+      "configured_budget"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "token_budget",
-    "name": "token budget",
-    "category": "semantic",
-    "description": "Candidate evaluation of token budget; design and validation pending",
-    "evaluator": null,
+    "name": "Token budget",
+    "category": "performance",
+    "description": "Candidate: token budget. Requires recorded_execution_metrics, configured_budget; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "recorded_execution_metrics",
+      "configured_budget"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "cost_budget",
-    "name": "cost budget",
-    "category": "safety",
-    "description": "Candidate evaluation of cost budget; design and validation pending",
-    "evaluator": null,
+    "name": "Cost budget",
+    "category": "performance",
+    "description": "Candidate: cost budget. Requires recorded_execution_metrics, configured_budget, known_token_usage, versioned_price_map; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "recorded_execution_metrics",
+      "configured_budget",
+      "known_token_usage",
+      "versioned_price_map"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "tool_call_accuracy",
-    "name": "tool call accuracy",
+    "name": "Tool call accuracy",
     "category": "instruction_following",
-    "description": "Candidate evaluation of tool call accuracy; design and validation pending",
-    "evaluator": null,
+    "description": "Candidate: tool call accuracy. Requires response, tool_schema, expected_and_actual_tool_calls; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "tool_schema",
+      "expected_and_actual_tool_calls"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "tool_selection",
-    "name": "tool selection",
-    "category": "rag",
-    "description": "Candidate evaluation of tool selection; design and validation pending",
-    "evaluator": null,
+    "name": "Tool selection",
+    "category": "instruction_following",
+    "description": "Candidate: tool selection. Requires response, tool_schema, expected_and_actual_tool_calls; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "tool_schema",
+      "expected_and_actual_tool_calls"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "function_argument_validation",
-    "name": "function argument validation",
-    "category": "performance",
-    "description": "Candidate evaluation of function argument validation; design and validation pending",
-    "evaluator": null,
+    "name": "Function argument validation",
+    "category": "instruction_following",
+    "description": "Candidate: function argument validation. Requires response, tool_schema, expected_and_actual_tool_calls; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "tool_schema",
+      "expected_and_actual_tool_calls"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "refusal_accuracy",
-    "name": "refusal accuracy",
-    "category": "content",
-    "description": "Candidate evaluation of refusal accuracy; design and validation pending",
-    "evaluator": null,
+    "name": "Refusal accuracy",
+    "category": "safety",
+    "description": "Candidate: refusal accuracy. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "reviewed_policy_or_detection_rules"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "safety_policy",
-    "name": "safety policy",
-    "category": "structure",
-    "description": "Candidate evaluation of safety policy; design and validation pending",
-    "evaluator": null,
+    "name": "Safety policy",
+    "category": "safety",
+    "description": "Candidate: safety policy. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "reviewed_policy_or_detection_rules"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "prompt_injection_resistance",
-    "name": "prompt injection resistance",
-    "category": "length",
-    "description": "Candidate evaluation of prompt injection resistance; design and validation pending",
-    "evaluator": null,
+    "name": "Prompt injection resistance",
+    "category": "safety",
+    "description": "Candidate: prompt injection resistance. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "reviewed_policy_or_detection_rules"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "instruction_priority",
-    "name": "instruction priority",
-    "category": "numerical",
-    "description": "Candidate evaluation of instruction priority; design and validation pending",
-    "evaluator": null,
+    "name": "Instruction priority",
+    "category": "instruction_following",
+    "description": "Candidate: instruction priority. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "completeness",
-    "name": "completeness",
+    "name": "Completeness",
     "category": "semantic",
-    "description": "Candidate evaluation of completeness; design and validation pending",
-    "evaluator": null,
+    "description": "Candidate: completeness. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "conciseness",
-    "name": "conciseness",
-    "category": "safety",
-    "description": "Candidate evaluation of conciseness; design and validation pending",
-    "evaluator": null,
+    "name": "Conciseness",
+    "category": "semantic",
+    "description": "Candidate: conciseness. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "clarity",
-    "name": "clarity",
-    "category": "instruction_following",
-    "description": "Candidate evaluation of clarity; design and validation pending",
-    "evaluator": null,
+    "name": "Clarity",
+    "category": "semantic",
+    "description": "Candidate: clarity. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "coherence",
-    "name": "coherence",
-    "category": "rag",
-    "description": "Candidate evaluation of coherence; design and validation pending",
-    "evaluator": null,
+    "name": "Coherence",
+    "category": "semantic",
+    "description": "Candidate: coherence. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "grammar",
-    "name": "grammar",
-    "category": "performance",
-    "description": "Candidate evaluation of grammar; design and validation pending",
-    "evaluator": null,
+    "name": "Grammar",
+    "category": "content",
+    "description": "Candidate: grammar. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "spelling",
-    "name": "spelling",
+    "name": "Spelling",
     "category": "content",
-    "description": "Candidate evaluation of spelling; design and validation pending",
-    "evaluator": null,
+    "description": "Candidate: spelling. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "format_compliance",
-    "name": "format compliance",
-    "category": "structure",
-    "description": "Candidate evaluation of format compliance; design and validation pending",
-    "evaluator": null,
+    "name": "Format compliance",
+    "category": "instruction_following",
+    "description": "Candidate: format compliance. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "list_length",
-    "name": "list length",
+    "name": "List length",
     "category": "length",
-    "description": "Candidate evaluation of list length; design and validation pending",
-    "evaluator": null,
+    "description": "Candidate: list length. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "table_structure",
-    "name": "table structure",
-    "category": "numerical",
-    "description": "Candidate evaluation of table structure; design and validation pending",
-    "evaluator": null,
+    "name": "Table structure",
+    "category": "structure",
+    "description": "Candidate: table structure. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "schema_required_keys",
-    "name": "schema required keys",
-    "category": "semantic",
-    "description": "Candidate evaluation of schema required keys; design and validation pending",
-    "evaluator": null,
+    "name": "Schema required keys",
+    "category": "structure",
+    "description": "Candidate: schema required keys. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation.",
+    "consolidate_with": "json_required_keys"
   },
   {
     "id": "schema_forbidden_keys",
-    "name": "schema forbidden keys",
-    "category": "safety",
-    "description": "Candidate evaluation of schema forbidden keys; design and validation pending",
-    "evaluator": null,
+    "name": "Schema forbidden keys",
+    "category": "structure",
+    "description": "Candidate: schema forbidden keys. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation.",
+    "consolidate_with": "json_forbidden_keys"
   },
   {
     "id": "json_field_type",
-    "name": "json field type",
-    "category": "instruction_following",
-    "description": "Candidate evaluation of json field type; design and validation pending",
-    "evaluator": null,
-    "parameters": {},
-    "status": "planned",
-    "priority": "research"
+    "name": "JSON field type",
+    "category": "structure",
+    "description": "Check one literal top-level field against a JSON type; booleans are distinct from numbers.",
+    "status": "supported",
+    "priority": "P2",
+    "evaluator_type": "structured",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "object",
+            "array",
+            "string",
+            "number",
+            "integer",
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "field",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "field": "count",
+      "type": "integer"
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "json_field_value",
-    "name": "json field value",
-    "category": "rag",
-    "description": "Candidate evaluation of json field value; design and validation pending",
-    "evaluator": null,
-    "parameters": {},
-    "status": "planned",
-    "priority": "research"
+    "name": "JSON field value",
+    "category": "structure",
+    "description": "Compare one top-level field with the configured JSON value using JSON equality.",
+    "status": "supported",
+    "priority": "P2",
+    "evaluator_type": "structured",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "value": {}
+      },
+      "required": [
+        "field",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "field": "count",
+      "value": 3
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "json_array_min_length",
-    "name": "json array min length",
-    "category": "performance",
-    "description": "Candidate evaluation of json array min length; design and validation pending",
-    "evaluator": null,
-    "parameters": {},
-    "status": "planned",
-    "priority": "research"
+    "name": "JSON array min length",
+    "category": "structure",
+    "description": "Require a root JSON array with at least the configured number of elements.",
+    "status": "supported",
+    "priority": "P2",
+    "evaluator_type": "structured",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "min_length": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "min_length"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "min_length": 1
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "json_array_max_length",
-    "name": "json array max length",
-    "category": "content",
-    "description": "Candidate evaluation of json array max length; design and validation pending",
-    "evaluator": null,
-    "parameters": {},
-    "status": "planned",
-    "priority": "research"
+    "name": "JSON array max length",
+    "category": "structure",
+    "description": "Require a root JSON array with at most the configured number of elements.",
+    "status": "supported",
+    "priority": "P2",
+    "evaluator_type": "structured",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "max_length": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "max_length"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "max_length": 1
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "email_format",
-    "name": "email format",
+    "name": "Email format",
     "category": "structure",
-    "description": "Candidate evaluation of email format; design and validation pending",
-    "evaluator": null,
-    "parameters": {},
-    "status": "planned",
-    "priority": "research"
+    "description": "Basic whole-response email syntax only; does not verify ownership or deliverability.",
+    "status": "supported",
+    "priority": "P2",
+    "evaluator_type": "patterns",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {},
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "url_format",
-    "name": "url format",
-    "category": "length",
-    "description": "Candidate evaluation of url format; design and validation pending",
-    "evaluator": null,
-    "parameters": {},
-    "status": "planned",
-    "priority": "research"
+    "name": "Url format",
+    "category": "structure",
+    "description": "Absolute whole-response HTTP(S) URL syntax only; never fetches or verifies the destination.",
+    "status": "supported",
+    "priority": "P2",
+    "evaluator_type": "patterns",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {},
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "date_format",
-    "name": "date format",
-    "category": "numerical",
-    "description": "Candidate evaluation of date format; design and validation pending",
-    "evaluator": null,
+    "name": "Date format",
+    "category": "structure",
+    "description": "Candidate: date format. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "code_syntax",
-    "name": "code syntax",
-    "category": "semantic",
-    "description": "Candidate evaluation of code syntax; design and validation pending",
-    "evaluator": null,
+    "name": "Code syntax",
+    "category": "structure",
+    "description": "Candidate: code syntax. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "code_execution",
-    "name": "code execution",
-    "category": "safety",
-    "description": "Candidate evaluation of code execution; design and validation pending",
-    "evaluator": null,
+    "name": "Code execution",
+    "category": "structure",
+    "description": "Candidate: code execution. Requires response, language, isolated_runtime, test_cases; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "language",
+      "isolated_runtime",
+      "test_cases"
+    ],
+    "evaluation_method": "isolated_execution",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "unit_test_pass",
-    "name": "unit test pass",
-    "category": "instruction_following",
-    "description": "Candidate evaluation of unit test pass; design and validation pending",
-    "evaluator": null,
+    "name": "Unit test pass",
+    "category": "structure",
+    "description": "Candidate: unit test pass. Requires response, language, isolated_runtime, test_cases; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "language",
+      "isolated_runtime",
+      "test_cases"
+    ],
+    "evaluation_method": "isolated_execution",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "sql_syntax",
-    "name": "sql syntax",
-    "category": "rag",
-    "description": "Candidate evaluation of sql syntax; design and validation pending",
-    "evaluator": null,
+    "name": "SQL syntax",
+    "category": "structure",
+    "description": "Candidate: sql syntax. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "translation_accuracy",
-    "name": "translation accuracy",
-    "category": "performance",
-    "description": "Candidate evaluation of translation accuracy; design and validation pending",
-    "evaluator": null,
+    "name": "Translation accuracy",
+    "category": "semantic",
+    "description": "Candidate: translation accuracy. Requires response, objective, reference_or_rubric, reference_output; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric",
+      "reference_output"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "summarization_coverage",
-    "name": "summarization coverage",
-    "category": "content",
-    "description": "Candidate evaluation of summarization coverage; design and validation pending",
-    "evaluator": null,
+    "name": "Summarization coverage",
+    "category": "semantic",
+    "description": "Candidate: summarization coverage. Requires response, objective, reference_or_rubric, reference_output; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric",
+      "reference_output"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "entity_extraction",
-    "name": "entity extraction",
+    "name": "Entity extraction",
     "category": "structure",
-    "description": "Candidate evaluation of entity extraction; design and validation pending",
-    "evaluator": null,
+    "description": "Candidate: entity extraction. Requires response, reference_output; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "reference_output"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "named_entity_accuracy",
-    "name": "named entity accuracy",
-    "category": "length",
-    "description": "Candidate evaluation of named entity accuracy; design and validation pending",
-    "evaluator": null,
+    "name": "Named entity accuracy",
+    "category": "semantic",
+    "description": "Candidate: named entity accuracy. Requires response, objective, reference_or_rubric, reference_output; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric",
+      "reference_output"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "keyword_density",
-    "name": "keyword density",
-    "category": "numerical",
-    "description": "Candidate evaluation of keyword density; design and validation pending",
-    "evaluator": null,
+    "name": "Keyword density",
+    "category": "content",
+    "description": "Candidate: keyword density. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "duplicate_detection",
-    "name": "duplicate detection",
-    "category": "semantic",
-    "description": "Candidate evaluation of duplicate detection; design and validation pending",
-    "evaluator": null,
+    "name": "Duplicate detection",
+    "category": "content",
+    "description": "Candidate: duplicate detection. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "repetition_penalty",
-    "name": "repetition penalty",
-    "category": "safety",
-    "description": "Candidate evaluation of repetition penalty; design and validation pending",
-    "evaluator": null,
+    "name": "Repetition penalty",
+    "category": "content",
+    "description": "Candidate: repetition penalty. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "answerability",
-    "name": "answerability",
-    "category": "instruction_following",
-    "description": "Candidate evaluation of answerability; design and validation pending",
-    "evaluator": null,
+    "name": "Answerability",
+    "category": "semantic",
+    "description": "Candidate: answerability. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "uncertainty_calibration",
-    "name": "uncertainty calibration",
-    "category": "rag",
-    "description": "Candidate evaluation of uncertainty calibration; design and validation pending",
-    "evaluator": null,
+    "name": "Uncertainty calibration",
+    "category": "semantic",
+    "description": "Candidate: uncertainty calibration. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "confidence_alignment",
-    "name": "confidence alignment",
-    "category": "performance",
-    "description": "Candidate evaluation of confidence alignment; design and validation pending",
-    "evaluator": null,
+    "name": "Confidence alignment",
+    "category": "semantic",
+    "description": "Candidate: confidence alignment. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "contradiction_detection",
-    "name": "contradiction detection",
-    "category": "content",
-    "description": "Candidate evaluation of contradiction detection; design and validation pending",
-    "evaluator": null,
+    "name": "Contradiction detection",
+    "category": "semantic",
+    "description": "Candidate: contradiction detection. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "multi_turn_consistency",
-    "name": "multi turn consistency",
-    "category": "structure",
-    "description": "Candidate evaluation of multi turn consistency; design and validation pending",
-    "evaluator": null,
+    "name": "Multi turn consistency",
+    "category": "semantic",
+    "description": "Candidate: multi turn consistency. Requires response, objective, reference_or_rubric, conversation_history; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric",
+      "conversation_history"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "memory_consistency",
-    "name": "memory consistency",
-    "category": "length",
-    "description": "Candidate evaluation of memory consistency; design and validation pending",
-    "evaluator": null,
+    "name": "Memory consistency",
+    "category": "semantic",
+    "description": "Candidate: memory consistency. Requires response, objective, reference_or_rubric, conversation_history; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric",
+      "conversation_history"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "privacy_compliance",
-    "name": "privacy compliance",
-    "category": "numerical",
-    "description": "Candidate evaluation of privacy compliance; design and validation pending",
-    "evaluator": null,
+    "name": "Privacy compliance",
+    "category": "safety",
+    "description": "Candidate: privacy compliance. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "reviewed_policy_or_detection_rules"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "copyright_compliance",
-    "name": "copyright compliance",
-    "category": "semantic",
-    "description": "Candidate evaluation of copyright compliance; design and validation pending",
-    "evaluator": null,
+    "name": "Copyright compliance",
+    "category": "safety",
+    "description": "Candidate: copyright compliance. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "reviewed_policy_or_detection_rules"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "profanity_detection",
-    "name": "profanity detection",
+    "name": "Profanity detection",
     "category": "safety",
-    "description": "Candidate evaluation of profanity detection; design and validation pending",
-    "evaluator": null,
+    "description": "Candidate: profanity detection. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "reviewed_policy_or_detection_rules"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "jailbreak_resistance",
-    "name": "jailbreak resistance",
-    "category": "instruction_following",
-    "description": "Candidate evaluation of jailbreak resistance; design and validation pending",
-    "evaluator": null,
+    "name": "Jailbreak resistance",
+    "category": "safety",
+    "description": "Candidate: jailbreak resistance. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "reviewed_policy_or_detection_rules"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "reasoning_consistency",
-    "name": "reasoning consistency",
-    "category": "rag",
-    "description": "Candidate evaluation of reasoning consistency; design and validation pending",
-    "evaluator": null,
+    "name": "Reasoning consistency",
+    "category": "semantic",
+    "description": "Candidate: reasoning consistency. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "objective",
+      "reference_or_rubric"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "mathematical_correctness",
-    "name": "mathematical correctness",
-    "category": "performance",
-    "description": "Candidate evaluation of mathematical correctness; design and validation pending",
-    "evaluator": null,
+    "name": "Mathematical correctness",
+    "category": "numerical",
+    "description": "Candidate: mathematical correctness. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "numeric_range",
-    "name": "numeric range",
-    "category": "content",
-    "description": "Candidate evaluation of numeric range; design and validation pending",
-    "evaluator": null,
-    "parameters": {},
-    "status": "planned",
-    "priority": "research"
+    "name": "Numeric range",
+    "category": "numerical",
+    "description": "Check one whole-response numeric scalar against inclusive bounds; never choose among several numbers.",
+    "status": "supported",
+    "priority": "P2",
+    "evaluator_type": "patterns",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "minimum": {
+          "type": "number",
+          "minimum": -1e+100,
+          "maximum": 1e+100
+        },
+        "maximum": {
+          "type": "number",
+          "minimum": -1e+100,
+          "maximum": 1e+100
+        }
+      },
+      "required": [
+        "minimum",
+        "maximum"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "example_parameters": {
+      "minimum": 0,
+      "maximum": 10
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   },
   {
     "id": "numeric_units",
-    "name": "numeric units",
-    "category": "structure",
-    "description": "Candidate evaluation of numeric units; design and validation pending",
-    "evaluator": null,
+    "name": "Numeric units",
+    "category": "numerical",
+    "description": "Candidate: numeric units. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "source_freshness",
-    "name": "source freshness",
-    "category": "length",
-    "description": "Candidate evaluation of source freshness; design and validation pending",
-    "evaluator": null,
+    "name": "Source freshness",
+    "category": "content",
+    "description": "Candidate: source freshness. Requires response, source_evidence; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "source_evidence"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "citation_presence",
-    "name": "citation presence",
-    "category": "numerical",
-    "description": "Candidate evaluation of citation presence; design and validation pending",
-    "evaluator": null,
+    "name": "Citation presence",
+    "category": "structure",
+    "description": "Candidate: citation presence. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "required_links",
-    "name": "required links",
-    "category": "semantic",
-    "description": "Candidate evaluation of required links; design and validation pending",
-    "evaluator": null,
+    "name": "Required links",
+    "category": "structure",
+    "description": "Candidate: required links. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "markdown_links",
-    "name": "markdown links",
-    "category": "safety",
-    "description": "Candidate evaluation of markdown links; design and validation pending",
-    "evaluator": null,
+    "name": "Markdown links",
+    "category": "structure",
+    "description": "Candidate: markdown links. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "html_safety",
-    "name": "html safety",
-    "category": "instruction_following",
-    "description": "Candidate evaluation of html safety; design and validation pending",
-    "evaluator": null,
+    "name": "Html safety",
+    "category": "safety",
+    "description": "Candidate: html safety. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "reviewed_policy_or_detection_rules"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "response_language",
-    "name": "response language",
-    "category": "rag",
-    "description": "Candidate evaluation of response language; design and validation pending",
-    "evaluator": null,
+    "name": "Response language",
+    "category": "instruction_following",
+    "description": "Candidate: response language. Requires response; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "evaluation_method": "model_or_human_review",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://deepeval.com/docs/metrics-introduction",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
   },
   {
     "id": "response_time",
-    "name": "response time",
+    "name": "Response time",
     "category": "performance",
-    "description": "Candidate evaluation of response time; design and validation pending",
-    "evaluator": null,
+    "description": "Candidate: response time. Requires recorded_execution_metrics, configured_budget; implementation and scoring validation are pending.",
     "parameters": {},
     "status": "planned",
-    "priority": "research"
+    "priority": "future",
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "recorded_execution_metrics",
+      "configured_budget"
+    ],
+    "evaluation_method": "deterministic",
+    "evaluator_type": null,
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "https://docs.langchain.com/langsmith/evaluation-types"
+    ],
+    "method_status": "Design proposal; not a validated implementation."
+  },
+  {
+    "id": "json_object",
+    "name": "JSON object",
+    "category": "structure",
+    "description": "Require a JSON object at the root of the complete response.",
+    "status": "supported",
+    "evaluator_type": "structured",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "priority": "P2",
+    "example_parameters": {},
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
+  },
+  {
+    "id": "json_array",
+    "name": "JSON array",
+    "category": "structure",
+    "description": "Require a JSON array at the root of the complete response.",
+    "status": "supported",
+    "evaluator_type": "structured",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "priority": "P2",
+    "example_parameters": {},
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
+  },
+  {
+    "id": "json_required_keys",
+    "name": "JSON required keys",
+    "category": "structure",
+    "description": "Require all configured top-level keys in a root JSON object.",
+    "status": "supported",
+    "evaluator_type": "structured",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "priority": "P2",
+    "example_parameters": {
+      "keys": [
+        "example"
+      ]
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
+  },
+  {
+    "id": "json_forbidden_keys",
+    "name": "JSON forbidden keys",
+    "category": "structure",
+    "description": "Require none of the configured top-level keys in a root JSON object.",
+    "status": "supported",
+    "evaluator_type": "structured",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "priority": "P2",
+    "example_parameters": {
+      "keys": [
+        "example"
+      ]
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
+  },
+  {
+    "id": "keyword_coverage",
+    "name": "Keyword coverage",
+    "category": "content",
+    "description": "Legacy substring keyword coverage; an empty required list is treated as satisfied for compatibility.",
+    "status": "supported",
+    "evaluator_type": "legacy",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "minItems": 0,
+          "maxItems": 100,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "keywords"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "priority": "P2",
+    "example_parameters": {
+      "keywords": [
+        "example"
+      ]
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
+  },
+  {
+    "id": "prompt_relevance",
+    "name": "Prompt relevance",
+    "category": "content",
+    "description": "Legacy lexical proxy: overlap with meaningful prompt terms, not a semantic or LLM judgment.",
+    "status": "supported",
+    "evaluator_type": "legacy",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response",
+      "prompt"
+    ],
+    "priority": "P2",
+    "example_parameters": {},
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
+  },
+  {
+    "id": "response_length",
+    "name": "Response length",
+    "category": "length",
+    "description": "Legacy character-count completion ratio, capped at one.",
+    "status": "supported",
+    "evaluator_type": "legacy",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "priority": "P2",
+    "example_parameters": {
+      "count": 1
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
+  },
+  {
+    "id": "sentence_structure",
+    "name": "Sentence structure",
+    "category": "length",
+    "description": "Legacy punctuation-separated sentence-count completion ratio, capped at one.",
+    "status": "supported",
+    "evaluator_type": "legacy",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "priority": "P2",
+    "example_parameters": {
+      "count": 1
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
+  },
+  {
+    "id": "forbidden_terms",
+    "name": "Forbidden terms",
+    "category": "content",
+    "description": "Legacy binary absence check for configured forbidden terms, ignoring case.",
+    "status": "supported",
+    "evaluator_type": "legacy",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "terms": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "minItems": 0,
+          "maxItems": 100,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "terms"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "priority": "P2",
+    "example_parameters": {
+      "terms": [
+        "example"
+      ]
+    },
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
+  },
+  {
+    "id": "nonempty_response",
+    "name": "Nonempty response",
+    "category": "content",
+    "description": "Binary check that the response contains non-whitespace text.",
+    "status": "supported",
+    "evaluator_type": "legacy",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "catalog_revision": "p2.1",
+    "required_inputs": [
+      "response"
+    ],
+    "priority": "P2",
+    "example_parameters": {},
+    "evaluation_method": "deterministic",
+    "research_sources": [
+      "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+    ]
   }
 ]

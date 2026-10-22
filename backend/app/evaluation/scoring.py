@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import re
-from math import floor
+from dataclasses import replace
+from decimal import Decimal
 
 from .models import CriterionResult
+from .points import earned_points
 from .weights import ScoringWeights, default_weights
 
 STOP_WORDS = set(
@@ -14,11 +16,6 @@ STOP_WORDS = set(
         "write provide tell are is to of in on a an"
     ).split()
 )
-
-
-def _round_points(value: float) -> float:
-    # Match JavaScript Math.round for the nonnegative scoring domain.
-    return floor(value * 10 + 0.5) / 10
 
 
 def score_response(
@@ -53,7 +50,7 @@ def score_response(
         CriterionResult(
             "Keyword coverage",
             keyword_ratio == 1,
-            _round_points(keyword_ratio * points["keyword"]),
+            earned_points(keyword_ratio, points["keyword"]),
             f"Matched {len(matches)} of {len(keywords)} keywords"
             if keywords
             else "No required keywords configured",
@@ -61,19 +58,19 @@ def score_response(
         CriterionResult(
             "Prompt relevance",
             relevance_ratio >= 0.5,
-            _round_points(min(1, relevance_ratio) * points["relevance"]),
+            earned_points(min(1, relevance_ratio), points["relevance"]),
             f"Matched {relevant} of {len(prompt_terms)} meaningful prompt terms",
         ),
         CriterionResult(
             "Minimum length",
             len(response) >= minimum_length,
-            _round_points(length_ratio * points["length"]),
+            earned_points(length_ratio, points["length"]),
             f"Response contains {len(response)} characters; target is {minimum_length}",
         ),
         CriterionResult(
             "Sentence structure",
             sentences >= minimum_sentences,
-            _round_points(sentence_ratio * points["sentences"]),
+            earned_points(sentence_ratio, points["sentences"]),
             f"Response contains {sentences} sentences; target is {minimum_sentences}",
         ),
         CriterionResult(
@@ -89,4 +86,25 @@ def score_response(
             "Model returned usable text" if valid else "Response is empty",
         ),
     ]
-    return min(100, _round_points(sum(item.score for item in criteria))), criteria
+    ids = [
+        "keyword_coverage",
+        "prompt_relevance",
+        "response_length",
+        "sentence_structure",
+        "forbidden_terms",
+        "nonempty_response",
+    ]
+    ratios = [
+        keyword_ratio,
+        relevance_ratio,
+        length_ratio,
+        sentence_ratio,
+        float(not forbidden),
+        float(valid),
+    ]
+    keys = ["keyword", "relevance", "length", "sentences", "forbidden", "valid"]
+    criteria = [
+        replace(c, criterion_id=cid, maximum_points=points[key], normalized_score=ratio)
+        for c, cid, key, ratio in zip(criteria, ids, keys, ratios, strict=True)
+    ]
+    return float(sum(Decimal(str(item.score)) for item in criteria)), criteria

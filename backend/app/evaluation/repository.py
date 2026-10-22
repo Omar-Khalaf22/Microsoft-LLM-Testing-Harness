@@ -45,4 +45,4 @@ class JsonResultRepository:
             return []
         with self.lock, self.path.open("r", encoding="utf-8") as file:
             rows = [json.loads(line) for line in file if line.strip()]
-        return list(reversed(rows[-limit:]))
+        return [{k: v for k, v in row.items() if k != "passed"} for row in reversed(rows[-limit:])]

@@ -26,7 +26,10 @@ function SavedRuns({
   onRefresh: () => void;
   onOpenRun: (run: RunResponse) => void;
 }) {
-  function handleKeyDown(event: KeyboardEvent<HTMLButtonElement>, run: RunResponse) {
+  function handleKeyDown(
+    event: KeyboardEvent<HTMLButtonElement>,
+    run: RunResponse,
+  ) {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       onOpenRun(run);
@@ -67,12 +70,20 @@ function SavedRuns({
               ↻
             </button>
           </div>
-          <p className="sidebar-hint">Select a saved run to load its prompt, scoring points, and result.</p>
-          {error && <p className="sidebar-error" role="alert">Could not load runs: {error}</p>}
+          <p className="sidebar-hint">
+            Select a saved run to load its prompt, scoring points, and result.
+          </p>
+          {error && (
+            <p className="sidebar-error" role="alert">
+              Could not load runs: {error}
+            </p>
+          )}
           {loading && runs.length === 0 ? (
             <p className="sidebar-empty">Loading saved runs…</p>
           ) : runs.length === 0 ? (
-            <p className="sidebar-empty">Your saved runs will appear here after the first evaluation.</p>
+            <p className="sidebar-empty">
+              Your saved runs will appear here after the first evaluation.
+            </p>
           ) : (
             <ul className="saved-run-list">
               {runs.map((run) => (
@@ -85,10 +96,17 @@ function SavedRuns({
                     onClick={() => onOpenRun(run)}
                     onKeyDown={(event) => handleKeyDown(event, run)}
                   >
-                    <span className="saved-run-name">{run.metadata.test_name || "Untitled test"}</span>
-                    <span className="saved-run-version">Version {run.metadata.test_version ?? "imported"}</span>
+                    <span className="saved-run-name">
+                      {run.metadata.test_name || "Untitled test"}
+                    </span>
+                    <span className="saved-run-version">
+                      Version {run.metadata.test_version ?? "imported"}
+                    </span>
                     <span className="saved-run-details">
-                      {formatDate(run.created_at)} · {run.score}/100
+                      {formatDate(run.created_at)} ·{" "}
+                      {run.score === null
+                        ? "Score unavailable"
+                        : `${run.score.toFixed(2)}/100`}
                     </span>
                   </button>
                 </li>

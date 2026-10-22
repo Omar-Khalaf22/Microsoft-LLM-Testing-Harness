@@ -160,7 +160,7 @@ def test_imported_run_can_be_displayed_in_history() -> None:
             )
         result = PostgresResultRepository(SessionLocal).recent(limit=100)
         imported = next(row for row in result if row["id"] == run_id)
-        assert imported["score"] == 100
+        assert imported["score"] is None  # No overall score was recorded; do not invent one.
         assert imported["metadata"]["schema_version"] == "imported"
         assert imported["metadata"]["test_name"] == "Imported JSON check"
         assert "test_id" not in imported["metadata"]

@@ -91,15 +91,13 @@ def test_request_and_response_contract(http_response, suffix):
 @pytest.mark.parametrize(
     "extra, expected",
     [
-        ({}, {"input_tokens": 0, "output_tokens": 0}),
-        ({"usage": {}}, {"input_tokens": 0, "output_tokens": 0}),
-        ({"usage": {"prompt_tokens": 4}}, {"input_tokens": 4, "output_tokens": 0}),
-        ({"usage": {"completion_tokens": "5"}}, {"input_tokens": 0, "output_tokens": 5}),
+        ({}, {"input_tokens": None, "output_tokens": None}),
+        ({"usage": {}}, {"input_tokens": None, "output_tokens": None}),
+        ({"usage": {"prompt_tokens": 4}}, {"input_tokens": 4, "output_tokens": None}),
+        ({"usage": {"completion_tokens": "5"}}, {"input_tokens": None, "output_tokens": 5}),
     ],
 )
-def test_missing_usage_defaults_to_zero_and_missing_model_falls_back(
-    http_response, extra, expected
-):
+def test_missing_usage_remains_unknown_and_missing_model_falls_back(http_response, extra, expected):
     http_response({"choices": [{"message": {"content": "answer"}}], **extra})
     result = generate()
     assert result.model == "requested-model"
@@ -155,19 +153,11 @@ def test_response_parsing_errors_escape_unwrapped(http_response, body, error):
 
 
 @pytest.mark.parametrize(
-    "usage, error",
-    [
-        (None, AttributeError),
-        ([], AttributeError),
-        ({"prompt_tokens": "unknown"}, ValueError),
-        ({"completion_tokens": None}, TypeError),
-    ],
-    ids=["null-usage", "list-usage", "nonnumeric-token-count", "null-token-count"],
+    "usage", [None, [], {"prompt_tokens": "unknown"}, {"completion_tokens": None}]
 )
-def test_malformed_usage_errors_escape_unwrapped(http_response, usage, error):
+def test_unreported_or_malformed_usage_is_unknown(http_response, usage):
     http_response({"choices": [{"message": {"content": "answer"}}], "usage": usage})
-    with pytest.raises(error):
-        generate()
+    assert generate().usage == {"input_tokens": None, "output_tokens": None}
 
 
 @pytest.mark.parametrize(
@@ -185,7 +175,7 @@ def test_demo_variants_are_successful_deterministic_responses(model, prefix):
     assert result.text.startswith(prefix)
     assert result.model == model
     assert provider.name == "local_demo"
-    assert result.usage == {"input_tokens": 4, "output_tokens": len(result.text.split())}
+    assert result.usage == {"input_tokens": None, "output_tokens": None}
     assert provider.generate("Explain secure JSON testing", model, 0.2) == result
     # Temperature currently has no effect on demo output.
     assert provider.generate("Explain secure JSON testing", model, 1.8) == result
@@ -211,4 +201,4 @@ def test_demo_unrecognized_models_use_strong_text(requested, returned):
 def test_demo_empty_prompt_uses_fallback_topic():
     result = DemoProvider().generate("", "demo-strong-v1", 0.2)
     assert "Complete analysis for: the requested topic." in result.text
-    assert result.usage["input_tokens"] == 0
+    assert result.usage["input_tokens"] is None

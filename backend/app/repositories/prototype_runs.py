@@ -8,6 +8,7 @@ from typing import Any
 from uuid import uuid4
 
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.evaluation.models import TestResult
@@ -18,6 +19,35 @@ from app.repositories.runs import get_run_result, save_run_result
 
 class UnknownTestError(ValueError):
     """The user selected a test that is not present in the database."""
+
+
+SYSTEM_PROMPT_FIELDS = (
+    "base_system_prompt",
+    "custom_system_prompt",
+    "resolved_system_prompt",
+)
+
+
+def _captured_system_prompts(metadata: dict[str, Any]) -> dict[str, Any] | None:
+    """Version the instructions actually captured by the executor.
+
+    Do not resolve defaults here: a current default cannot establish which
+    instructions were used by an older executor. Missing legacy fields remain
+    unknown, and any fields actually supplied are preserved verbatim.
+    """
+    captured = {field: metadata[field] for field in SYSTEM_PROMPT_FIELDS if field in metadata}
+    return captured or None
+
+
+def _comparable_definition(definition: dict[str, Any]) -> dict[str, Any]:
+    """Read legacy defaults without changing the stored, possibly run-linked row."""
+    if "criteria" in definition:
+        return definition
+    return {
+        "scoring_weights": default_weights(),
+        "system_prompt_configuration": None,
+        **definition,
+    }
 
 
 class PostgresResultRepository:
@@ -32,7 +62,7 @@ class PostgresResultRepository:
         test_name: str | None = None,
         test_version: int | None = None,
     ) -> TestResult:
-        """Save a run and version its name, prompt, and scoring definition."""
+        """Save a run and version its name, prompts, and scoring definition."""
         name = (test_name or result.prompt[:100]).strip()
         definition = {
             "expected_keywords": result.metadata["expected_keywords"],
@@ -40,7 +70,17 @@ class PostgresResultRepository:
             "minimum_sentences": result.metadata["minimum_sentences"],
             "forbidden_terms": result.metadata["forbidden_terms"],
             "scoring_weights": result.metadata.get("scoring_weights", default_weights()),
+            "system_prompt_configuration": _captured_system_prompts(result.metadata),
         }
+
+        if result.metadata.get("criteria") is not None:
+            definition = dict(
+                system_prompt_configuration=_captured_system_prompts(result.metadata),
+                criteria=result.metadata["criteria"],
+                objective=result.metadata.get("objective", ""),
+                configuration_state="approved",
+                catalog_revision=result.metadata["catalog_revision"],
+            )
 
         with self.session_factory.begin() as session:
             if test_id is None:
@@ -74,8 +114,7 @@ class PostgresResultRepository:
                 selected is None
                 or selected.name != name
                 or selected.prompt != result.prompt
-                or {"scoring_weights": default_weights(), **selected.evaluation_definition}
-                != definition
+                or _comparable_definition(selected.evaluation_definition) != definition
             ):
                 version = TestVersion(
                     test_id=test.id,
@@ -91,9 +130,12 @@ class PostgresResultRepository:
 
             model = session.get(Model, result.model)
             if model is None:
-                model = Model(id=result.model, name=result.model)
-                session.add(model)
-                session.flush()
+                session.execute(
+                    insert(Model)
+                    .values(id=result.model, name=result.model)
+                    .on_conflict_do_nothing()
+                )
+                model = session.get(Model, result.model)
 
             metadata = {
                 **result.metadata,
@@ -114,8 +156,8 @@ class PostgresResultRepository:
                         "temperature": metadata["temperature"],
                         "provider": result.provider,
                         "overall_score": result.score,
-                        "passed": result.passed,
                         "metadata": metadata,
+                        "result_snapshot": replace(result, metadata=metadata).to_dict(),
                     },
                     "input": {"prompt": result.prompt},
                     "response": {"content": result.response},
@@ -123,19 +165,28 @@ class PostgresResultRepository:
                         {
                             "method": criterion.name,
                             "passed": criterion.passed,
-                            "score": criterion.score / 100,
+                            "score": criterion.score / 100 if criterion.score is not None else None,
+                            "criterion_id": criterion.criterion_id,
+                            "status": criterion.status
+                            if criterion.maximum_points is not None
+                            else None,
+                            "earned_points": criterion.score
+                            if criterion.maximum_points is not None
+                            else None,
+                            "maximum_points": criterion.maximum_points,
+                            "normalized_score": criterion.normalized_score,
                             "details": {"detail": criterion.detail},
                         }
                         for criterion in result.criteria
                     ],
                     "metrics": {
                         "latency_ms": result.latency_ms,
-                        "input_tokens": usage.get("input_tokens", 0),
-                        "output_tokens": usage.get("output_tokens", 0),
+                        "input_tokens": usage.get("input_tokens"),
+                        "output_tokens": usage.get("output_tokens"),
                     },
                     "started_at": metadata.get("started_at", result.created_at),
                     "completed_at": result.created_at,
-                    "error": None,
+                    "error": result.error["message"] if result.error else None,
                 },
             )
 
@@ -152,12 +203,19 @@ class PostgresResultRepository:
             ).all()
             return [self._as_api_result(get_run_result(session, run_id)) for run_id in run_ids]
 
+    def get(self, run_id: str) -> dict[str, Any] | None:
+        with self.session_factory() as session:
+            saved = get_run_result(session, run_id)
+            return self._as_api_result(saved) if saved else None
+
     @staticmethod
     def _as_api_result(saved: dict[str, Any] | None) -> dict[str, Any]:
         if saved is None:
             raise LookupError("A saved run disappeared during retrieval.")
 
         configuration = saved["configuration"]
+        if "result_snapshot" in configuration:
+            return {k: v for k, v in configuration["result_snapshot"].items() if k != "passed"}
         criteria = saved["evaluations"]
         metadata = configuration.get("metadata")
         if metadata is None:
@@ -171,8 +229,8 @@ class PostgresResultRepository:
                 "minimum_sentences": 1,
                 "forbidden_terms": [],
                 "usage": {
-                    "input_tokens": saved["metrics"]["input_tokens"] or 0,
-                    "output_tokens": saved["metrics"]["output_tokens"] or 0,
+                    "input_tokens": saved["metrics"]["input_tokens"],
+                    "output_tokens": saved["metrics"]["output_tokens"],
                 },
                 "schema_version": "imported",
             }
@@ -180,12 +238,6 @@ class PostgresResultRepository:
         # backfilled by migration 0003. Do not rely on old metadata having a name.
         metadata = {**metadata, "test_name": saved["test_name"]}
         score = configuration.get("overall_score")
-        if score is None:
-            score = (
-                round(100 * sum(item["score"] for item in criteria) / len(criteria), 1)
-                if criteria
-                else 0
-            )
         return {
             "id": saved["run_id"],
             "status": saved["status"],
@@ -194,14 +246,13 @@ class PostgresResultRepository:
             "provider": configuration.get("provider", "imported"),
             "response": saved["response"]["content"] or "",
             "score": score,
-            "passed": configuration.get(
-                "passed", bool(criteria) and all(c["passed"] for c in criteria)
-            ),
             "criteria": [
                 {
                     "name": criterion["method"],
                     "passed": criterion["passed"],
-                    "score": round(criterion["score"] * 100, 1),
+                    "score": round(criterion["score"] * 100, 2)
+                    if criterion["score"] is not None
+                    else None,
                     "detail": criterion.get("details", {}).get("detail", ""),
                 }
                 for criterion in criteria

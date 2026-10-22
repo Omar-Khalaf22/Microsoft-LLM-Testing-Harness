@@ -1,40 +1,47 @@
-"""Validated criterion execution, independent of the legacy six score fields."""
+"""Registry dispatcher. Failed evaluations retain unavailable scores and a null total."""
 
-from .evaluators.content import evaluate
-from .registry import validate_criterion
+from .configuration import validate_selection
+from .points import earned_points, total_points
+from .registry import evaluate_criterion, get_criterion
 
 
-def evaluate_selected(response: str, selected: list[dict]) -> tuple[float, list[dict]]:
-    if not selected:
-        raise ValueError("At least one criterion is required")
-    if len(selected) > 100:
-        raise ValueError("Too many criteria")
-    total = 0.0
+def evaluate_selected(response: str, selected: list[dict], context: dict | None = None):
+    # Adapt Lina's original standalone helper interface for existing callers.
+    selected = [
+        dict(criterion_id=x["id"], parameters=x["parameters"], weight=x["weight"])
+        if isinstance(x, dict) and set(x) == {"id", "parameters", "weight"}
+        else x
+        for x in selected
+    ]
+    selected = validate_selection(selected)
     results = []
-    ids = set()
     for item in selected:
-        if not isinstance(item, dict) or set(item) != {"id", "parameters", "weight"}:
-            raise ValueError("Each criterion requires id, parameters and weight")
-        criterion_id = item["id"]
-        if not isinstance(criterion_id, str) or criterion_id in ids:
-            raise ValueError("Criterion IDs must be unique strings")
-        ids.add(criterion_id)
-        validate_criterion(criterion_id, item["parameters"])
-        weight = item["weight"]
-        if type(weight) not in (int, float) or not 0 <= weight <= 100 or weight != weight:
-            raise ValueError("Weights must be finite numbers between 0 and 100")
-        passed, normalized, detail = evaluate(criterion_id, response, item["parameters"])
-        score = round(normalized * weight, 1)
-        results.append(
-            {
-                "id": criterion_id,
-                "passed": passed,
-                "normalized_score": normalized,
-                "score": score,
-                "detail": detail,
-            }
+        cid = item["criterion_id"]
+        result = dict(
+            id=cid,
+            criterion_id=cid,
+            name=get_criterion(cid)["name"],
+            maximum_points=item["weight"],
+            status="completed",
         )
-        total += weight
-    if abs(total - 100) > 1e-8:
-        raise ValueError("Weights must total 100")
-    return min(100.0, round(sum(r["score"] for r in results), 1)), results
+        try:
+            met, normalized, detail = evaluate_criterion(
+                cid, response, item["parameters"], context or {}
+            )
+            score = earned_points(normalized, item["weight"])
+            result.update(passed=met, normalized_score=normalized, score=score, detail=detail)
+        except Exception:
+            result.update(
+                status="error",
+                passed=None,
+                normalized_score=None,
+                score=None,
+                detail="Evaluator could not complete. Review the criterion or retry.",
+            )
+        results.append(result)
+    total = (
+        total_points([x["score"] for x in results])
+        if all(x["status"] == "completed" for x in results)
+        else None
+    )
+    return total, results

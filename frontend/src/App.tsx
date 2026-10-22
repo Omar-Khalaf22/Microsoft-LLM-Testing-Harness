@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { checkHealth, listRuns, type RunResponse } from "./api";
+import { checkHealth, getRun, listRuns, type RunResponse } from "./api";
 import RunForm from "./RunForm";
 import RunResults from "./RunResults";
 import SavedRuns from "./SavedRuns";
@@ -8,6 +8,7 @@ import SavedRuns from "./SavedRuns";
 type HealthState = "checking" | "ok" | "unavailable";
 
 function App() {
+  const openSequence = useRef(0);
   const [health, setHealth] = useState<HealthState>("checking");
   const [runs, setRuns] = useState<RunResponse[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
@@ -25,7 +26,9 @@ function App() {
       if (!signal?.aborted) setRuns(saved);
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
-      setHistoryError(error instanceof Error ? error.message : "Could not load saved runs");
+      setHistoryError(
+        error instanceof Error ? error.message : "Could not load saved runs",
+      );
     } finally {
       if (!signal?.aborted) setHistoryLoading(false);
     }
@@ -37,7 +40,8 @@ function App() {
     async function loadHealth() {
       try {
         const isHealthy = await checkHealth(controller.signal);
-        if (!controller.signal.aborted) setHealth(isHealthy ? "ok" : "unavailable");
+        if (!controller.signal.aborted)
+          setHealth(isHealthy ? "ok" : "unavailable");
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") {
           return;
@@ -56,41 +60,62 @@ function App() {
   }, [view]);
 
   function handleRunCreated(run: RunResponse) {
-    setRuns((previous) => [run, ...previous.filter((item) => item.id !== run.id)].slice(0, 100));
+    setRuns((previous) =>
+      [run, ...previous.filter((item) => item.id !== run.id)].slice(0, 100),
+    );
     setSelectedRun(run);
+    setEditorKey((previous) => previous + 1);
     setView("results");
   }
 
-  function handleOpenRun(run: RunResponse) {
-    setView("results");
-    setSelectedRun(run);
-    setEditorKey((previous) => previous + 1);
+  async function handleOpenRun(run: RunResponse) {
+    const sequence = ++openSequence.current;
+    setHistoryError("");
+    try {
+      const saved = await getRun(run.id);
+      if (sequence !== openSequence.current) return;
+      setView("results");
+      setSelectedRun(saved);
+      setEditorKey((previous) => previous + 1);
+    } catch (error) {
+      if (sequence === openSequence.current)
+        setHistoryError(
+          error instanceof Error
+            ? error.message
+            : "Could not open the saved run",
+        );
+    }
   }
 
   function handleNewTest() {
+    openSequence.current += 1;
     setView("configure");
     setSelectedRun(null);
     setEditorKey((previous) => previous + 1);
   }
 
   return (
-    <div className={`app-shell ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
+    <div
+      className={`app-shell ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}
+    >
       <SavedRuns
-          runs={runs}
-          selectedRunId={selectedRun?.id}
-          open={sidebarOpen}
-          loading={historyLoading}
-          error={historyError}
-          onToggle={() => setSidebarOpen((open) => !open)}
-          onRefresh={() => void refreshHistory()}
-          onOpenRun={handleOpenRun}
+        runs={runs}
+        selectedRunId={selectedRun?.id}
+        open={sidebarOpen}
+        loading={historyLoading}
+        error={historyError}
+        onToggle={() => setSidebarOpen((open) => !open)}
+        onRefresh={() => void refreshHistory()}
+        onOpenRun={handleOpenRun}
       />
       <main className="workspace">
         <header className="page-header">
           <div>
-            <p className="eyebrow">Capstone prototype V3</p>
             <h1>LLM Testing Harness</h1>
-            <p className="subtitle">Run prompts, evaluate responses, and inspect structured test results.</p>
+            <p className="subtitle">
+              Run prompts, evaluate responses, and inspect structured test
+              results.
+            </p>
           </div>
           <div className="status" data-status={health}>
             <span className="status-dot" aria-hidden="true" />
@@ -107,8 +132,23 @@ function App() {
             />
           </div>
           <div hidden={view !== "results"}>
-            <button type="button" className="back-to-test" onClick={() => setView("configure")}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+            <button
+              type="button"
+              className="back-to-test"
+              onClick={() => setView("configure")}
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                focusable="false"
+              >
                 <path d="m12 19-7-7 7-7M5 12h14" />
               </svg>
               Back to Test

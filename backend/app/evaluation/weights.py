@@ -1,9 +1,10 @@
 """Validated 100-point scoring configuration shared by API and executor."""
 
-from math import isclose
 from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+from .points import allocation
 
 
 class ScoringWeights(BaseModel):
@@ -17,8 +18,9 @@ class ScoringWeights(BaseModel):
 
     @model_validator(mode="after")
     def total_is_100(self) -> Self:
-        if not isclose(sum(self.model_dump().values()), 100, rel_tol=0, abs_tol=1e-8):
-            raise ValueError("Scoring points must total 100.")
+        points = [allocation(value, allow_zero=True) for value in self.model_dump().values()]
+        if sum(points) != 100:
+            raise ValueError("Scoring points must total exactly 100.00.")
         return self
 
 

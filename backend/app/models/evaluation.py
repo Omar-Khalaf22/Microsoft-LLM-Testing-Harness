@@ -11,6 +11,7 @@ from sqlalchemy import (
     Identity,
     Numeric,
     Text,
+    UniqueConstraint,
     func,
     text,
 )
@@ -24,6 +25,34 @@ from app.models.run import TestRun
 class EvaluationResult(Base):
     __tablename__ = "evaluation_results"
     __table_args__ = (
+        UniqueConstraint("run_id", "criterion_id", name="uq_evaluation_run_criterion"),
+        CheckConstraint(
+            "status IS NULL OR status IN ('completed','error')", name="ck_evaluation_status"
+        ),
+        CheckConstraint(
+            (
+                "earned_points IS NULL OR (earned_points >= 0 AND maximum_points "
+                "IS NOT NULL AND earned_points <= maximum_points)"
+            ),
+            name="ck_evaluation_points",
+        ),
+        CheckConstraint(
+            "maximum_points IS NULL OR (maximum_points >= 0 AND maximum_points <= 100)",
+            name="ck_evaluation_maximum",
+        ),
+        CheckConstraint(
+            "normalized_score IS NULL OR (normalized_score >= 0 AND normalized_score <= 1)",
+            name="ck_evaluation_normalized",
+        ),
+        CheckConstraint(
+            (
+                "status IS NULL OR (status = 'completed' AND earned_points IS NOT"
+                " NULL AND normalized_score IS NOT NULL) OR (status = 'error' AND"
+                " earned_points IS NULL AND normalized_score IS NULL AND score IS"
+                " NULL AND passed IS NULL)"
+            ),
+            name="ck_evaluation_completion",
+        ),
         CheckConstraint(
             "score >= 0 AND score <= 1",
             name="ck_evaluation_results_score_range",
@@ -41,11 +70,16 @@ class EvaluationResult(Base):
         index=True,
     )
     method: Mapped[str] = mapped_column(Text, nullable=False)
-    passed: Mapped[bool] = mapped_column(Boolean, nullable=False)
-    score: Mapped[Decimal] = mapped_column(
+    passed: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    score: Mapped[Decimal | None] = mapped_column(
         Numeric(5, 4),
-        nullable=False,
+        nullable=True,
     )
+    criterion_id: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str | None] = mapped_column(Text)
+    earned_points: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
+    maximum_points: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
+    normalized_score: Mapped[Decimal | None] = mapped_column(Numeric(12, 10))
     details: Mapped[dict[str, Any]] = mapped_column(
         JSONB,
         nullable=False,

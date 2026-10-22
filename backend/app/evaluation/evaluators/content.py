@@ -5,7 +5,9 @@ import re
 
 def evaluate(criterion_id: str, response: str, parameters: dict) -> tuple[bool, float, str]:
     """Return passed, normalized score and explanation."""
-    text = response or ""
+    if not isinstance(response, str):
+        raise TypeError("The model response must be text.")
+    text = response
     folded = text.casefold()
     if criterion_id in {
         "required_keywords",
@@ -17,7 +19,7 @@ def evaluate(criterion_id: str, response: str, parameters: dict) -> tuple[bool, 
         terms = parameters[key]
         matches = [term for term in terms if term.casefold() in folded]
         required = criterion_id.startswith("required")
-        ratio = len(matches) / len(terms) if required else 1 - len(matches) / len(terms)
+        ratio = len(matches) / len(terms) if required else float(not matches)
         return ratio == 1, ratio, f"Matched {len(matches)} of {len(terms)} configured {key}"
     if criterion_id == "exact_match":
         passed = text == parameters["expected"]

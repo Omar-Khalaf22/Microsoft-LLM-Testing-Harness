@@ -1,3 +1,8 @@
+> Prototype 2 local integration: see [scope and contracts](docs/prototype2-integration.md),
+> [Windows review steps](docs/prototype2-local-review.md), and
+> [verification evidence](docs/prototype2-verification.md). These describe the current
+> integration; earlier prototype notes below remain historical context.
+
 # LLM Testing Harness
 
 LLM Testing Harness is a senior capstone project for creating and reviewing repeatable LLM evaluations. The Week 5 prototype runs an inline prompt against a demo or OpenAI-compatible provider, scores it, and saves the test version and run in PostgreSQL.

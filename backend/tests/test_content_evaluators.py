@@ -31,8 +31,9 @@ def test_content_criteria(criterion_id, params, response, passed):
 
 
 def test_catalog_marks_only_implemented_entries_supported():
-    assert len(catalog()) == 100
-    assert len(list_supported_criteria()) == 10
+    assert len(catalog()) >= 100
+    assert len({x["id"] for x in catalog()}) == len(catalog())
+    assert len(list_supported_criteria()) == 36
 
 
 def test_planned_criterion_cannot_execute():

@@ -15,7 +15,7 @@ from app.assistant.prompts import DEFAULT_SYSTEM_PROMPT
 class ProviderResponse:
     text: str
     model: str
-    usage: dict[str, int]
+    usage: dict[str, int | None]
 
 
 class DemoProvider:
@@ -43,6 +43,8 @@ class DemoProvider:
                 "Error: the requested information is unavailable. "
                 "The model could not complete the requested analysis."
             )
+        elif model == "demo-json-v1":
+            text = '{"count": 3, "ok": true, "summary": "JSON testing"}'
         else:
             text = (
                 f"Complete analysis for: {topic}. "
@@ -55,7 +57,7 @@ class DemoProvider:
         return ProviderResponse(
             text=text,
             model=model if model.startswith("demo-") else "demo-strong-v1",
-            usage={"input_tokens": len(words), "output_tokens": len(text.split())},
+            usage={"input_tokens": None, "output_tokens": None},
         )
 
 
@@ -102,12 +104,22 @@ class OpenAICompatibleProvider:
         except (HTTPError, URLError, TimeoutError) as exc:
             raise RuntimeError(f"Model request failed: {exc}") from exc
 
-        usage = body.get("usage", {})
+        usage = body.get("usage")
+        usage = usage if isinstance(usage, dict) else {}
+
+        def reported(name):
+            value = usage.get(name)
+            if type(value) is int and value >= 0:
+                return value
+            if isinstance(value, str) and value.isascii() and value.isdecimal():
+                return int(value)
+            return None
+
         return ProviderResponse(
             text=body["choices"][0]["message"]["content"],
             model=body.get("model", model),
             usage={
-                "input_tokens": int(usage.get("prompt_tokens", 0)),
-                "output_tokens": int(usage.get("completion_tokens", 0)),
+                "input_tokens": reported("prompt_tokens"),
+                "output_tokens": reported("completion_tokens"),
             },
         )

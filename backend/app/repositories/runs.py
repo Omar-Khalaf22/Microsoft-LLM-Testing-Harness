@@ -85,7 +85,14 @@ def save_run_result(
             EvaluationResult(
                 method=evaluation["method"],
                 passed=evaluation["passed"],
-                score=Decimal(str(evaluation["score"])),
+                score=Decimal(str(evaluation["score"]))
+                if evaluation["score"] is not None
+                else None,
+                criterion_id=evaluation.get("criterion_id"),
+                status=evaluation.get("status"),
+                earned_points=evaluation.get("earned_points"),
+                maximum_points=evaluation.get("maximum_points"),
+                normalized_score=evaluation.get("normalized_score"),
                 details=dict(evaluation.get("details", {})),
             )
         )
@@ -122,9 +129,19 @@ def get_run_result(
         evaluation_data: dict[str, Any] = {
             "method": evaluation.method,
             "passed": evaluation.passed,
-            "score": float(evaluation.score),
+            "score": float(evaluation.score) if evaluation.score is not None else None,
         }
 
+        for key in (
+            "criterion_id",
+            "status",
+            "earned_points",
+            "maximum_points",
+            "normalized_score",
+        ):
+            value = getattr(evaluation, key)
+            if value is not None:
+                evaluation_data[key] = float(value) if isinstance(value, Decimal) else value
         if evaluation.details:
             evaluation_data["details"] = evaluation.details
 

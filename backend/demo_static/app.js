@@ -93,7 +93,7 @@ function scoreResponse(payload, response) {
   criteria.push({
     name: "Keyword coverage",
     passed: keywordRatio === 1,
-    score: Math.round(keywordRatio * weights.keyword * 10) / 10,
+    score: Math.round(keywordRatio * weights.keyword * 100) / 100,
     detail: payload.expected_keywords.length
       ? `Matched ${keywordMatches.length} of ${payload.expected_keywords.length} keywords`
       : "No required keywords configured"
@@ -115,7 +115,7 @@ function scoreResponse(payload, response) {
   criteria.push({
     name: "Prompt relevance",
     passed: relevanceRatio >= 0.5,
-    score: Math.round(Math.min(1, relevanceRatio) * weights.relevance * 10) / 10,
+    score: Math.round(Math.min(1, relevanceRatio) * weights.relevance * 100) / 100,
     detail: `Matched ${relevantMatches} of ${promptTerms.size} meaningful prompt terms`
   });
 
@@ -126,7 +126,7 @@ function scoreResponse(payload, response) {
   criteria.push({
     name: "Minimum length",
     passed: response.length >= payload.minimum_length,
-    score: Math.round(lengthRatio * weights.length * 10) / 10,
+    score: Math.round(lengthRatio * weights.length * 100) / 100,
     detail: `Response contains ${response.length} characters; target is ${payload.minimum_length}`
   });
 
@@ -136,7 +136,7 @@ function scoreResponse(payload, response) {
   criteria.push({
     name: "Sentence structure",
     passed: sentences >= payload.minimum_sentences,
-    score: Math.round(sentenceRatio * weights.sentences * 10) / 10,
+    score: Math.round(sentenceRatio * weights.sentences * 100) / 100,
     detail: `Response contains ${sentences} sentences; target is ${payload.minimum_sentences}`
   });
 
@@ -164,7 +164,7 @@ function scoreResponse(payload, response) {
 
   const score = Math.min(
     100,
-    Math.round(criteria.reduce((sum, item) => sum + item.score, 0) * 10) / 10
+    Math.round(criteria.reduce((sum, item) => sum + item.score, 0) * 100) / 100
   );
 
   return {score, criteria};
@@ -197,7 +197,6 @@ function executeSimulation(payload) {
     provider: "local_demo",
     response,
     score: scored.score,
-    passed: scored.score >= 75,
     criteria: scored.criteria,
     latency_ms: latency,
     created_at: new Date().toISOString(),
@@ -216,14 +215,14 @@ function executeSimulation(payload) {
 function showResult(result) {
   document.querySelector("#empty-state").hidden = true;
   document.querySelector("#result").hidden = false;
-  document.querySelector("#score").textContent = Math.round(result.score);
+  document.querySelector("#score").textContent = result.score.toFixed(2);
 
   const badge = document.querySelector("#badge");
-  badge.textContent = result.passed ? "PASS" : "REVIEW";
-  badge.className = `badge ${result.passed ? "" : "fail"}`;
+  badge.textContent = "COMPLETED";
+  badge.className = "badge";
 
   document.querySelector("#result-title").textContent =
-    result.passed ? "Test passed" : "Needs review";
+    "Evaluation completed";
   document.querySelector("#metadata").textContent =
     `${result.model} · ${result.latency_ms} ms · ${result.provider}`;
   document.querySelector("#response").textContent = result.response;

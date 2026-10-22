@@ -11,6 +11,8 @@ from app.evaluation.executor import TestExecutor
 from app.evaluation.providers import DemoProvider, OpenAICompatibleProvider
 from app.models import Test, TestVersion
 from app.repositories.prototype_runs import PostgresResultRepository, UnknownTestError
+from app.repositories.recommendations import RecommendationRepository
+from app.routes.assistant import get_recommendation_repository
 from app.schemas.runs import RunCreateRequest, RunResponse
 from app.services.run_service import create_run
 
@@ -59,6 +61,7 @@ def list_runs(
 def post_run(
     request: RunCreateRequest,
     executor: Annotated[TestExecutor, Depends(get_executor)],
+    recommendations: Annotated[RecommendationRepository, Depends(get_recommendation_repository)],
 ) -> RunResponse:
     if request.test_id:
         try:
@@ -82,10 +85,47 @@ def post_run(
             raise
         except Exception:
             raise HTTPException(status_code=500, detail="The run could not be completed.") from None
+    recommendation = None
+    if request.recommendation_id:
+        try:
+            recommendation = recommendations.get(request.recommendation_id)
+        except Exception:
+            raise HTTPException(500, detail="The recommendation could not be loaded.") from None
+        if recommendation is None:
+            raise HTTPException(404, detail="The selected recommendation no longer exists.")
+        if (
+            recommendation["test_prompt"] != request.prompt
+            or recommendation["objective"] != request.objective
+        ):
+            raise HTTPException(
+                422,
+                detail=(
+                    "The objective or prompt changed. Generate new suggestions or app"
+                    "rove a manual configuration."
+                ),
+            )
     try:
-        return create_run(request, executor=executor)
+        result = create_run(request, executor=executor, recommendation=recommendation)
+        if result.error and result.error["code"] == "provider_failure":
+            raise HTTPException(502, detail={**result.error, "run_id": result.id})
+        return result
+    except HTTPException:
+        raise
     except UnknownTestError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from None
     except Exception:
         # Includes raw provider parsing errors and service response-validation errors.
         raise HTTPException(status_code=500, detail="The run could not be completed.") from None
+
+
+@router.get("/runs/{run_id}", response_model=RunResponse)
+def get_run(
+    run_id: str, repository: Annotated[PostgresResultRepository, Depends(get_result_repository)]
+):
+    try:
+        result = repository.get(run_id)
+    except Exception:
+        raise HTTPException(500, detail="The saved run could not be loaded.") from None
+    if result is None:
+        raise HTTPException(404, detail="The saved run does not exist.")
+    return result

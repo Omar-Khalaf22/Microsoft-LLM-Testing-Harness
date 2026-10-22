@@ -60,7 +60,7 @@ def request_model():
 
 @pytest.fixture
 def execution_result():
-    # Deliberately not a passing evaluation; the service must preserve the result.
+    # A low numeric score is still a completed run, without an overall judgment.
     return EvaluationResult(
         id="bf6babaa-431e-4b04-8182-25499cb75c3f",
         status="completed",
@@ -69,7 +69,6 @@ def execution_result():
         provider="openai_compatible",
         response="JSON storage needs care.",
         score=42.5,
-        passed=False,
         criteria=[CriterionResult("Keyword coverage", False, 15.0, "Missing: metadata")],
         latency_ms=123,
         created_at="2026-09-22T12:00:00+00:00",
@@ -124,7 +123,7 @@ def test_service_adapts_all_inputs_and_executes_once(run_service, request_model,
     )
 
 
-def test_service_preserves_result_and_failed_evaluation(
+def test_service_preserves_numeric_result_and_execution_status(
     run_service, request_model, executor, execution_result
 ):
     response = run_service.create_run(request_model, executor=executor)
@@ -132,7 +131,8 @@ def test_service_preserves_result_and_failed_evaluation(
     assert isinstance(response, RunResponse)
     assert response.model_dump(mode="json") == execution_result.to_dict()
     assert response.status == "completed"
-    assert response.passed is False
+    assert response.score == 42.5
+    assert "passed" not in response.model_dump()
     executor.execute.assert_called_once()
 
 
@@ -153,7 +153,8 @@ def test_post_runs_returns_completed_result(client, request_model, executor, exe
 
     assert response.status_code == 200
     assert response.json() == execution_result.to_dict()
-    assert RunResponse.model_validate(response.json()).passed is False
+    assert RunResponse.model_validate(response.json()).score == 42.5
+    assert "passed" not in response.json()
     executor.execute.assert_called_once_with(EvaluationRequest(**request_model.model_dump()))
 
 
