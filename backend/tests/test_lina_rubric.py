@@ -1,8 +1,9 @@
 """Prototype 3 rubric tests use a fake judge, never paid model calls."""
 import json
 import math
+
 import pytest
-from app.evaluation.rubric_judge import judge_rubric, InvalidJudgment
+from app.evaluation.rubric_judge import InvalidJudgment, judge_rubric
 from app.evaluation.rubric_integration import evaluate_rubric
 
 BASE = dict(criterion_id="factual_accuracy",prompt="What is 2+2?",response="4",
@@ -60,7 +61,9 @@ def test_supported_criteria(criterion):
 @pytest.mark.parametrize("score,passed",[(0.1,False),(0.5,False),(0.8,True)])
 def test_quality_levels(score,passed):
     context={"prompt":"2+2?","judge_provider":FakeProvider(score),"judge_model":"judge-test"}
-    assert evaluate_rubric("factual_accuracy","wrong",{"reference_evidence":"2+2=4"},context)[0] is passed
+    assert evaluate_rubric(
+        "factual_accuracy", "wrong", {"reference_evidence": "2+2=4"}, context
+    )[0] is passed
 
 @pytest.mark.parametrize("text",["not json","{}",'{"score":5}',"[]"])
 def test_malformed_judgment(text):
