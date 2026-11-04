@@ -1,4 +1,5 @@
 """Human review request and response contracts."""
+
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -16,6 +17,7 @@ class HumanReviewCreate(BaseModel):
         if not value.strip():
             raise ValueError("Must not be blank")
         return value.strip()
+
 
 class HumanReviewResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
