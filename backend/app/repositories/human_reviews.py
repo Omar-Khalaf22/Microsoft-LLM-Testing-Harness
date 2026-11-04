@@ -1,4 +1,5 @@
 """Transactional append only human review history."""
+
 from sqlalchemy import func, select
 
 from app.models.human_review import HumanReview
@@ -7,6 +8,7 @@ from app.models.run import TestRun
 
 class RunNotFound(LookupError):
     pass
+
 
 def add_review(session, run_id, request):
     run = session.scalar(select(TestRun).where(TestRun.id == run_id).with_for_update())
@@ -32,6 +34,7 @@ def add_review(session, run_id, request):
     session.flush()
     session.refresh(review)
     return review
+
 
 def list_reviews(session, run_id):
     if session.get(TestRun, run_id) is None:
