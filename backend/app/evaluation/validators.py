@@ -30,6 +30,8 @@ def evaluate_selected(response: str, selected: list[dict], context: dict | None 
             )
             score = earned_points(normalized, item["weight"])
             result.update(passed=met, normalized_score=normalized, score=score, detail=detail)
+            if cid in (context or {}).get("rubric_evidence", {}):
+                result.update((context or {})["rubric_evidence"][cid])
         except Exception:
             result.update(
                 status="error",
