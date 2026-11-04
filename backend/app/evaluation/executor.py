@@ -42,6 +42,7 @@ class TestExecutor:
         score = None
         error = None
         criteria = []
+        context = {}
         try:
             generated = self.provider.generate(
                 request.prompt, request.model, request.temperature, system_prompt=instructions
