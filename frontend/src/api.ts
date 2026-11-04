@@ -82,6 +82,10 @@ export interface CriterionResult {
   maximum_points?: number | null;
   normalized_score?: number | null;
   status?: string;
+  // Present for rubric (LLM-judged) criteria; see docs/lina-prototype3.md on lina-prototype-3.
+  evaluator_model?: string | null;
+  rationale?: string | null;
+  evidence?: string[] | null;
 }
 export interface RunResponse {
   id: string;
@@ -180,6 +184,44 @@ export async function suggestCriteria(
     body: JSON.stringify({ objective, test_prompt }),
     signal,
   });
+  if (!response.ok) throw new Error((await detail(response)).message);
+  return response.json();
+}
+// Human reviews: a separate 0-100 rating that never changes the automated score.
+// Contract: POST/GET /runs/{run_id}/reviews (docs/lina-prototype3.md on lina-prototype-3).
+// Reviewer identity is client supplied for now; it must come from authentication before
+// shared deployment.
+export interface HumanReview {
+  id: number;
+  run_id: string;
+  reviewer_id: string;
+  rating: number;
+  rationale: string;
+  revision: number;
+  created_at: string;
+}
+export interface HumanReviewInput {
+  reviewer_id: string;
+  rating: number;
+  rationale: string;
+}
+export function listReviews(runId: string, signal?: AbortSignal) {
+  return get<HumanReview[]>(`/runs/${encodeURIComponent(runId)}/reviews`, signal);
+}
+export async function addReview(
+  runId: string,
+  input: HumanReviewInput,
+  signal?: AbortSignal,
+): Promise<HumanReview> {
+  const response = await fetch(
+    `${apiBaseUrl}/runs/${encodeURIComponent(runId)}/reviews`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+      signal,
+    },
+  );
   if (!response.ok) throw new Error((await detail(response)).message);
   return response.json();
 }
