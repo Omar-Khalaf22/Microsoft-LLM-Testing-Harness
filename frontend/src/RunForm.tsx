@@ -95,6 +95,7 @@ export default function RunForm({
     m?.generated_configuration ?? null,
   );
   const [approved, setApproved] = useState(false);
+  const [approvalNotice, setApprovalNotice] = useState("");
   const [catalog, setCatalog] = useState<CriterionDefinition[]>([]);
   const [catalogError, setCatalogError] = useState("");
   const [catalogRetry, setCatalogRetry] = useState(0);
@@ -141,13 +142,25 @@ export default function RunForm({
     Object.values(weights).reduce((s, v) => s + Math.round(v * 100), 0) ===
       10000;
   const busy = generating || submitting;
-  function changeRows(next: CriterionDraft[]) {
-    setRows(next);
+  // Any edit that changes what the user reviewed withdraws approval and says why, because
+  // some of these fields (system instructions) sit in a collapsed section away from the box.
+  function clearApproval(reason: string) {
+    if (approved)
+      setApprovalNotice(
+        `Approval was cleared because ${reason}. Review the criteria and approve them again.`,
+      );
     setApproved(false);
+  }
+  function changeRows(
+    next: CriterionDraft[],
+    reason = "the criteria were edited",
+  ) {
+    setRows(next);
+    clearApproval(reason);
   }
   function changedPrompt(value: string) {
     setPrompt(value);
-    setApproved(false);
+    clearApproval("the test prompt changed");
     setRecommendation(null);
   }
   async function generate() {
@@ -169,6 +182,7 @@ export default function RunForm({
           reason: s.reason,
           included: true,
         })),
+        "new suggestions were loaded",
       );
     } catch (e) {
       if (!c.signal.aborted)
@@ -284,7 +298,7 @@ export default function RunForm({
             value={objective}
             onChange={(e) => {
               setObjective(e.target.value);
-              setApproved(false);
+              clearApproval("the testing objective changed");
               setRecommendation(null);
             }}
             placeholder="What should a useful response accomplish?"
@@ -340,7 +354,10 @@ export default function RunForm({
                 rows={3}
                 maxLength={10000}
                 value={base}
-                onChange={(e) => setBase(e.target.value)}
+                onChange={(e) => {
+                  setBase(e.target.value);
+                  clearApproval("the base system instructions changed");
+                }}
               />
             </label>
             <label className="field">
@@ -349,7 +366,10 @@ export default function RunForm({
                 rows={3}
                 maxLength={10000}
                 value={custom}
-                onChange={(e) => setCustom(e.target.value)}
+                onChange={(e) => {
+                  setCustom(e.target.value);
+                  clearApproval("the additional system instructions changed");
+                }}
               />
             </label>
           </div>
@@ -360,10 +380,10 @@ export default function RunForm({
             checked={legacy}
             onChange={(e) => {
               setLegacy(e.target.checked);
-              setApproved(false);
+              clearApproval("the scoring mode changed");
             }}
           />
-          Use the original six-check configuration
+          Use the original six automatic checks (legacy scoring)
         </label>
       </fieldset>
       {!legacy ? (
@@ -427,15 +447,23 @@ export default function RunForm({
               type="checkbox"
               checked={approved}
               disabled={busy || !parsed}
-              onChange={(e) => setApproved(e.target.checked)}
+              onChange={(e) => {
+                setApproved(e.target.checked);
+                if (e.target.checked) setApprovalNotice("");
+              }}
             />
             I reviewed and approve these criteria, parameters, and point
             allocations.
           </label>
+          {approvalNotice && !approved && (
+            <p role="status" className="approval-notice">
+              {approvalNotice}
+            </p>
+          )}
         </>
       ) : (
         <fieldset className="form-fields scoring-box" disabled={busy}>
-          <legend>Original six checks</legend>
+          <legend>Original six automatic checks (legacy)</legend>
           <div className="field-row">
             <label className="field">
               <span>Expected keywords (comma separated)</span>
@@ -495,7 +523,8 @@ export default function RunForm({
             )}
           </div>
           <p className="muted">
-            Zero disables a legacy check. Total must equal 100.00.
+            A check set to 0 points is still evaluated and reported, but adds
+            nothing to the total. Points must total 100.00.
           </p>
           {!legacyValid && (
             <p className="error-text">Check the point allocations and total.</p>
