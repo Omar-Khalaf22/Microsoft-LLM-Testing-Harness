@@ -114,6 +114,9 @@ class CriterionResult:
     maximum_points: float | None = None
     normalized_score: float | None = None
     status: str = "completed"
+    evaluator_model: str | None = None
+    rationale: str | None = None
+    evidence: list[str] | None = None
 
 
 @dataclass(frozen=True)
