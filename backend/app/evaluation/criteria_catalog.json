@@ -2825,5 +2825,63 @@
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
     ]
+  },
+  {
+    "id": "factual_accuracy",
+    "name": "Factual accuracy",
+    "category": "quality",
+    "description": "Evaluate factual correctness against approved instructions and reference evidence.",
+    "status": "supported",
+    "priority": "P3",
+    "evaluator_type": "rubric",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "reference_evidence": {
+          "type": "string",
+          "maxLength": 10000
+        }
+      },
+      "additionalProperties": false
+    },
+    "catalog_revision": "p3.0",
+    "required_inputs": [
+      "response",
+      "prompt"
+    ],
+    "example_parameters": {
+      "reference_evidence": "An authoritative excerpt"
+    },
+    "evaluation_method": "llm_rubric",
+    "research_sources": []
+  },
+  {
+    "id": "evidence_grounding",
+    "name": "Evidence grounding",
+    "category": "quality",
+    "description": "Evaluate whether factual claims are supported by reference evidence.",
+    "status": "supported",
+    "priority": "P3",
+    "evaluator_type": "rubric",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "reference_evidence": {
+          "type": "string",
+          "maxLength": 10000
+        }
+      },
+      "additionalProperties": false
+    },
+    "catalog_revision": "p3.0",
+    "required_inputs": [
+      "response",
+      "prompt"
+    ],
+    "example_parameters": {
+      "reference_evidence": "An authoritative excerpt"
+    },
+    "evaluation_method": "llm_rubric",
+    "research_sources": []
   }
 ]
