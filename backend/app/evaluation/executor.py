@@ -96,7 +96,8 @@ class TestExecutor:
             else:
                 context = {"prompt": request.prompt, "approved_instructions": instructions}
                 if any(
-
+                    get_criterion(item["criterion_id"])["evaluator_type"] == "rubric"
+                    for item in selected
                 ):
                     settings = get_settings()
                     context["judge_model"] = settings.assistant_model
