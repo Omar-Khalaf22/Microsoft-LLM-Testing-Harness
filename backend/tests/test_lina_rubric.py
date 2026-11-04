@@ -105,6 +105,10 @@ def test_quality_levels(score, passed):
 
 @pytest.mark.parametrize("text", ["not json", "{}", '{"score":5}', "[]"])
 def test_malformed_judgment(text):
-    context = {"prompt": "2+2?", "judge_provider": FakeProvider(text=text), "judge_model": "judge-test"}
+    context = {
+        "prompt": "2+2?",
+        "judge_provider": FakeProvider(text=text),
+        "judge_model": "judge-test",
+    }
     with pytest.raises((ValueError, TypeError)):
         evaluate_rubric("factual_accuracy", "wrong", {"reference_evidence": "2+2=4"}, context)
