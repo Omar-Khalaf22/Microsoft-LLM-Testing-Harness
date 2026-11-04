@@ -92,7 +92,7 @@ def test_live_request_schema_and_saved_draft_preserve_original_inputs(monkeypatc
     }
     schema = outbound["response_format"]["json_schema"]["schema"]
     assert outbound["response_format"]["type"] == "json_schema"
-    assert len(schema["properties"]["suggestions"]["items"]["anyOf"]) == 36
+    assert len(schema["properties"]["suggestions"]["items"]["anyOf"]) == len(list_supported_criteria())
     Draft202012Validator(schema).validate({"suggestions": [row()]})
 
 
