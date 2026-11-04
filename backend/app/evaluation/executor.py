@@ -6,6 +6,7 @@ from urllib.parse import urlsplit, urlunsplit
 from uuid import uuid4
 
 from app.assistant.prompts import resolve_system_prompt
+from app.config import get_settings
 
 from .configuration import validate_selection
 from .models import CriterionResult, TestRequest, TestResult
@@ -93,7 +94,16 @@ class TestExecutor:
                         for key, cid in WEIGHT_IDS.items()
                     ]
             else:
-                score, outcomes = evaluate_selected(response, selected, {"prompt": request.prompt})
+                context = {"prompt": request.prompt, "approved_instructions": instructions}
+                if any(get_criterion(x["criterion_id"])["evaluator_type"] == "rubric" for x in selected):
+                    settings = get_settings()
+                    context["judge_model"] = settings.assistant_model
+                    if settings.openai_api_key.get_secret_value().strip():
+                        context["judge_provider"] = OpenAICompatibleProvider(
+                            api_key=settings.openai_api_key.get_secret_value().strip(),
+                            base_url=settings.openai_base_url,
+                        )
+                score, outcomes = evaluate_selected(response, selected, context)
                 criteria = [
                     CriterionResult(**{k: v for k, v in row.items() if k != "id"})
                     for row in outcomes
@@ -178,6 +188,7 @@ class TestExecutor:
                 if selected
                 else None,
                 "endpoint": endpoint,
+                "rubric_evidence": context.get("rubric_evidence", {}) if selected else {},
             },
         )
         return (
