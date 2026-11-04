@@ -1,7 +1,9 @@
 """Human review endpoints never modify automated scores."""
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
 from app.database import get_db
 from app.repositories.human_reviews import RunNotFound, add_review, list_reviews
 from app.schemas.human_reviews import HumanReviewCreate, HumanReviewResponse
