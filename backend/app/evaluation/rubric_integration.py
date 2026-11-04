@@ -3,6 +3,7 @@ import json
 
 from .rubric_judge import judge_rubric
 
+
 def evaluate_rubric(criterion_id, response, parameters, context):
     provider = context.get("judge_provider")
     model = context.get("judge_model")
