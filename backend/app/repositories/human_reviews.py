@@ -1,8 +1,9 @@
 """Transactional append only human review history."""
 from sqlalchemy import func, select
 
-from app.models.run import TestRun
 from app.models.human_review import HumanReview
+from app.models.run import TestRun
+
 
 class RunNotFound(LookupError):
     pass
