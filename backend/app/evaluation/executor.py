@@ -189,6 +189,7 @@ class TestExecutor:
                 else None,
                 "endpoint": endpoint,
                 "rubric_evidence": context.get("rubric_evidence", {}) if selected else {},
+                "resolved_judge_models": context.get("resolved_judge_models", {}) if selected else {},
             },
         )
         return (
