@@ -3,6 +3,7 @@
 Revision ID: 0005_lina_reviews
 Revises: 0004_prototype2
 """
+
 import sqlalchemy as sa
 
 from alembic import op
@@ -11,6 +12,7 @@ revision = "0005_lina_reviews"
 down_revision = "0004_prototype2"
 branch_labels = None
 depends_on = None
+
 
 def upgrade():
     op.create_table(
@@ -37,6 +39,7 @@ def upgrade():
     )
     op.create_index("ix_human_reviews_run_id", "human_reviews", ["run_id"])
     op.create_index("ix_human_reviews_reviewer_id", "human_reviews", ["reviewer_id"])
+
 
 def downgrade():
     op.drop_index("ix_human_reviews_reviewer_id", table_name="human_reviews")
