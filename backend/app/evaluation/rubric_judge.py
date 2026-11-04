@@ -1,4 +1,5 @@
 """Strict subjective rubric judgment validator."""
+
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
@@ -11,8 +12,12 @@ RUBRICS = {
         "Assess whether factual claims are supported by supplied reference evidence."
     ),
 }
+
+
 class InvalidJudgment(ValueError):
     pass
+
+
 @dataclass(frozen=True)
 class RubricJudgment:
     criterion_id: str
@@ -20,6 +25,7 @@ class RubricJudgment:
     rationale: str
     evaluator_model: str
     evidence: tuple[str, ...]
+
 
 def judge_rubric(
     *,
