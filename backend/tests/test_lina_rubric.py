@@ -98,9 +98,10 @@ def test_supported_criteria(criterion):
 @pytest.mark.parametrize("score,passed", [(0.1, False), (0.5, False), (0.8, True)])
 def test_quality_levels(score, passed):
     context = {"prompt": "2+2?", "judge_provider": FakeProvider(score), "judge_model": "judge-test"}
-    assert evaluate_rubric(
-        "factual_accuracy", "wrong", {"reference_evidence": "2+2=4"}, context
-    )[0] is passed
+    assert (
+        evaluate_rubric("factual_accuracy", "wrong", {"reference_evidence": "2+2=4"}, context)[0]
+        is passed
+    )
 
 
 @pytest.mark.parametrize("text", ["not json", "{}", '{"score":5}', "[]"])

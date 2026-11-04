@@ -17,7 +17,9 @@ def upgrade():
         "human_reviews",
         sa.Column("id", sa.BigInteger(), sa.Identity(always=True), primary_key=True),
         sa.Column(
-            "run_id", sa.Text(), sa.ForeignKey("test_runs.id", ondelete="CASCADE"),
+            "run_id",
+            sa.Text(),
+            sa.ForeignKey("test_runs.id", ondelete="CASCADE"),
             nullable=False,
         ),
         sa.Column("reviewer_id", sa.Text(), nullable=False),
@@ -25,8 +27,10 @@ def upgrade():
         sa.Column("rationale", sa.Text(), nullable=False),
         sa.Column("revision", sa.Integer(), nullable=False),
         sa.Column(
-            "created_at", sa.DateTime(timezone=True),
-            nullable=False, server_default=sa.func.now(),
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.func.now(),
         ),
         sa.CheckConstraint("rating >= 0 AND rating <= 100", name="ck_human_review_rating"),
         sa.UniqueConstraint("run_id", "reviewer_id", "revision", name="uq_human_review_revision"),

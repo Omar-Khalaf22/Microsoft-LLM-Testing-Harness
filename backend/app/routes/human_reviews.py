@@ -11,8 +11,9 @@ from app.schemas.human_reviews import HumanReviewCreate, HumanReviewResponse
 router = APIRouter(tags=["human reviews"])
 
 @router.post("/runs/{run_id}/reviews", response_model=HumanReviewResponse, status_code=201)
-def post_review(run_id: str, request: HumanReviewCreate,
-                session: Annotated[Session, Depends(get_db)]):
+def post_review(
+    run_id: str, request: HumanReviewCreate, session: Annotated[Session, Depends(get_db)]
+):
     try:
         with session.begin():
             result = add_review(session, run_id, request)
