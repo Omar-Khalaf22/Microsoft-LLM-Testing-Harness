@@ -1,5 +1,6 @@
 """Server configured LLM rubric adapter."""
 import json
+
 from .rubric_judge import judge_rubric
 
 def evaluate_rubric(criterion_id, response, parameters, context):
@@ -9,7 +10,10 @@ def evaluate_rubric(criterion_id, response, parameters, context):
         raise RuntimeError("Rubric evaluator not configured")
     def invoke(payload):
         output = provider.generate(
-            json.dumps({**payload, "approved_instructions": context.get("approved_instructions", "")}),
+            json.dumps({
+                **payload,
+                "approved_instructions": context.get("approved_instructions", ""),
+            }),
             model, 0,
             system_prompt=(
                 "Judge the approved rubric using supplied evidence. Return exactly a JSON object "
