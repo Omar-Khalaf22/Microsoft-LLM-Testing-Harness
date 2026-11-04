@@ -54,7 +54,7 @@ def test_suggestions_approval_execution_and_exact_snapshot_reload(app):
     body = config()
     with TestClient(app) as client:
         definitions = client.get("/evaluation/criteria").json()
-        assert len(definitions["criteria"]) == 36
+        assert len(definitions["criteria"]) == 38
         rec = client.post(
             "/assistant/suggest-criteria",
             json={"objective": body["objective"], "test_prompt": body["prompt"]},
