@@ -95,7 +95,10 @@ class TestExecutor:
                     ]
             else:
                 context = {"prompt": request.prompt, "approved_instructions": instructions}
-                if any(get_criterion(x["criterion_id"])["evaluator_type"] == "rubric" for x in selected):
+                if any(
+                    get_criterion(x["criterion_id"])["evaluator_type"] == "rubric"
+                    for x in selected
+                ):
                     settings = get_settings()
                     context["judge_model"] = settings.assistant_model
                     if settings.openai_api_key.get_secret_value().strip():
@@ -189,7 +192,9 @@ class TestExecutor:
                 else None,
                 "endpoint": endpoint,
                 "rubric_evidence": context.get("rubric_evidence", {}) if selected else {},
-                "resolved_judge_models": context.get("resolved_judge_models", {}) if selected else {},
+                "resolved_judge_models": (
+                    context.get("resolved_judge_models", {}) if selected else {}
+                ),
             },
         )
         return (
