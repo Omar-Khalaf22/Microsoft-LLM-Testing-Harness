@@ -1,4 +1,5 @@
 """Server configured LLM rubric adapter."""
+
 import json
 
 from .rubric_judge import judge_rubric
@@ -9,6 +10,7 @@ def evaluate_rubric(criterion_id, response, parameters, context):
     model = context.get("judge_model")
     if provider is None or not isinstance(model, str) or not model.strip():
         raise RuntimeError("Rubric evaluator not configured")
+
     def invoke(payload):
         output = provider.generate(
             json.dumps(
@@ -36,10 +38,14 @@ def evaluate_rubric(criterion_id, response, parameters, context):
             raise ValueError("Invalid evaluator model or response size")
         context.setdefault("resolved_judge_models", {})[criterion_id] = output.model
         return json.loads(output.text)
+
     judgment = judge_rubric(
-        criterion_id=criterion_id, prompt=context.get("prompt", ""),
-        response=response, reference_evidence=parameters.get("reference_evidence", ""),
-        evaluator_model=model, invoke=invoke,
+        criterion_id=criterion_id,
+        prompt=context.get("prompt", ""),
+        response=response,
+        reference_evidence=parameters.get("reference_evidence", ""),
+        evaluator_model=model,
+        invoke=invoke,
     )
     context.setdefault("rubric_evidence", {})[criterion_id] = {
         "evaluator_model": judgment.evaluator_model,
