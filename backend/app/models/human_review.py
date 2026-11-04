@@ -2,12 +2,20 @@
 from datetime import datetime
 
 from sqlalchemy import (
-    BigInteger, CheckConstraint, DateTime, ForeignKey, Identity, Integer,
-    Text, UniqueConstraint, func,
+    BigInteger,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Identity,
+    Integer,
+    Text,
+    UniqueConstraint,
+    func,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
+
 
 class HumanReview(Base):
     __tablename__ = "human_reviews"
