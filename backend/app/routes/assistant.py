@@ -116,9 +116,7 @@ async def understand_prompt(request: UnderstandingRequest):
                 },
                 {
                     "role": "user",
-                    "content": json.dumps(
-                        {"prompt": request.prompt, "objective": request.objective}
-                    ),
+                    "content": json.dumps({"prompt": request.prompt, "objective": request.objective}),
                 },
             ],
             schema,
