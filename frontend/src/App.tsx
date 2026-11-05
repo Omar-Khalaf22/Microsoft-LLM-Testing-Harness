@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { checkHealth, getRun, listRuns, type RunResponse } from "./api";
+import { checkHealth, getRun, listHistory, type RunResponse, type RunSummary } from "./api";
+import EvidenceTransfer from "./EvidenceTransfer";
 import HumanReviews from "./HumanReviews";
 import RunComparison from "./RunComparison";
 import RunForm from "./RunForm";
@@ -12,7 +13,8 @@ type HealthState = "checking" | "ok" | "unavailable";
 function App() {
   const openSequence = useRef(0);
   const [health, setHealth] = useState<HealthState>("checking");
-  const [runs, setRuns] = useState<RunResponse[]>([]);
+  const [runs, setRuns] = useState<RunSummary[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [historyLoading, setHistoryLoading] = useState(true);
   const [historyError, setHistoryError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -27,8 +29,8 @@ function App() {
     setHistoryLoading(true);
     setHistoryError("");
     try {
-      const saved = await listRuns(signal);
-      if (!signal?.aborted) setRuns(saved);
+      const saved = await listHistory(null, signal);
+      if (!signal?.aborted) { setRuns(saved.items); setNextCursor(saved.next_cursor); }
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
       setHistoryError(
@@ -66,14 +68,14 @@ function App() {
 
   function handleRunCreated(run: RunResponse) {
     setRuns((previous) =>
-      [run, ...previous.filter((item) => item.id !== run.id)].slice(0, 100),
+      [run, ...previous.filter((item) => item.id !== run.id)],
     );
     setSelectedRun(run);
     setEditorKey((previous) => previous + 1);
     setView("results");
   }
 
-  async function handleOpenRun(run: RunResponse) {
+  async function handleOpenRun(run: RunSummary) {
     const sequence = ++openSequence.current;
     setHistoryError("");
     try {
@@ -90,6 +92,19 @@ function App() {
             : "Could not open the saved run",
         );
     }
+  }
+
+  async function loadMore() {
+    if (!nextCursor || historyLoading) return;
+    setHistoryLoading(true);
+    setHistoryError("");
+    try {
+      const page = await listHistory(nextCursor);
+      setRuns(previous => [...previous, ...page.items.filter(item => !previous.some(r => r.id === item.id))]);
+      setNextCursor(page.next_cursor);
+    } catch (error) {
+      setHistoryError(error instanceof Error ? error.message : "Could not load more runs");
+    } finally { setHistoryLoading(false); }
   }
 
   function openComparison(seedId?: string) {
@@ -117,6 +132,8 @@ function App() {
         onToggle={() => setSidebarOpen((open) => !open)}
         onRefresh={() => void refreshHistory()}
         onOpenRun={handleOpenRun}
+        hasMore={!!nextCursor}
+        onLoadMore={() => void loadMore()}
       />
       <main className="workspace">
         <header className="page-header">
@@ -142,6 +159,7 @@ function App() {
             </div>
           </div>
         </header>
+        <EvidenceTransfer selectedRunId={selectedRun?.id} onImported={() => void refreshHistory()} />
         <div className="workspace-views">
           <div hidden={view !== "configure"}>
             <RunForm

@@ -20,10 +20,15 @@ from .weights import ScoringWeights
 
 class TestExecutor:
     def __init__(
-        self, provider: DemoProvider | OpenAICompatibleProvider, repository: ResultRepository
+        self,
+        provider: DemoProvider | OpenAICompatibleProvider,
+        repository: ResultRepository,
+        *,
+        judge_context: dict | None = None,
     ):
         self.provider = provider
         self.repository = repository
+        self.judge_context = judge_context
 
     def execute(self, request: TestRequest) -> TestResult:
         selected = validate_selection(request.criteria) if request.criteria is not None else None
@@ -33,7 +38,7 @@ class TestExecutor:
             raise ValueError("Approve the criteria before execution.")
         started_at = datetime.now(UTC).isoformat()
         started = perf_counter()
-        instructions = resolve_system_prompt(
+        instructions = request.frozen_system_prompt or resolve_system_prompt(
             request.base_system_prompt, request.custom_system_prompt
         )
         response = ""
@@ -43,6 +48,8 @@ class TestExecutor:
         error = None
         criteria = []
         context = {}
+        reported_model = None
+        target_started = perf_counter()
         try:
             generated = self.provider.generate(
                 request.prompt, request.model, request.temperature, system_prompt=instructions
@@ -56,11 +63,16 @@ class TestExecutor:
                 generated.model or request.model,
                 generated.usage,
             )
+            reported_model = generated.model if getattr(generated, "model_reported", True) else None
         except Exception:
             error = {
                 "code": "provider_failure",
                 "message": "The model request failed. Retry or check the provider configuration.",
             }
+        target_ms = max(0, round((perf_counter() - target_started) * 1000))
+        if error is None and request.reserved_run_id:
+            self.repository.checkpoint(generated, target_ms)
+        evaluation_started = perf_counter()
         if error is None:
             if selected is None:
                 try:
@@ -101,8 +113,19 @@ class TestExecutor:
                     for item in selected
                 ):
                     settings = get_settings()
-                    context["judge_model"] = settings.assistant_model
-                    if settings.openai_api_key.get_secret_value().strip():
+                    context.update(
+                        self.judge_context
+                        or {
+                            "judge_model": settings.judge_model,
+                            "judge_profile_id": settings.judge_profile_id,
+                            "judge_profile_revision": settings.judge_profile_revision,
+                        }
+                    )
+                    if (
+                        not self.judge_context
+                        and settings.judge_model
+                        and settings.openai_api_key.get_secret_value().strip()
+                    ):
                         context["judge_provider"] = OpenAICompatibleProvider(
                             api_key=settings.openai_api_key.get_secret_value().strip(),
                             base_url=settings.openai_base_url,
@@ -156,7 +179,7 @@ class TestExecutor:
         else:
             endpoint = None
         result = TestResult(
-            id=str(uuid4()),
+            id=request.reserved_run_id or str(uuid4()),
             status="failed" if error else "completed",
             prompt=request.prompt,
             model=model,
@@ -193,6 +216,15 @@ class TestExecutor:
                 else None,
                 "endpoint": endpoint,
                 "rubric_evidence": context.get("rubric_evidence", {}) if selected else {},
+                "target_metrics": {"latency_ms": target_ms, "usage": usage},
+                "provider_reported_model": reported_model,
+                "evaluation_metrics": {
+                    "latency_ms": max(0, round((perf_counter() - evaluation_started) * 1000)),
+                    "judge_calls": context.get("judge_calls", []),
+                },
+                "latency_semantics": "target_plus_evaluation",
+                "judge_profile_id": context.get("judge_profile_id"),
+                "judge_profile_revision": context.get("judge_profile_revision"),
                 "resolved_judge_models": (
                     context.get("resolved_judge_models", {}) if selected else {}
                 ),

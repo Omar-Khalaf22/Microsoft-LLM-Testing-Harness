@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getRun } from "./api";
-import type { CriterionResult, RunResponse } from "./api";
+import type { CriterionResult, RunResponse, RunSummary } from "./api";
 
 type Loaded = { run: RunResponse | null; loading: boolean; error: string };
 
@@ -119,8 +119,8 @@ const diff = (x: number | null | undefined, y: number | null | undefined, digits
     ? `${y - x > 0 ? "+" : ""}${(y - x).toFixed(digits)}`
     : "—";
 const total = (run: RunResponse) => (run.score === null ? "Unavailable" : run.score.toFixed(2) + " / 100.00");
-const when = (run: RunResponse) => new Date(run.created_at).toLocaleString();
-const optionLabel = (run: RunResponse) =>
+const when = (run: RunSummary) => new Date(run.created_at).toLocaleString();
+const optionLabel = (run: RunSummary) =>
   `${run.metadata.test_name || "Untitled test"} · version ${run.metadata.test_version ?? "unknown"} · ${when(run)} · ${run.model}`;
 
 function Changed({ changed }: { changed: boolean }) {
@@ -132,7 +132,7 @@ export default function RunComparison({
   seedId,
   onBack,
 }: {
-  runs: RunResponse[];
+  runs: RunSummary[];
   seedId?: string;
   onBack: () => void;
 }) {
@@ -306,8 +306,8 @@ export default function RunComparison({
                   </tr>
                   <tr>
                     <th scope="row">Latency</th>
-                    <td>{A.run!.latency_ms} ms</td>
-                    <td>{B.run!.latency_ms} ms</td>
+                    <td>{A.run!.latency_ms === null ? "Unavailable" : `${A.run!.latency_ms} ms`}</td>
+                    <td>{B.run!.latency_ms === null ? "Unavailable" : `${B.run!.latency_ms} ms`}</td>
                     <td>{diff(A.run!.latency_ms, B.run!.latency_ms, 0)} ms</td>
                   </tr>
                   {(["input", "output", "total"] as const).map((part) => {

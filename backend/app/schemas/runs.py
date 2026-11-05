@@ -109,7 +109,7 @@ class RunResponse(BaseModel):
     response: str
     score: float | None
     criteria: list[CriterionResultResponse]
-    latency_ms: int
+    latency_ms: int | None
     created_at: str
     metadata: dict[str, JsonValue]
     error: dict[str, str] | None = None

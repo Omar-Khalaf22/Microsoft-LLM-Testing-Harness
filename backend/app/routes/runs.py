@@ -15,11 +15,14 @@ from app.repositories.recommendations import RecommendationRepository
 from app.routes.assistant import get_recommendation_repository
 from app.schemas.runs import RunCreateRequest, RunResponse
 from app.services.run_service import create_run
+from app.storage.access import AccessContext, get_access
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_access)])
 
 
-def get_executor(request: RunCreateRequest) -> TestExecutor:
+def get_executor(
+    request: RunCreateRequest, access: Annotated[AccessContext | None, Depends(get_access)] = None
+) -> TestExecutor:
     """Choose the provider and store API runs in PostgreSQL.
 
     The body parameter requires validation before this dependency runs.
@@ -36,14 +39,16 @@ def get_executor(request: RunCreateRequest) -> TestExecutor:
             )
         else:
             raise ValueError("Unsupported provider configuration")
-        return TestExecutor(provider, PostgresResultRepository(SessionLocal))
+        return TestExecutor(provider, PostgresResultRepository(SessionLocal, access))
     except Exception:
         # Dependency errors occur before the route function's error boundary.
         raise HTTPException(status_code=500, detail="The run could not be completed.") from None
 
 
-def get_result_repository() -> PostgresResultRepository:
-    return PostgresResultRepository(SessionLocal)
+def get_result_repository(
+    access: Annotated[AccessContext, Depends(get_access)],
+) -> PostgresResultRepository:
+    return PostgresResultRepository(SessionLocal, access)
 
 
 @router.get("/runs", response_model=list[RunResponse])
@@ -62,11 +67,13 @@ def post_run(
     request: RunCreateRequest,
     executor: Annotated[TestExecutor, Depends(get_executor)],
     recommendations: Annotated[RecommendationRepository, Depends(get_recommendation_repository)],
+    access: Annotated[AccessContext, Depends(get_access)],
 ) -> RunResponse:
     if request.test_id:
         try:
             with SessionLocal() as session:
-                if session.get(Test, request.test_id) is None:
+                selected_test = session.get(Test, request.test_id)
+                if selected_test is None or selected_test.project_id != access.project_id:
                     raise HTTPException(
                         status_code=404, detail="The selected test no longer exists."
                     )

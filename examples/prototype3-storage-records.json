@@ -1,0 +1,62 @@
+{
+  "test_reference": {
+    "test_id": "test_0f9f08bcfa0e437995e325f71832e0ec",
+    "test_version": 1
+  },
+  "approved_definition": {
+    "name": "Storage handoff example",
+    "state": "approved",
+    "legacy": null,
+    "prompt": "Return JSON with count 3",
+    "criteria": [
+      {
+        "weight": 100.0,
+        "parameters": {},
+        "criterion_id": "valid_json"
+      }
+    ],
+    "objective": "Produce machine readable data",
+    "catalog_revision": "p2.1",
+    "base_system_prompt": null,
+    "custom_system_prompt": null,
+    "criterion_definitions": [
+      {
+        "id": "valid_json",
+        "name": "Valid JSON",
+        "status": "supported",
+        "category": "structure",
+        "priority": "P2",
+        "description": "Validate the entire response as strict JSON; reject duplicate keys and nonfinite numbers.",
+        "evaluator_type": "structured",
+        "required_inputs": [
+          "response"
+        ],
+        "catalog_revision": "p2.1",
+        "parameter_schema": {
+          "type": "object",
+          "required": [],
+          "properties": {},
+          "additionalProperties": false
+        },
+        "research_sources": [
+          "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+        ],
+        "evaluation_method": "deterministic",
+        "example_parameters": {}
+      }
+    ],
+    "resolved_system_prompt": "You are a helpful assistant. Follow the user's instructions accurately."
+  },
+  "profile": {
+    "provider": "local_demo",
+    "parameters": {},
+    "profile_id": "local-demo",
+    "endpoint_id": "local-demo",
+    "requested_model": "demo-json-v1",
+    "parameter_schema": {
+      "type": "object",
+      "additionalProperties": false
+    },
+    "profile_revision": 1
+  }
+}

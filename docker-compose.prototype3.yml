@@ -1,0 +1,19 @@
+name: llm-harness-p3-review
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: llm_harness
+      POSTGRES_PASSWORD: local-p3-review-only
+      POSTGRES_DB: llm_harness_p3_review
+    ports:
+      - "127.0.0.1:55433:5432"
+    volumes:
+      - p3-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U llm_harness -d llm_harness_p3_review"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+volumes:
+  p3-postgres:

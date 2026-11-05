@@ -1,5 +1,5 @@
 export const apiBaseUrl =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
+  import.meta.env.VITE_API_BASE_URL ?? "";
 export interface ScoringWeights {
   keyword: number;
   relevance: number;
@@ -96,7 +96,7 @@ export interface RunResponse {
   response: string;
   score: number | null;
   criteria: CriterionResult[];
-  latency_ms: number;
+  latency_ms: number | null;
   created_at: string;
   error?: { code: string; message: string } | null;
   metadata: {
@@ -120,7 +120,7 @@ export interface RunResponse {
     configuration_state?: string;
     recommendation_id?: string | null;
     generated_configuration?: Recommendation | null;
-    schema_version: string;
+    schema_version?: string;
     scoring_weights?: ScoringWeights | null;
     started_at?: string;
     test_id?: string;
@@ -154,7 +154,7 @@ async function detail(
   };
 }
 async function get<T>(path: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(`${apiBaseUrl}${path}`, { signal });
+  const response = await apiFetch(`${apiBaseUrl}${path}`, { signal });
   if (!response.ok) throw new Error((await detail(response)).message);
   return response.json() as Promise<T>;
 }
@@ -178,7 +178,7 @@ export async function suggestCriteria(
   test_prompt: string,
   signal?: AbortSignal,
 ): Promise<Recommendation> {
-  const response = await fetch(`${apiBaseUrl}/assistant/suggest-criteria`, {
+  const response = await apiFetch(`${apiBaseUrl}/assistant/suggest-criteria`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ objective, test_prompt }),
@@ -189,8 +189,7 @@ export async function suggestCriteria(
 }
 // Human reviews: a separate 0-100 rating that never changes the automated score.
 // Contract: POST/GET /runs/{run_id}/reviews (docs/lina-prototype3.md on lina-prototype-3).
-// Reviewer identity is client supplied for now; it must come from authentication before
-// shared deployment.
+// Reviewer identity comes from the server authenticated subject.
 export interface HumanReview {
   id: number;
   run_id: string;
@@ -199,9 +198,9 @@ export interface HumanReview {
   rationale: string;
   revision: number;
   created_at: string;
+  attribution?: { source?: string; imported_by?: string; source_review_id?: number } | null;
 }
 export interface HumanReviewInput {
-  reviewer_id: string;
   rating: number;
   rationale: string;
 }
@@ -213,7 +212,7 @@ export async function addReview(
   input: HumanReviewInput,
   signal?: AbortSignal,
 ): Promise<HumanReview> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${apiBaseUrl}/runs/${encodeURIComponent(runId)}/reviews`,
     {
       method: "POST",
@@ -229,7 +228,7 @@ export async function runEvaluation(
   request: RunCreateRequest,
   signal?: AbortSignal,
 ): Promise<RunResponse> {
-  const response = await fetch(`${apiBaseUrl}/runs`, {
+  const response = await apiFetch(`${apiBaseUrl}/runs`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(request),
@@ -241,4 +240,41 @@ export async function runEvaluation(
     throw new Error(d.message);
   }
   return response.json();
+}
+
+// Pranjal's browser-login adapter supplies the current access token in memory.
+// Do not put credentials or bearer tokens into exports or localStorage.
+let accessToken: string | null = null;
+export function setAccessToken(token: string | null) { accessToken = token; }
+function apiFetch(input: RequestInfo | URL, init: RequestInit = {}) {
+  const headers = new Headers(init.headers);
+  if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
+  return fetch(input, { ...init, headers });
+}
+export type RunSummary = Pick<RunResponse,
+  "id" | "status" | "created_at" | "model" | "provider" | "score" | "latency_ms"> & {
+    metadata: { test_id?: string; test_version?: number; test_name?: string;
+      execution_id?: string | null; rerun_of_run_id?: string | null };
+  };
+export interface HistoryPage { items: RunSummary[]; next_cursor: string | null }
+export function listHistory(cursor?: string | null, signal?: AbortSignal) {
+  return get<HistoryPage>(`/history/runs?limit=20${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ""}`, signal);
+}
+export function getIdentity(signal?: AbortSignal) {
+  return get<{ subject: string; project_id: string }>("/auth/me", signal);
+}
+export async function exportEvidence(runId: string) {
+  const response = await apiFetch(`${apiBaseUrl}/evidence/export`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ run_ids: [runId] }),
+  });
+  if (!response.ok) throw new Error((await detail(response)).message);
+  return response.json();
+}
+export async function importEvidence(bundle: unknown) {
+  const response = await apiFetch(`${apiBaseUrl}/evidence/import`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(bundle),
+  });
+  if (!response.ok) throw new Error((await detail(response)).message);
+  return response.json() as Promise<{ imported_run_ids: string[] }>;
 }

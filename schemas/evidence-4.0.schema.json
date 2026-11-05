@@ -1,0 +1,834 @@
+{
+  "$defs": {
+    "CriterionEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "criterion_id": {
+          "title": "Criterion Id",
+          "type": "string"
+        },
+        "maximum_points": {
+          "anyOf": [
+            {
+              "maximum": 100.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Maximum Points"
+        },
+        "definition": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Definition",
+          "type": "object"
+        }
+      },
+      "required": [
+        "criterion_id",
+        "maximum_points",
+        "definition"
+      ],
+      "title": "CriterionEvidence",
+      "type": "object"
+    },
+    "DefinitionEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "test_id": {
+          "title": "Test Id",
+          "type": "string"
+        },
+        "test_version": {
+          "exclusiveMinimum": 0,
+          "title": "Test Version",
+          "type": "integer"
+        },
+        "test_name": {
+          "title": "Test Name",
+          "type": "string"
+        },
+        "test_created_at": {
+          "format": "date-time",
+          "title": "Test Created At",
+          "type": "string"
+        },
+        "creator_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Creator Id"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "prompt": {
+          "title": "Prompt",
+          "type": "string"
+        },
+        "definition": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Definition",
+          "type": "object"
+        },
+        "definition_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Definition Hash"
+        },
+        "approval": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Approval"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "criteria": {
+          "items": {
+            "$ref": "#/$defs/CriterionEvidence"
+          },
+          "title": "Criteria",
+          "type": "array"
+        }
+      },
+      "required": [
+        "test_id",
+        "test_version",
+        "test_name",
+        "test_created_at",
+        "creator_id",
+        "name",
+        "prompt",
+        "definition",
+        "definition_hash",
+        "approval",
+        "created_at",
+        "criteria"
+      ],
+      "title": "DefinitionEvidence",
+      "type": "object"
+    },
+    "EvaluationEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "title": "Method",
+          "type": "string"
+        },
+        "criterion_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Criterion Id"
+        },
+        "passed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Passed"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Score"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "enum": [
+                "completed",
+                "error"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Status"
+        },
+        "earned_points": {
+          "anyOf": [
+            {
+              "maximum": 100.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Earned Points"
+        },
+        "maximum_points": {
+          "anyOf": [
+            {
+              "maximum": 100.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Maximum Points"
+        },
+        "normalized_score": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Normalized Score"
+        },
+        "details": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Details",
+          "type": "object"
+        }
+      },
+      "required": [
+        "method",
+        "criterion_id",
+        "passed",
+        "score",
+        "status",
+        "earned_points",
+        "maximum_points",
+        "normalized_score",
+        "details"
+      ],
+      "title": "EvaluationEvidence",
+      "type": "object"
+    },
+    "ExecutionEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "execution_id": {
+          "title": "Execution Id",
+          "type": "string"
+        },
+        "actor_id": {
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "request_hash": {
+          "title": "Request Hash",
+          "type": "string"
+        },
+        "snapshot": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Snapshot",
+          "type": "object"
+        },
+        "status": {
+          "enum": [
+            "completed",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "execution_id",
+        "actor_id",
+        "request_hash",
+        "snapshot",
+        "status",
+        "created_at"
+      ],
+      "title": "ExecutionEvidence",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "PreviewEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "preview_id": {
+          "title": "Preview Id",
+          "type": "string"
+        },
+        "actor_id": {
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "test": {
+          "$ref": "#/$defs/TestReference"
+        },
+        "configuration_hash": {
+          "title": "Configuration Hash",
+          "type": "string"
+        },
+        "profile": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Profile",
+          "type": "object"
+        },
+        "status": {
+          "enum": [
+            "completed",
+            "technical_error"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "actual_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actual Model"
+        },
+        "interpretation": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Interpretation",
+          "type": "object"
+        },
+        "error_category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error Category"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "preview_id",
+        "actor_id",
+        "test",
+        "configuration_hash",
+        "profile",
+        "status",
+        "actual_model",
+        "interpretation",
+        "error_category",
+        "created_at"
+      ],
+      "title": "PreviewEvidence",
+      "type": "object"
+    },
+    "ReviewEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "source_review_id": {
+          "exclusiveMinimum": 0,
+          "title": "Source Review Id",
+          "type": "integer"
+        },
+        "reviewer_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Reviewer Id",
+          "type": "string"
+        },
+        "rating": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Rating",
+          "type": "integer"
+        },
+        "rationale": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        },
+        "revision": {
+          "exclusiveMinimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "attribution": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attribution"
+        }
+      },
+      "required": [
+        "source_review_id",
+        "reviewer_id",
+        "rating",
+        "rationale",
+        "revision",
+        "created_at"
+      ],
+      "title": "ReviewEvidence",
+      "type": "object"
+    },
+    "RunEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Run Id",
+          "type": "string"
+        },
+        "test": {
+          "$ref": "#/$defs/TestReference"
+        },
+        "model_id": {
+          "title": "Model Id",
+          "type": "string"
+        },
+        "model_name": {
+          "title": "Model Name",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "running",
+            "completed",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "configuration": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Configuration",
+          "type": "object"
+        },
+        "prompt": {
+          "title": "Prompt",
+          "type": "string"
+        },
+        "response": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Response"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Started At"
+        },
+        "completed_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Completed At"
+        },
+        "latency_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Latency Ms"
+        },
+        "input_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Input Tokens"
+        },
+        "output_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Output Tokens"
+        },
+        "execution_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Execution Id"
+        },
+        "rerun_of_run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rerun Of Run Id"
+        },
+        "suite_position": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Position"
+        },
+        "model_position": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Model Position"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Evidence"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error"
+        },
+        "evaluations": {
+          "items": {
+            "$ref": "#/$defs/EvaluationEvidence"
+          },
+          "title": "Evaluations",
+          "type": "array"
+        },
+        "reviews": {
+          "items": {
+            "$ref": "#/$defs/ReviewEvidence"
+          },
+          "title": "Reviews",
+          "type": "array"
+        }
+      },
+      "required": [
+        "run_id",
+        "test",
+        "model_id",
+        "model_name",
+        "status",
+        "configuration",
+        "prompt",
+        "response",
+        "created_at",
+        "started_at",
+        "completed_at",
+        "latency_ms",
+        "input_tokens",
+        "output_tokens",
+        "execution_id",
+        "rerun_of_run_id",
+        "suite_position",
+        "model_position",
+        "evidence",
+        "error",
+        "evaluations",
+        "reviews"
+      ],
+      "title": "RunEvidence",
+      "type": "object"
+    },
+    "SuiteEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "suite_id": {
+          "title": "Suite Id",
+          "type": "string"
+        },
+        "revision": {
+          "exclusiveMinimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "creator_id": {
+          "title": "Creator Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/TestReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "suite_id",
+        "revision",
+        "creator_id",
+        "name",
+        "created_at",
+        "items"
+      ],
+      "title": "SuiteEvidence",
+      "type": "object"
+    },
+    "TestReference": {
+      "additionalProperties": false,
+      "properties": {
+        "test_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Test Id",
+          "type": "string"
+        },
+        "test_version": {
+          "exclusiveMinimum": 0,
+          "title": "Test Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "test_id",
+        "test_version"
+      ],
+      "title": "TestReference",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "4.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source": {
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "Source",
+      "type": "string"
+    },
+    "exported_at": {
+      "format": "date-time",
+      "title": "Exported At",
+      "type": "string"
+    },
+    "definitions": {
+      "items": {
+        "$ref": "#/$defs/DefinitionEvidence"
+      },
+      "maxItems": 10000,
+      "title": "Definitions",
+      "type": "array"
+    },
+    "suites": {
+      "items": {
+        "$ref": "#/$defs/SuiteEvidence"
+      },
+      "maxItems": 1000,
+      "title": "Suites",
+      "type": "array"
+    },
+    "executions": {
+      "items": {
+        "$ref": "#/$defs/ExecutionEvidence"
+      },
+      "maxItems": 5000,
+      "title": "Executions",
+      "type": "array"
+    },
+    "previews": {
+      "items": {
+        "$ref": "#/$defs/PreviewEvidence"
+      },
+      "maxItems": 10000,
+      "title": "Previews",
+      "type": "array"
+    },
+    "runs": {
+      "items": {
+        "$ref": "#/$defs/RunEvidence"
+      },
+      "maxItems": 5000,
+      "minItems": 1,
+      "title": "Runs",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "source",
+    "exported_at",
+    "definitions",
+    "runs"
+  ],
+  "title": "EvidenceBundle",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

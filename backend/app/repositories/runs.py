@@ -147,7 +147,7 @@ def get_run_result(
 
         evaluations.append(evaluation_data)
 
-    return {
+    result = {
         "run_id": run.id,
         "test_id": run.test_version.test_id,
         "test_version": run.test_version.version,
@@ -170,7 +170,10 @@ def get_run_result(
             "input_tokens": run.input_tokens,
             "output_tokens": run.output_tokens,
         },
-        "started_at": run.started_at.isoformat(),
+        "started_at": run.started_at.isoformat() if run.started_at else None,
         "completed_at": (run.completed_at.isoformat() if run.completed_at is not None else None),
         "error": run.error,
     }
+    if run.execution_id is not None:
+        result["created_at"] = run.created_at.isoformat()
+    return result

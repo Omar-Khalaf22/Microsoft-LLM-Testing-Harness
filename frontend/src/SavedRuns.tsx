@@ -1,6 +1,6 @@
 import type { KeyboardEvent } from "react";
 
-import type { RunResponse } from "./api";
+import type { RunSummary } from "./api";
 
 function formatDate(value: string): string {
   const date = new Date(value);
@@ -16,19 +16,23 @@ function SavedRuns({
   onToggle,
   onRefresh,
   onOpenRun,
+  hasMore,
+  onLoadMore,
 }: {
-  runs: RunResponse[];
+  runs: RunSummary[];
+  hasMore: boolean;
+  onLoadMore: () => void;
   selectedRunId?: string;
   open: boolean;
   loading: boolean;
   error: string;
   onToggle: () => void;
   onRefresh: () => void;
-  onOpenRun: (run: RunResponse) => void;
+  onOpenRun: (run: RunSummary) => void;
 }) {
   function handleKeyDown(
     event: KeyboardEvent<HTMLButtonElement>,
-    run: RunResponse,
+    run: RunSummary,
   ) {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
@@ -113,6 +117,9 @@ function SavedRuns({
               ))}
             </ul>
           )}
+          {hasMore && <button type="button" className="secondary-button" disabled={loading} onClick={onLoadMore}>
+            {loading ? "Loading…" : "Load more runs"}
+          </button>}
         </div>
       )}
     </aside>

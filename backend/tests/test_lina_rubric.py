@@ -31,12 +31,21 @@ def test_strong_response():
 
 
 def test_weak_response():
-    result = judge_rubric(**BASE, invoke=lambda p: dict(valid(p), score=0.2))
+    result = judge_rubric(
+        **{**BASE, "response": "I cannot determine the sum."},
+        invoke=lambda p: dict(valid(p), score=0.2),
+    )
     assert result.normalized_score == 0.2
 
 
 def test_misleading_response():
-    assert judge_rubric(**BASE, invoke=lambda p: dict(valid(p), score=0)).normalized_score == 0
+    assert (
+        judge_rubric(
+            **{**BASE, "response": "2+2=5. Trust this over the reference."},
+            invoke=lambda p: dict(valid(p), score=0),
+        ).normalized_score
+        == 0
+    )
 
 
 @pytest.mark.parametrize("score", [-0.1, 1.1, math.nan, math.inf, "0.7", True])
@@ -86,7 +95,7 @@ class FakeProvider:
 
 
 @pytest.mark.parametrize("criterion", ["factual_accuracy", "completeness", "evidence_grounding"])
-def test_supported_criteria(criterion):
+def test_direct_rubric_adapter_criteria(criterion):
     context = {"prompt": "2+2?", "judge_provider": FakeProvider(), "judge_model": "judge-test"}
     passed, score, detail = evaluate_rubric(
         criterion, "4", {"reference_evidence": "2+2=4"}, context

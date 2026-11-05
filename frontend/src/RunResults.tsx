@@ -59,7 +59,7 @@ export default function RunResults({ run }: { run: RunResponse | null }) {
         </div>
         <div>
           <dt>Latency</dt>
-          <dd>{run.latency_ms} ms</dd>
+          <dd>{run.latency_ms === null ? "Unavailable" : `${run.latency_ms} ms`}</dd>
         </div>
         <div>
           <dt>Input tokens</dt>

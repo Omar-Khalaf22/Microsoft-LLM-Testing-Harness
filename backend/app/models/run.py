@@ -10,6 +10,7 @@ from sqlalchemy import (
     ForeignKey,
     Identity,
     Index,
+    Integer,
     Text,
     func,
     text,
@@ -73,6 +74,16 @@ class TestRun(Base):
         nullable=False,
         server_default=text("'pending'"),
     )
+    project_id: Mapped[str] = mapped_column(Text, server_default="prototype")
+    execution_id: Mapped[str | None] = mapped_column(Text, ForeignKey("executions.id"), index=True)
+    rerun_of_run_id: Mapped[str | None] = mapped_column(
+        Text, ForeignKey("test_runs.id"), index=True
+    )
+    suite_position: Mapped[int | None] = mapped_column(Integer)
+    model_position: Mapped[int | None] = mapped_column(Integer)
+    lease_token: Mapped[str | None] = mapped_column(Text)
+    lease_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    evidence: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     configuration: Mapped[dict[str, Any]] = mapped_column(
         JSONB,
         nullable=False,
@@ -82,9 +93,9 @@ class TestRun(Base):
     latency_ms: Mapped[int | None] = mapped_column(BigInteger)
     input_tokens: Mapped[int | None] = mapped_column(BigInteger)
     output_tokens: Mapped[int | None] = mapped_column(BigInteger)
-    started_at: Mapped[datetime] = mapped_column(
+    started_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
-        nullable=False,
+        nullable=True,
     )
     completed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),

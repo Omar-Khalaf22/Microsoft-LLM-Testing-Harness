@@ -45,6 +45,7 @@ jobs:
       - run: ruff check .
       - run: ruff format --check .
       - run: pytest -v
+      - run: python -m app.storage.schema --check
 
   frontend:
     runs-on: ubuntu-latest
@@ -64,3 +65,15 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+
+  package-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose -f docker-compose.prototype3.yml config --quiet
+      - run: docker build -t llm-harness-p3:ci .
+      - run: |
+          curl -fsSL https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64 -o /tmp/bicep
+          chmod +x /tmp/bicep
+          /tmp/bicep build deployment/main.bicep --outfile /tmp/main.json
+          /tmp/bicep build deployment/app.bicep --outfile /tmp/app.json

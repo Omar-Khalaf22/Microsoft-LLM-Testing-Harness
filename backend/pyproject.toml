@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "Backend foundation for the LLM Testing Harness"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "PyJWT[crypto]>=2.10,<3",
     "alembic>=1.13,<2",
     "jsonschema>=4.23,<5",
     "regex>=2024.11.6",

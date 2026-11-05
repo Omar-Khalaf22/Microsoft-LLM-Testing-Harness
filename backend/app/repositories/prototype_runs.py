@@ -51,8 +51,9 @@ def _comparable_definition(definition: dict[str, Any]) -> dict[str, Any]:
 
 
 class PostgresResultRepository:
-    def __init__(self, session_factory: sessionmaker[Session]):
+    def __init__(self, session_factory: sessionmaker[Session], access=None):
         self.session_factory = session_factory
+        self.access = access
 
     def save(
         self,
@@ -84,7 +85,12 @@ class PostgresResultRepository:
 
         with self.session_factory.begin() as session:
             if test_id is None:
-                test = Test(id=f"test_{uuid4().hex}", name=name)
+                test = Test(
+                    id=f"test_{uuid4().hex}",
+                    name=name,
+                    project_id=self.access.project_id if self.access else "prototype",
+                    creator_id=self.access.principal.subject if self.access else None,
+                )
                 session.add(test)
                 session.flush()
             else:
@@ -93,6 +99,8 @@ class PostgresResultRepository:
                 test = session.scalar(select(Test).where(Test.id == test_id).with_for_update())
                 if test is None:
                     raise UnknownTestError("The selected test no longer exists.")
+                if self.access:
+                    self.access.require(test.project_id)
 
             latest = session.scalar(
                 select(TestVersion)
@@ -195,6 +203,9 @@ class PostgresResultRepository:
                 },
             )
 
+            if self.access:
+                session.get(TestRun, result.id).project_id = self.access.project_id
+
         # Return only once the transaction committed, so the UI cannot show an
         # apparently successful run that has not actually been saved.
         return replace(result, metadata=metadata)
@@ -203,6 +214,9 @@ class PostgresResultRepository:
         with self.session_factory() as session:
             run_ids = session.scalars(
                 select(TestRun.id)
+                .where(
+                    TestRun.project_id == (self.access.project_id if self.access else "prototype")
+                )
                 .order_by(TestRun.started_at.desc(), TestRun.id.desc())
                 .limit(limit)
             ).all()
@@ -210,6 +224,9 @@ class PostgresResultRepository:
 
     def get(self, run_id: str) -> dict[str, Any] | None:
         with self.session_factory() as session:
+            row = session.get(TestRun, run_id)
+            if row is None or (self.access and row.project_id != self.access.project_id):
+                return None
             saved = get_run_result(session, run_id)
             return self._as_api_result(saved) if saved else None
 
@@ -219,6 +236,31 @@ class PostgresResultRepository:
             raise LookupError("A saved run disappeared during retrieval.")
 
         configuration = saved["configuration"]
+        if "snapshot" in configuration and "result_snapshot" not in configuration:
+            frozen = configuration["snapshot"]
+            return {
+                "id": saved["run_id"],
+                "status": saved["status"],
+                "prompt": saved["input"]["prompt"],
+                "model": saved["model"]["name"],
+                "provider": frozen["profile"]["provider"],
+                "response": saved["response"]["content"] or "",
+                "score": None,
+                "criteria": [],
+                "latency_ms": saved["metrics"]["latency_ms"],
+                "created_at": saved["created_at"],
+                "metadata": {
+                    "test_id": frozen["test_id"],
+                    "test_version": frozen["test_version"],
+                    "test_name": frozen["test_name"],
+                    "schema_version": "4.0",
+                    "profile": frozen["profile"],
+                    "usage": saved["metrics"],
+                },
+                "error": {"code": saved["error"], "message": "Execution was interrupted."}
+                if saved["error"]
+                else None,
+            }
         if "result_snapshot" in configuration:
             return {k: v for k, v in configuration["result_snapshot"].items() if k != "passed"}
         criteria = saved["evaluations"]
@@ -228,11 +270,7 @@ class PostgresResultRepository:
             # Keep them visible without pretending their scoring rules can be edited here.
             metadata = {
                 "requested_model": saved["model"]["name"],
-                "temperature": configuration.get("temperature", 0.2),
-                "expected_keywords": [],
-                "minimum_length": 0,
-                "minimum_sentences": 1,
-                "forbidden_terms": [],
+                "temperature": configuration.get("temperature"),
                 "usage": {
                     "input_tokens": saved["metrics"]["input_tokens"],
                     "output_tokens": saved["metrics"]["output_tokens"],
@@ -265,7 +303,7 @@ class PostgresResultRepository:
                 }
                 for criterion in criteria
             ],
-            "latency_ms": saved["metrics"]["latency_ms"] or 0,
+            "latency_ms": saved["metrics"]["latency_ms"],
             "created_at": datetime.fromisoformat(saved["completed_at"] or saved["started_at"])
             .astimezone(UTC)
             .isoformat(),

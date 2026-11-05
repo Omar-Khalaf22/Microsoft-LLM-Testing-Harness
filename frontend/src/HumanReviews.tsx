@@ -1,30 +1,14 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { addReview, listReviews } from "./api";
+import { addReview, listReviews, getIdentity } from "./api";
 import type { HumanReview } from "./api";
-
-const REVIEWER_KEY = "harness.reviewerId";
-const rememberedReviewer = () => {
-  try {
-    return localStorage.getItem(REVIEWER_KEY) ?? "";
-  } catch {
-    return "";
-  }
-};
-const rememberReviewer = (value: string) => {
-  try {
-    localStorage.setItem(REVIEWER_KEY, value);
-  } catch {
-    /* Storage can be unavailable (private mode); the form still works. */
-  }
-};
 
 export default function HumanReviews({ runId }: { runId: string }) {
   const [reviews, setReviews] = useState<HumanReview[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [loadError, setLoadError] = useState("");
   const [reload, setReload] = useState(0);
-  const [reviewer, setReviewer] = useState(rememberedReviewer);
+  const [reviewer, setReviewer] = useState("");
   const [rating, setRating] = useState("");
   const [rationale, setRationale] = useState("");
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -35,6 +19,9 @@ export default function HumanReviews({ runId }: { runId: string }) {
   useEffect(() => {
     const controller = new AbortController();
     setStatus("loading");
+    getIdentity(controller.signal).then(identity => {
+      if (!controller.signal.aborted) setReviewer(identity.subject);
+    }).catch(() => { if (!controller.signal.aborted) setReviewer(""); });
     listReviews(runId, controller.signal)
       .then((result) => {
         setReviews(result);
@@ -51,7 +38,7 @@ export default function HumanReviews({ runId }: { runId: string }) {
 
   const ratingNumber = Number(rating);
   const problems = {
-    reviewer: !reviewer.trim() ? "Enter your reviewer ID." : "",
+    reviewer: !reviewer.trim() ? "Authenticated identity is unavailable." : "",
     rating:
       !/^\d{1,3}$/.test(rating.trim()) || ratingNumber < 0 || ratingNumber > 100
         ? "Enter a whole number from 0 to 100."
@@ -80,11 +67,9 @@ export default function HumanReviews({ runId }: { runId: string }) {
     setSaved("");
     try {
       const created = await addReview(runId, {
-        reviewer_id: reviewer.trim(),
         rating: ratingNumber,
         rationale: rationale.trim(),
       });
-      rememberReviewer(reviewer.trim());
       setReviews((previous) => [...previous, created]);
       setStatus("ready");
       setSaved(`Review saved as revision ${created.revision} for ${created.reviewer_id}.`);
@@ -130,6 +115,7 @@ export default function HumanReviews({ runId }: { runId: string }) {
                 <p className="muted review-meta">
                   Revision {r.revision} · {new Date(r.created_at).toLocaleString()} ·{" "}
                   <span className="review-state">{current ? "Current" : "Replaced"}</span>
+                  {r.attribution && <span> · Imported evidence</span>}
                 </p>
                 <p className="review-rationale">{r.rationale}</p>
               </li>
@@ -141,18 +127,17 @@ export default function HumanReviews({ runId }: { runId: string }) {
       <form className="review-form" onSubmit={(e) => void submit(e)} aria-busy={submitting} noValidate>
         <h3>Add a review</h3>
         <p className="muted">
-          Using a reviewer ID that already reviewed this run saves a new revision. Earlier revisions
-          are kept.
+          A new review from your authenticated identity creates a revision. Earlier revisions are kept.
         </p>
         <div className="field-row">
           <label className="field">
-            <span>Reviewer ID</span>
+            <span>Authenticated reviewer</span>
             <input
               value={reviewer}
               maxLength={128}
               aria-invalid={show("reviewer") ? true : undefined}
               aria-describedby={show("reviewer") ? "review-reviewer-error" : undefined}
-              onChange={(e) => setReviewer(e.target.value)}
+              readOnly
               onBlur={() => touch("reviewer")}
             />
             {show("reviewer") && (

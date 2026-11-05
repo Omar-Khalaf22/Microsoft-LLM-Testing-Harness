@@ -1,0 +1,427 @@
+{
+  "schema_version": "4.0",
+  "source": "documented-local-demo-no-live-model-calls",
+  "exported_at": "2026-11-05T04:02:15.213547Z",
+  "definitions": [
+    {
+      "test_id": "test_0f9f08bcfa0e437995e325f71832e0ec",
+      "test_version": 1,
+      "test_name": "Storage handoff example",
+      "test_created_at": "2026-11-05T03:52:01.847333Z",
+      "creator_id": "omar-local",
+      "name": "Storage handoff example",
+      "prompt": "Return JSON with count 3",
+      "definition": {
+        "name": "Storage handoff example",
+        "state": "approved",
+        "legacy": null,
+        "prompt": "Return JSON with count 3",
+        "criteria": [
+          {
+            "weight": 100.0,
+            "parameters": {},
+            "criterion_id": "valid_json"
+          }
+        ],
+        "objective": "Produce machine readable data",
+        "catalog_revision": "p2.1",
+        "base_system_prompt": null,
+        "custom_system_prompt": null,
+        "criterion_definitions": [
+          {
+            "id": "valid_json",
+            "name": "Valid JSON",
+            "status": "supported",
+            "category": "structure",
+            "priority": "P2",
+            "description": "Validate the entire response as strict JSON; reject duplicate keys and nonfinite numbers.",
+            "evaluator_type": "structured",
+            "required_inputs": [
+              "response"
+            ],
+            "catalog_revision": "p2.1",
+            "parameter_schema": {
+              "type": "object",
+              "required": [],
+              "properties": {},
+              "additionalProperties": false
+            },
+            "research_sources": [
+              "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+            ],
+            "evaluation_method": "deterministic",
+            "example_parameters": {}
+          }
+        ],
+        "resolved_system_prompt": "You are a helpful assistant. Follow the user's instructions accurately."
+      },
+      "definition_hash": "ea319c8f7d531d26b6a06566d2ae99bca79c1bf57c77696bd580af6da76d66b8",
+      "approval": {
+        "state": "approved",
+        "actor_id": "omar-local",
+        "recorded_at": "2026-11-05T03:52:01.851826+00:00"
+      },
+      "created_at": "2026-11-05T03:52:01.847333Z",
+      "criteria": [
+        {
+          "criterion_id": "valid_json",
+          "maximum_points": "100.00",
+          "definition": {
+            "id": "valid_json",
+            "name": "Valid JSON",
+            "status": "supported",
+            "category": "structure",
+            "priority": "P2",
+            "description": "Validate the entire response as strict JSON; reject duplicate keys and nonfinite numbers.",
+            "evaluator_type": "structured",
+            "required_inputs": [
+              "response"
+            ],
+            "catalog_revision": "p2.1",
+            "parameter_schema": {
+              "type": "object",
+              "required": [],
+              "properties": {},
+              "additionalProperties": false
+            },
+            "research_sources": [
+              "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+            ],
+            "evaluation_method": "deterministic",
+            "example_parameters": {}
+          }
+        }
+      ]
+    }
+  ],
+  "suites": [],
+  "executions": [
+    {
+      "execution_id": "exec_dfc1282bd4b3473dbf367e2adb23a958",
+      "actor_id": "omar-local",
+      "request_hash": "b25dd9f5640ec713525b9ad825edce2d3012beb0ee6750b60dee8775fd83110c",
+      "snapshot": {
+        "tests": [
+          {
+            "test_id": "test_0f9f08bcfa0e437995e325f71832e0ec",
+            "test_name": "Storage handoff example",
+            "definition": {
+              "name": "Storage handoff example",
+              "state": "approved",
+              "legacy": null,
+              "prompt": "Return JSON with count 3",
+              "criteria": [
+                {
+                  "weight": 100.0,
+                  "parameters": {},
+                  "criterion_id": "valid_json"
+                }
+              ],
+              "objective": "Produce machine readable data",
+              "catalog_revision": "p2.1",
+              "base_system_prompt": null,
+              "custom_system_prompt": null,
+              "criterion_definitions": [
+                {
+                  "id": "valid_json",
+                  "name": "Valid JSON",
+                  "status": "supported",
+                  "category": "structure",
+                  "priority": "P2",
+                  "description": "Validate the entire response as strict JSON; reject duplicate keys and nonfinite numbers.",
+                  "evaluator_type": "structured",
+                  "required_inputs": [
+                    "response"
+                  ],
+                  "catalog_revision": "p2.1",
+                  "parameter_schema": {
+                    "type": "object",
+                    "required": [],
+                    "properties": {},
+                    "additionalProperties": false
+                  },
+                  "research_sources": [
+                    "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+                  ],
+                  "evaluation_method": "deterministic",
+                  "example_parameters": {}
+                }
+              ],
+              "resolved_system_prompt": "You are a helpful assistant. Follow the user's instructions accurately."
+            },
+            "test_version": 1,
+            "definition_hash": "ea319c8f7d531d26b6a06566d2ae99bca79c1bf57c77696bd580af6da76d66b8"
+          }
+        ],
+        "profiles": [
+          {
+            "provider": "local_demo",
+            "parameters": {},
+            "profile_id": "local-demo",
+            "endpoint_id": "local-demo",
+            "requested_model": "demo-json-v1",
+            "parameter_schema": {
+              "type": "object",
+              "additionalProperties": false
+            },
+            "profile_revision": 1
+          }
+        ],
+        "suite_id": null,
+        "suite_revision": null
+      },
+      "status": "completed",
+      "created_at": "2026-11-05T03:52:01.868847Z"
+    }
+  ],
+  "previews": [],
+  "runs": [
+    {
+      "run_id": "run_3f7c06a14cf042ef861818309368436b",
+      "test": {
+        "test_id": "test_0f9f08bcfa0e437995e325f71832e0ec",
+        "test_version": 1
+      },
+      "model_id": "profile_60eecacd007ba2eb5beb8fef73c77a5b7b133cd113e00a783f6ae58870ff00e0",
+      "model_name": "demo-json-v1",
+      "status": "completed",
+      "configuration": {
+        "snapshot": {
+          "preview": null,
+          "profile": {
+            "provider": "local_demo",
+            "parameters": {},
+            "profile_id": "local-demo",
+            "endpoint_id": "local-demo",
+            "requested_model": "demo-json-v1",
+            "parameter_schema": {
+              "type": "object",
+              "additionalProperties": false
+            },
+            "profile_revision": 1
+          },
+          "test_id": "test_0f9f08bcfa0e437995e325f71832e0ec",
+          "test_name": "Storage handoff example",
+          "definition": {
+            "name": "Storage handoff example",
+            "state": "approved",
+            "legacy": null,
+            "prompt": "Return JSON with count 3",
+            "criteria": [
+              {
+                "weight": 100.0,
+                "parameters": {},
+                "criterion_id": "valid_json"
+              }
+            ],
+            "objective": "Produce machine readable data",
+            "catalog_revision": "p2.1",
+            "base_system_prompt": null,
+            "custom_system_prompt": null,
+            "criterion_definitions": [
+              {
+                "id": "valid_json",
+                "name": "Valid JSON",
+                "status": "supported",
+                "category": "structure",
+                "priority": "P2",
+                "description": "Validate the entire response as strict JSON; reject duplicate keys and nonfinite numbers.",
+                "evaluator_type": "structured",
+                "required_inputs": [
+                  "response"
+                ],
+                "catalog_revision": "p2.1",
+                "parameter_schema": {
+                  "type": "object",
+                  "required": [],
+                  "properties": {},
+                  "additionalProperties": false
+                },
+                "research_sources": [
+                  "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+                ],
+                "evaluation_method": "deterministic",
+                "example_parameters": {}
+              }
+            ],
+            "resolved_system_prompt": "You are a helpful assistant. Follow the user's instructions accurately."
+          },
+          "test_version": 1,
+          "definition_hash": "ea319c8f7d531d26b6a06566d2ae99bca79c1bf57c77696bd580af6da76d66b8",
+          "configuration_hash": "fa8462cf71122f4f4e3d3cdfaee9459fe36334aeef0c84289e8a755185c3c994"
+        },
+        "overall_score": 100.0,
+        "result_snapshot": {
+          "id": "run_3f7c06a14cf042ef861818309368436b",
+          "error": null,
+          "model": "demo-json-v1",
+          "score": 100.0,
+          "prompt": "Return JSON with count 3",
+          "status": "completed",
+          "criteria": [
+            {
+              "name": "Valid JSON",
+              "score": 100.0,
+              "detail": "The complete response is accepted JSON.",
+              "passed": true,
+              "status": "completed",
+              "evidence": null,
+              "rationale": null,
+              "criterion_id": "valid_json",
+              "maximum_points": 100.0,
+              "evaluator_model": null,
+              "normalized_score": 1.0
+            }
+          ],
+          "metadata": {
+            "usage": {
+              "input_tokens": null,
+              "output_tokens": null
+            },
+            "profile": {
+              "provider": "local_demo",
+              "parameters": {},
+              "profile_id": "local-demo",
+              "endpoint_id": "local-demo",
+              "requested_model": "demo-json-v1",
+              "parameter_schema": {
+                "type": "object",
+                "additionalProperties": false
+              },
+              "profile_revision": 1
+            },
+            "test_id": "test_0f9f08bcfa0e437995e325f71832e0ec",
+            "approval": {
+              "state": "approved",
+              "actor_id": "omar-local",
+              "recorded_at": "2026-11-05T03:52:01.851826+00:00"
+            },
+            "criteria": [
+              {
+                "weight": 100.0,
+                "parameters": {},
+                "criterion_id": "valid_json"
+              }
+            ],
+            "endpoint": null,
+            "objective": "Produce machine readable data",
+            "test_name": "Storage handoff example",
+            "started_at": "2026-11-05T03:52:01.894500+00:00",
+            "approved_at": "2026-11-05T03:52:01.851826+00:00",
+            "temperature": null,
+            "execution_id": "exec_dfc1282bd4b3473dbf367e2adb23a958",
+            "test_version": 1,
+            "minimum_length": 40,
+            "schema_version": "3.0",
+            "target_metrics": {
+              "usage": {
+                "input_tokens": null,
+                "output_tokens": null
+              },
+              "latency_ms": 0
+            },
+            "forbidden_terms": [],
+            "requested_model": "demo-json-v1",
+            "rerun_of_run_id": null,
+            "rubric_evidence": {},
+            "scoring_weights": null,
+            "catalog_revision": "p2.1",
+            "judge_profile_id": null,
+            "expected_keywords": [],
+            "latency_semantics": "target_plus_evaluation",
+            "minimum_sentences": 2,
+            "recommendation_id": null,
+            "base_system_prompt": null,
+            "evaluation_metrics": {
+              "latency_ms": 0,
+              "judge_calls": []
+            },
+            "configuration_state": "approved",
+            "custom_system_prompt": null,
+            "criterion_definitions": [
+              {
+                "id": "valid_json",
+                "name": "Valid JSON",
+                "status": "supported",
+                "category": "structure",
+                "priority": "P2",
+                "description": "Validate the entire response as strict JSON; reject duplicate keys and nonfinite numbers.",
+                "evaluator_type": "structured",
+                "required_inputs": [
+                  "response"
+                ],
+                "catalog_revision": "p2.1",
+                "parameter_schema": {
+                  "type": "object",
+                  "required": [],
+                  "properties": {},
+                  "additionalProperties": false
+                },
+                "research_sources": [
+                  "https://www.promptfoo.dev/docs/configuration/expected-outputs/"
+                ],
+                "evaluation_method": "deterministic",
+                "example_parameters": {}
+              }
+            ],
+            "resolved_judge_models": {},
+            "judge_profile_revision": null,
+            "resolved_system_prompt": "You are a helpful assistant. Follow the user's instructions accurately.",
+            "generated_configuration": null,
+            "provider_reported_model": "demo-json-v1"
+          },
+          "provider": "local_demo",
+          "response": "{\"count\": 3, \"ok\": true, \"summary\": \"JSON testing\"}",
+          "created_at": "2026-11-05T03:52:01.906873+00:00",
+          "latency_ms": 12
+        }
+      },
+      "prompt": "Return JSON with count 3",
+      "response": "{\"count\": 3, \"ok\": true, \"summary\": \"JSON testing\"}",
+      "created_at": "2026-11-05T03:52:01.868847Z",
+      "started_at": "2026-11-05T03:52:01.887103Z",
+      "completed_at": "2026-11-05T03:52:01.922086Z",
+      "latency_ms": 12,
+      "input_tokens": null,
+      "output_tokens": null,
+      "execution_id": "exec_dfc1282bd4b3473dbf367e2adb23a958",
+      "rerun_of_run_id": null,
+      "suite_position": 1,
+      "model_position": 1,
+      "evidence": {
+        "target": {
+          "usage": {
+            "input_tokens": null,
+            "output_tokens": null
+          },
+          "latency_ms": 0,
+          "actual_model": "demo-json-v1"
+        },
+        "evaluation": {
+          "latency_ms": 0,
+          "judge_calls": []
+        }
+      },
+      "error": null,
+      "evaluations": [
+        {
+          "method": "Valid JSON",
+          "criterion_id": "valid_json",
+          "passed": true,
+          "score": "1.0000",
+          "status": "completed",
+          "earned_points": "100.00",
+          "maximum_points": "100.00",
+          "normalized_score": "1.0000000000",
+          "details": {
+            "detail": "The complete response is accepted JSON.",
+            "evidence": null,
+            "rationale": null,
+            "evaluator_model": null
+          }
+        }
+      ],
+      "reviews": []
+    }
+  ]
+}

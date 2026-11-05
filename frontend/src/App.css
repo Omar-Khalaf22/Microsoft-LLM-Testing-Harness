@@ -1067,6 +1067,7 @@ textarea {
 .header-actions .secondary-button[aria-pressed="true"] { background: var(--lime); border-color: var(--green); }
 .approval-notice { margin: 0; padding: 10px 12px; border-left: 4px solid #c28a1b; background: #fbf3df; border-radius: 4px 10px 10px 4px; font-size: 13px; }
 
+.evidence-transfer { min-height: 0; margin: 0 auto 18px; max-width: 1200px; }
 .human-reviews { margin-top: 18px; min-height: 0; display: grid; gap: 14px; }
 .human-reviews h2, .human-reviews h3 { margin: 0; }
 .review-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }

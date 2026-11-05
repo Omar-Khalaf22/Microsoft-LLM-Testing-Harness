@@ -16,6 +16,7 @@ class ProviderResponse:
     text: str
     model: str
     usage: dict[str, int | None]
+    model_reported: bool = True
 
 
 class DemoProvider:
@@ -86,7 +87,7 @@ class OpenAICompatibleProvider:
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt},
                 ],
-                "temperature": temperature,
+                **({"temperature": temperature} if temperature is not None else {}),
             }
         ).encode()
         request = Request(
@@ -118,6 +119,7 @@ class OpenAICompatibleProvider:
         return ProviderResponse(
             text=body["choices"][0]["message"]["content"],
             model=body.get("model", model),
+            model_reported=isinstance(body.get("model"), str) and bool(body["model"].strip()),
             usage={
                 "input_tokens": reported("prompt_tokens"),
                 "output_tokens": reported("completion_tokens"),

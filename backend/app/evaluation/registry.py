@@ -52,6 +52,11 @@ def validate_criterion(criterion_id: str, parameters: dict) -> dict:
     item = get_criterion(criterion_id)
     if item["status"] != "supported" or item.get("evaluator_type") not in _EVALUATORS:
         raise ValueError(f"Criterion is not executable: {criterion_id}")
+    if criterion_id in {"factual_accuracy", "evidence_grounding"} and (
+        not isinstance(parameters.get("reference_evidence"), str)
+        or not parameters["reference_evidence"].strip()
+    ):
+        raise ValueError("Reference evidence is required for factual/grounding evaluation.")
     if not isinstance(parameters, dict):
         raise ValueError("Parameters must be an object.")
     try:

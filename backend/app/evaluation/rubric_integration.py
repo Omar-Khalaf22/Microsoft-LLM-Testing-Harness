@@ -31,12 +31,21 @@ def evaluate_rubric(criterion_id, response, parameters, context):
         )
         if (
             not isinstance(output.model, str)
-            or not (output.model == model or output.model.startswith(model + "-"))
+            or not output.model.strip()
+            or not getattr(output, "model_reported", True)
             or not isinstance(output.text, str)
             or len(output.text) > 12000
         ):
             raise ValueError("Invalid evaluator model or response size")
         context.setdefault("resolved_judge_models", {})[criterion_id] = output.model
+        context.setdefault("judge_calls", []).append(
+            {
+                "criterion_id": criterion_id,
+                "requested_model": model,
+                "actual_model": output.model,
+                "usage": getattr(output, "usage", None),
+            }
+        )
         return json.loads(output.text)
 
     judgment = judge_rubric(
@@ -48,7 +57,7 @@ def evaluate_rubric(criterion_id, response, parameters, context):
         invoke=invoke,
     )
     context.setdefault("rubric_evidence", {})[criterion_id] = {
-        "evaluator_model": judgment.evaluator_model,
+        "evaluator_model": context["resolved_judge_models"][criterion_id],
         "rationale": judgment.rationale,
         "evidence": list(judgment.evidence),
     }

@@ -76,6 +76,7 @@ class EvaluationResult(Base):
         nullable=True,
     )
     criterion_id: Mapped[str | None] = mapped_column(Text)
+    test_version_id: Mapped[int | None] = mapped_column(BigInteger)
     status: Mapped[str | None] = mapped_column(Text)
     earned_points: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
     maximum_points: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))

@@ -1,7 +1,10 @@
-> Prototype 2 local integration: see [scope and contracts](docs/prototype2-integration.md),
+> Prototype 3: use [apply/run instructions](docs/PROTOTYPE3_APPLY_AND_RUN.md),
+> [Windows local setup](docs/PROTOTYPE3_LOCAL_SETUP.md), and the
+> [internal storage handoff](docs/PROTOTYPE3_HANDOFF_PRANJAL.md).
+> Prototype 2 foundation: see [scope and contracts](docs/prototype2-integration.md),
 > [Windows review steps](docs/prototype2-local-review.md), and
-> [verification evidence](docs/prototype2-verification.md). These describe the current
-> integration; earlier prototype notes below remain historical context.
+> [verification evidence](docs/prototype2-verification.md). Those and the earlier notes
+> below remain historical context; use the P3 environment and ports on this branch.
 
 # LLM Testing Harness
 

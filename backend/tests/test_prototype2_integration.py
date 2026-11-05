@@ -90,7 +90,11 @@ def test_suggestions_approval_execution_and_exact_snapshot_reload(app):
         evaluations = s.scalars(
             select(EvaluationResult).where(EvaluationResult.run_id == first["id"])
         ).all()
-        assert [float(x.earned_points) for x in evaluations] == [33.33, 33.33, 33.34]
+        assert {x.criterion_id: float(x.earned_points) for x in evaluations} == {
+            "valid_json": 33.33,
+            "json_object": 33.33,
+            "json_field_type": 33.34,
+        }
         assert all(x.normalized_score == 1 for x in evaluations)
         version = s.scalar(
             select(TestVersion).where(TestVersion.test_id == tid, TestVersion.version == 1)

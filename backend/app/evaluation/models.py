@@ -18,7 +18,7 @@ class TestRequest:
     prompt: str
     expected_keywords: list[str] = field(default_factory=list)
     model: str = "gpt-4.1-mini"
-    temperature: float = 0.2
+    temperature: float | None = 0.2
     minimum_length: int = 40
     minimum_sentences: int = 2
     forbidden_terms: list[str] = field(default_factory=list)
@@ -35,6 +35,8 @@ class TestRequest:
     configuration_state: str | None = None
     recommendation_id: str | None = None
     recommendation_snapshot: dict | None = None
+    reserved_run_id: str | None = None
+    frozen_system_prompt: str | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> TestRequest:

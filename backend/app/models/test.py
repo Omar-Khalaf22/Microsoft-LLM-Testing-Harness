@@ -25,6 +25,8 @@ class Test(Base):
     __tablename__ = "tests"
     id: Mapped[str] = mapped_column(Text, primary_key=True)
     name: Mapped[str] = mapped_column(Text, nullable=False)
+    project_id: Mapped[str] = mapped_column(Text, server_default="prototype", index=True)
+    creator_id: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -62,6 +64,8 @@ class TestVersion(Base):
     version: Mapped[int] = mapped_column(Integer, nullable=False)
     name: Mapped[str] = mapped_column(Text, nullable=False)
     prompt: Mapped[str] = mapped_column(Text, nullable=False)
+    definition_hash: Mapped[str | None] = mapped_column(Text)
+    approval: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     evaluation_definition: Mapped[dict[str, Any]] = mapped_column(
         JSONB,
         nullable=False,
