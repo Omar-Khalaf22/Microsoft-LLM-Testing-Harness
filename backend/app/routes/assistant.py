@@ -1,9 +1,8 @@
 import json
-
-from pydantic import BaseModel, Field
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
 
 from app.assistant.provider import AssistantError, OpenAIRecommendationProvider
