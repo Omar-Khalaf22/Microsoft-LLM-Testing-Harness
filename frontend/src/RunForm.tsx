@@ -6,6 +6,7 @@ import {
   runEvaluation,
   listCriteria,
   suggestCriteria,
+  understandPrompt,
 } from "./api";
 import type {
   CriterionConfiguration,
@@ -100,6 +101,10 @@ export default function RunForm({
   const [catalogRetry, setCatalogRetry] = useState(0);
   const [generating, setGenerating] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
+  const [understanding, setUnderstanding] = useState("");
+  const [previewModel, setPreviewModel] = useState("");
+  const [confirmedPreview, setConfirmedPreview] = useState(false);
   const [error, setError] = useState("");
   const inFlight = useRef(false);
   const generateController = useRef<AbortController | null>(null);
@@ -140,13 +145,31 @@ export default function RunForm({
     ) &&
     Object.values(weights).reduce((s, v) => s + Math.round(v * 100), 0) ===
       10000;
-  const busy = generating || submitting;
+  const busy = generating || submitting || previewing;
+  async function previewPrompt() {
+    if (!prompt.trim() || busy) return;
+    setPreviewing(true);
+    setError("");
+    setConfirmedPreview(false);
+    setUnderstanding("");
+    try {
+      const result = await understandPrompt(prompt, objective);
+      setUnderstanding(result.understanding);
+      setPreviewModel(result.assistant_model);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Prompt preview failed");
+    } finally {
+      setPreviewing(false);
+    }
+  }
   function changeRows(next: CriterionDraft[]) {
     setRows(next);
     setApproved(false);
   }
   function changedPrompt(value: string) {
     setPrompt(value);
+    setUnderstanding("");
+    setConfirmedPreview(false);
     setApproved(false);
     setRecommendation(null);
   }
@@ -186,6 +209,7 @@ export default function RunForm({
       busy ||
       !testName.trim() ||
       !prompt.trim() ||
+      !confirmedPreview ||
       (legacy ? !legacyValid : !parsed || !approved)
     )
       return;
@@ -284,6 +308,8 @@ export default function RunForm({
             value={objective}
             onChange={(e) => {
               setObjective(e.target.value);
+              setUnderstanding("");
+              setConfirmedPreview(false);
               setApproved(false);
               setRecommendation(null);
             }}
@@ -502,6 +528,23 @@ export default function RunForm({
           )}
         </fieldset>
       )}
+      <section className="suggestion-controls" aria-label="Prompt understanding preview">
+        <h3>AI Prompt Understanding</h3>
+        <p className="muted">Preview what the assistant understands before running your test. This does not execute the model under test.</p>
+        <button type="button" className="secondary-button" disabled={busy || !prompt.trim()} onClick={() => void previewPrompt()}>
+          {previewing ? "Interpreting prompt…" : "Preview prompt understanding"}
+        </button>
+        {understanding && (
+          <div className="response-box" role="status">
+            <p>{understanding}</p>
+            <p className="muted">Interpretation by {previewModel}. This is a preview, not a test result.</p>
+            <label className="check-field">
+              <input type="checkbox" checked={confirmedPreview} disabled={busy} onChange={(e) => setConfirmedPreview(e.target.checked)} />
+              I reviewed this interpretation and want to run the test.
+            </label>
+          </div>
+        )}
+      </section>
       {error && (
         <p className="error-text" role="alert">
           {error}
@@ -510,7 +553,7 @@ export default function RunForm({
       <button
         className="primary-button"
         type="submit"
-        disabled={busy || (legacy ? !legacyValid : !parsed || !approved)}
+        disabled={busy || !confirmedPreview || (legacy ? !legacyValid : !parsed || !approved)}
       >
         {submitting ? "Running and saving…" : "Run and save test"}
       </button>
