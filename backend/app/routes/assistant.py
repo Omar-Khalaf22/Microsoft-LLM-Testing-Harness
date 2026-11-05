@@ -104,6 +104,7 @@ async def understand_prompt(request: UnderstandingRequest):
         "additionalProperties": False,
     }
     try:
+        task_data = {"prompt": request.prompt, "objective": request.objective}
         raw = await provider.complete(
             [
                 {
@@ -116,7 +117,7 @@ async def understand_prompt(request: UnderstandingRequest):
                 },
                 {
                     "role": "user",
-                    "content": json.dumps({"prompt": request.prompt, "objective": request.objective}),
+                    "content": json.dumps(task_data),
                 },
             ],
             schema,
