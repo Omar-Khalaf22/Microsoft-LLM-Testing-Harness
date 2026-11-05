@@ -200,3 +200,14 @@ export async function runEvaluation(
   }
   return response.json();
 }
+
+export async function understandPrompt(prompt: string, objective: string, signal?: AbortSignal): Promise<{understanding: string; assistant_model: string}> {
+  const response = await fetch(`${apiBaseUrl}/assistant/understand-prompt`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({prompt, objective}),
+    signal,
+  });
+  if (!response.ok) throw new Error((await detail(response)).message);
+  return response.json();
+}
