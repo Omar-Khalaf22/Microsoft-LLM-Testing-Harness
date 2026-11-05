@@ -82,7 +82,6 @@ async def suggest_criteria(
     return result
 
 
-
 class UnderstandingRequest(BaseModel):
     prompt: str = Field(min_length=1, max_length=10000)
     objective: str = Field(default="", max_length=2000)
