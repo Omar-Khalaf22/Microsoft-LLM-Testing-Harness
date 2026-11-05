@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { checkHealth, getRun, listRuns, type RunResponse } from "./api";
+import HumanReviews from "./HumanReviews";
+import RunComparison from "./RunComparison";
 import RunForm from "./RunForm";
 import RunResults from "./RunResults";
 import SavedRuns from "./SavedRuns";
@@ -16,7 +18,10 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedRun, setSelectedRun] = useState<RunResponse | null>(null);
   const [editorKey, setEditorKey] = useState(0);
-  const [view, setView] = useState<"configure" | "results">("configure");
+  const [view, setView] = useState<"configure" | "results" | "compare">(
+    "configure",
+  );
+  const [compareSeed, setCompareSeed] = useState<string | undefined>();
 
   const refreshHistory = useCallback(async (signal?: AbortSignal) => {
     setHistoryLoading(true);
@@ -87,6 +92,11 @@ function App() {
     }
   }
 
+  function openComparison(seedId?: string) {
+    setCompareSeed(seedId);
+    setView("compare");
+  }
+
   function handleNewTest() {
     openSequence.current += 1;
     setView("configure");
@@ -117,9 +127,19 @@ function App() {
               results.
             </p>
           </div>
-          <div className="status" data-status={health}>
-            <span className="status-dot" aria-hidden="true" />
-            Backend {health === "ok" ? "ready" : health}
+          <div className="header-actions">
+            <button
+              type="button"
+              className="secondary-button"
+              aria-pressed={view === "compare"}
+              onClick={() => openComparison(selectedRun?.id)}
+            >
+              Compare runs
+            </button>
+            <div className="status" data-status={health}>
+              <span className="status-dot" aria-hidden="true" />
+              Backend {health === "ok" ? "ready" : health}
+            </div>
           </div>
         </header>
         <div className="workspace-views">
@@ -153,8 +173,28 @@ function App() {
               </svg>
               Back to Test
             </button>
+            {selectedRun && (
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => openComparison(selectedRun.id)}
+              >
+                Compare with another run
+              </button>
+            )}
             <RunResults run={selectedRun} />
+            {selectedRun && (
+              <HumanReviews key={selectedRun.id} runId={selectedRun.id} />
+            )}
           </div>
+          {view === "compare" && (
+            <RunComparison
+              key={compareSeed ?? "none"}
+              runs={runs}
+              seedId={compareSeed}
+              onBack={() => setView(selectedRun ? "results" : "configure")}
+            />
+          )}
         </div>
       </main>
     </div>

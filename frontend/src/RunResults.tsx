@@ -96,6 +96,17 @@ export default function RunResults({ run }: { run: RunResponse | null }) {
                 Evaluation:{" "}
                 {c.status === "error" ? "Incomplete" : (c.status ?? "Recorded")}
               </p>
+              {c.evaluator_model && <p>Judged by {c.evaluator_model}</p>}
+              {c.rationale && <p>Rationale: {c.rationale}</p>}
+              {c.evidence && c.evidence.length > 0 && (
+                <ul className="evidence-excerpts" aria-label="Reference excerpts">
+                  {c.evidence.map((excerpt, i) => (
+                    <li key={i}>
+                      <q>{excerpt}</q>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <span className="points">
               {c.score === null ? "Unavailable" : c.score.toFixed(2)}
