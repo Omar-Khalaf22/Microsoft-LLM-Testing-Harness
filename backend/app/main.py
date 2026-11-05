@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.routes.assistant import router as assistant_router
 from app.routes.criteria import router as criteria_router
+from app.routes.human_reviews import router as human_reviews_router
 from app.routes.runs import router as runs_router
 
 settings = get_settings()
@@ -22,6 +23,7 @@ app.add_middleware(
 app.include_router(runs_router)
 app.include_router(assistant_router)
 app.include_router(criteria_router)
+app.include_router(human_reviews_router)
 
 
 @app.get("/health")

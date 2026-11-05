@@ -175,7 +175,12 @@ class PostgresResultRepository:
                             else None,
                             "maximum_points": criterion.maximum_points,
                             "normalized_score": criterion.normalized_score,
-                            "details": {"detail": criterion.detail},
+                            "details": {
+                                "detail": criterion.detail,
+                                "evaluator_model": criterion.evaluator_model,
+                                "rationale": criterion.rationale,
+                                "evidence": criterion.evidence,
+                            },
                         }
                         for criterion in result.criteria
                     ],
@@ -254,6 +259,9 @@ class PostgresResultRepository:
                     if criterion["score"] is not None
                     else None,
                     "detail": criterion.get("details", {}).get("detail", ""),
+                    "evaluator_model": criterion.get("details", {}).get("evaluator_model"),
+                    "rationale": criterion.get("details", {}).get("rationale"),
+                    "evidence": criterion.get("details", {}).get("evidence"),
                 }
                 for criterion in criteria
             ],
