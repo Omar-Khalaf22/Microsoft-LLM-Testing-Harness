@@ -7,7 +7,7 @@ export default function RunResults({ run }: { run: RunResponse | null }) {
       <section className="panel result-panel">
         <h2>Saved result</h2>
         <p className="muted">
-          Run a test or open a saved run to inspect its evidence.
+          Run a test or open a saved run to inspect its scores.
         </p>
       </section>
     );
@@ -78,7 +78,7 @@ export default function RunResults({ run }: { run: RunResponse | null }) {
         <h3>Model response</h3>
         <p>{run.response || "No response was saved."}</p>
       </div>
-      <h3>Criterion evidence</h3>
+      <h3>Criterion scores</h3>
       <div className="criteria-list">
         {run.criteria.map((c, i) => (
           <div
@@ -87,7 +87,9 @@ export default function RunResults({ run }: { run: RunResponse | null }) {
           >
             <div>
               <strong>{c.name}</strong>
-              <p>{c.detail}</p>
+              {!["factual_accuracy", "completeness", "evidence_grounding"].includes(
+                c.criterion_id ?? "",
+              ) && <p>{c.detail}</p>}
               {c.normalized_score !== null &&
                 c.normalized_score !== undefined && (
                   <p>Completion value: {c.normalized_score.toFixed(4)}</p>
@@ -131,7 +133,7 @@ export default function RunResults({ run }: { run: RunResponse | null }) {
       </details>
       <details className="json-details">
         <summary>Complete run JSON</summary>
-        <pre>{JSON.stringify(run, null, 2)}</pre>
+        <pre>{JSON.stringify({ ...run, metadata: Object.fromEntries(Object.entries(run.metadata).filter(([key]) => !["rubric_evidence", "resolved_judge_models"].includes(key))) }, null, 2)}</pre>
       </details>
     </section>
   );
