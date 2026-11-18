@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getRun } from "./api";
+import { capitalize } from "./titleCase";
 import type { CriterionResult, RunResponse, RunSummary } from "./api";
 import CriterionEvidence, { isJudged } from "./CriterionEvidence";
 
@@ -61,44 +62,41 @@ function rubricOf(run: RunResponse): unknown {
 
 interface FieldRow {
   label: string;
-  a: string;
-  b: string;
+  values: string[];
   changed: boolean;
   long?: boolean;
 }
 
-function fieldRows(a: RunResponse, b: RunResponse): FieldRow[] {
+// One row per input, with one text value per compared run (A, B and optionally C).
+function fieldRows(runs: RunResponse[]): FieldRow[] {
   const rows: FieldRow[] = [];
   const add = (
     label: string,
-    va: unknown,
-    vb: unknown,
+    pick: (run: RunResponse) => unknown,
     options: { long?: boolean; missing?: string } = {},
-  ) =>
+  ) => {
+    const raw = runs.map(pick);
     rows.push({
       label,
-      a: showText(va, options.missing),
-      b: showText(vb, options.missing),
-      changed: !same(va, vb),
+      values: raw.map((value) => showText(value, options.missing)),
+      changed: !raw.every((value) => same(value, raw[0])),
       long: options.long,
     });
-  add("Test prompt", a.prompt, b.prompt, { long: true });
-  add("Testing objective", a.metadata.objective, b.metadata.objective, { long: true });
-  add("Base system instructions", a.metadata.base_system_prompt, b.metadata.base_system_prompt, {
+  };
+  add("Test Prompt", (r) => r.prompt, { long: true });
+  add("Testing Objective", (r) => r.metadata.objective, { long: true });
+  add("Base System Instructions", (r) => r.metadata.base_system_prompt, { long: true });
+  add("Additional System Instructions", (r) => r.metadata.custom_system_prompt, { long: true });
+  const rubrics = runs.map((r) => JSON.stringify(rubricOf(r), null, 2));
+  rows.push({
+    label: "Scoring Rubric",
+    values: rubrics,
+    changed: !rubrics.every((value) => value === rubrics[0]),
     long: true,
   });
-  add(
-    "Additional system instructions",
-    a.metadata.custom_system_prompt,
-    b.metadata.custom_system_prompt,
-    { long: true },
-  );
-  const ra = JSON.stringify(rubricOf(a), null, 2);
-  const rb = JSON.stringify(rubricOf(b), null, 2);
-  rows.push({ label: "Scoring rubric", a: ra, b: rb, changed: ra !== rb, long: true });
-  add("Requested model", a.metadata.requested_model, b.metadata.requested_model);
-  add("Temperature", a.metadata.temperature, b.metadata.temperature);
-  add("Test version", a.metadata.test_version, b.metadata.test_version, { missing: "Unknown" });
+  add("Requested Model", (r) => r.metadata.requested_model);
+  add("Temperature", (r) => r.metadata.temperature);
+  add("Test Version", (r) => r.metadata.test_version, { missing: "Unknown" });
   return rows;
 }
 
@@ -140,8 +138,22 @@ const when = (run: RunSummary) => new Date(run.created_at).toLocaleString();
 const optionLabel = (run: RunSummary) =>
   `${run.metadata.test_name || "Untitled test"} · version ${run.metadata.test_version ?? "unknown"} · ${when(run)} · ${run.model}`;
 
+
 function Changed({ changed }: { changed: boolean }) {
   return changed ? <span className="changed-badge">Changed</span> : <span className="same-text">Same</span>;
+}
+
+const NAMES = ["Run A", "Run B", "Run C"];
+
+// With three runs where two match, the index of the one that differs; otherwise null
+// (all the same, or all different, in which case the whole row is highlighted instead).
+function oddOneOut(values: string[]): number | null {
+  if (values.length !== 3) return null;
+  const [a, b, c] = values;
+  if (a === b && b !== c) return 2;
+  if (a === c && a !== b) return 1;
+  if (b === c && a !== b) return 0;
+  return null;
 }
 
 export default function RunComparison({
@@ -156,35 +168,56 @@ export default function RunComparison({
   const initialA = seedId && runs.some((r) => r.id === seedId) ? seedId : (runs[0]?.id ?? "");
   const [aId, setAId] = useState(initialA);
   const [bId, setBId] = useState(() => runs.find((r) => r.id !== initialA)?.id ?? "");
+  const [cId, setCId] = useState("");
+  const [three, setThree] = useState(false);
   const A = useRun(aId);
   const B = useRun(bId);
+  const C = useRun(three ? cId : "");
 
-  const ready = A.run && B.run && aId !== bId;
-  const rows = ready ? fieldRows(A.run!, B.run!) : [];
+  const ids = three ? [aId, bId, cId] : [aId, bId];
+  const slots = three ? [A, B, C] : [A, B];
+  const distinct = new Set(ids).size === ids.length;
+  const ready = ids.every(Boolean) && slots.every((slot) => slot.run) && distinct;
+  const loaded: RunResponse[] = ready ? slots.map((slot) => slot.run!) : [];
+  const [first] = loaded;
+  const rows = ready ? fieldRows(loaded) : [];
   const changedLabels = rows.filter((r) => r.changed).map((r) => r.label);
+  const anyChanged = changedLabels.length > 0;
+
+  function toggleThree() {
+    if (three) {
+      setThree(false);
+      return;
+    }
+    setCId((current) => current || (runs.find((r) => r.id !== aId && r.id !== bId)?.id ?? ""));
+    setThree(true);
+  }
 
   const criteriaKeys: string[] = [];
   if (ready) {
-    criteriaKeys.push(...new Set([
-      ...A.run!.criteria.map((c) => key(A.run!, c)),
-      ...B.run!.criteria.map((c) => key(B.run!, c)),
-    ]));
+    criteriaKeys.push(...new Set(loaded.flatMap((run) => run.criteria.map((c) => key(run, c)))));
   }
   const find = (run: RunResponse, k: string) => run.criteria.find((c) => key(run, c) === k);
-  const comparable = (ca?: CriterionResult, cb?: CriterionResult) => {
-    if (!ca || !cb) return false;
-    const left = savedRow(A.run!, ca);
-    return left !== null && same(left, savedRow(B.run!, cb));
+  // A criterion is comparable when every run saved it with the same rubric as Run A.
+  const comparable = (cells: (CriterionResult | undefined)[]) => {
+    if (cells.some((cell) => !cell)) return false;
+    const left = savedRow(first, cells[0]!);
+    return left !== null && cells.slice(1).every((cell, i) => same(left, savedRow(loaded[i + 1], cell!)));
   };
   const comparableTotal = ready && criteriaKeys.length > 0 &&
-    same(rubricOf(A.run!), rubricOf(B.run!)) &&
-    criteriaKeys.every((k) => comparable(find(A.run!, k), find(B.run!, k)));
+    loaded.every((run) => same(rubricOf(first), rubricOf(run))) &&
+    criteriaKeys.every((k) => comparable(loaded.map((run) => find(run, k))));
+  const sameScore = ready && loaded.every((run) => run.score === first.score);
+  const sameResponse = ready && loaded.every((run) => run.response === first.response);
+  const tokenParts = loaded.map(tokens);
+  const totalValues = loaded.map(total);
+  const totalOdd = three && ready ? oddOneOut(loaded.map(total)) : null;
 
   const select = (id: string, label: string, value: string, set: (v: string) => void) => (
     <div className="field">
       <label htmlFor={id}>{label}</label>
       <select id={id} value={value} onChange={(e) => set(e.target.value)}>
-        <option value="">Choose a saved run</option>
+        <option value="">Choose a Saved Run</option>
         {runs.map((r) => (
           <option key={r.id} value={r.id}>
             {optionLabel(r)}
@@ -195,11 +228,24 @@ export default function RunComparison({
   );
 
   return (
-    <section className="panel comparison" aria-labelledby="comparison-title">
+    <section className={`panel comparison${three ? " three-runs" : ""}`} aria-labelledby="comparison-title">
       <div className="result-heading">
-        <h2 id="comparison-title">Compare two runs</h2>
+        <div className="comparison-title-row">
+          <h2 id="comparison-title">{three ? "Compare Three Runs" : "Compare Two Runs"}</h2>
+          <button
+            type="button"
+            className="icon-button add-run-button"
+            aria-pressed={three}
+            aria-label={three ? "Remove Run C and compare two runs" : "Add Run C and compare three runs"}
+            title={three ? "Remove Run C" : "Add a third run (Run C)"}
+            disabled={runs.length < 3 && !three}
+            onClick={toggleThree}
+          >
+            <span aria-hidden="true">{three ? "−" : "+"}</span>
+          </button>
+        </div>
         <button type="button" className="secondary-button" onClick={onBack}>
-          Close comparison
+          Close Comparison
         </button>
       </div>
 
@@ -207,115 +253,163 @@ export default function RunComparison({
         <p className="muted">Save at least two runs to compare them.</p>
       ) : (
         <>
-          <div className="field-row">
+          <div className={`field-row${three ? " three" : ""}`}>
             {select("compare-a", "Run A", aId, setAId)}
             {select("compare-b", "Run B", bId, setBId)}
+            {three && select("compare-c", "Run C", cId, setCId)}
           </div>
-          <button
-            type="button"
-            className="text-button"
-            onClick={() => {
-              setAId(bId);
-              setBId(aId);
-            }}
-          >
-            Swap A and B
-          </button>
+          <div className="swap-row">
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => {
+                setAId(bId);
+                setBId(aId);
+              }}
+            >
+              Swap A and B
+            </button>
+            {three && (
+              <>
+                <button
+                  type="button"
+                  className="text-button"
+                  onClick={() => {
+                    setBId(cId);
+                    setCId(bId);
+                  }}
+                >
+                  Swap B and C
+                </button>
+                <button
+                  type="button"
+                  className="text-button"
+                  onClick={() => {
+                    setAId(cId);
+                    setCId(aId);
+                  }}
+                >
+                  Swap A and C
+                </button>
+              </>
+            )}
+          </div>
 
-          {(A.loading || B.loading) && <p role="status">Loading runs…</p>}
-          {A.error && (
-            <p role="alert" className="error-text">
-              Run A: {A.error}
-            </p>
+          {slots.some((slot) => slot.loading) && <p role="status">Loading runs…</p>}
+          {slots.map((slot, i) =>
+            slot.error ? (
+              <p key={NAMES[i]} role="alert" className="error-text">
+                {NAMES[i]}: {slot.error}
+              </p>
+            ) : null,
           )}
-          {B.error && (
-            <p role="alert" className="error-text">
-              Run B: {B.error}
-            </p>
-          )}
-          {aId && bId && aId === bId && (
+          {ids.every(Boolean) && !distinct && (
             <p role="status" className="muted">
-              Choose two different runs to see what changed.
+              {three ? "Choose three different runs to see what changed." : "Choose two different runs to see what changed."}
             </p>
           )}
-          {(!aId || !bId) && <p className="muted">Choose a run for both A and B.</p>}
+          {!ids.every(Boolean) && (
+            <p className="muted">{three ? "Choose a run for A, B and C." : "Choose a run for both A and B."}</p>
+          )}
 
           {ready && (
             <>
               <p role="status" className="change-summary">
-                {changedLabels.length
+                {anyChanged
                   ? `Changed between these runs: ${changedLabels.join(", ")}.`
                   : "The prompts, system instructions, rubric and settings are identical."}
               </p>
 
               <table className="compare-table">
-                <caption>Inputs, rubric and settings</caption>
+                <caption>
+                  Inputs, Rubric and Settings
+                  {anyChanged && <span className="changed-tag">CHANGED</span>}
+                </caption>
                 <thead>
                   <tr>
                     <th scope="col">Field</th>
-                    <th scope="col">Run A</th>
-                    <th scope="col">Run B</th>
-                    <th scope="col">Difference</th>
+                    {loaded.map((_, i) => (
+                      <th key={NAMES[i]} scope="col">{NAMES[i]}</th>
+                    ))}
+                    {!three && <th scope="col">Difference</th>}
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((r) => (
-                    <tr key={r.label} data-changed={r.changed}>
-                      <th scope="row">{r.label}</th>
-                      <td>{r.long ? <pre className="compare-text">{r.a}</pre> : r.a}</td>
-                      <td>{r.long ? <pre className="compare-text">{r.b}</pre> : r.b}</td>
-                      <td>
-                        <Changed changed={r.changed} />
-                      </td>
+                  {rows.map((r) => {
+                    const odd = three ? oddOneOut(r.values) : null;
+                    return (
+                    <tr key={r.label} data-changed={r.changed && odd === null}>
+                      <th scope="row" data-field-changed={r.changed ? "true" : undefined}>{r.label}</th>
+                      {r.values.map((value, i) => (
+                        <td key={NAMES[i]} data-odd={odd === i ? "true" : undefined}>
+                          {r.long ? <pre className="compare-text">{value}</pre> : value}
+                        </td>
+                      ))}
+                      {!three && (
+                        <td>
+                          <Changed changed={r.changed} />
+                        </td>
+                      )}
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
 
               <table className="compare-table">
-                <caption>Criterion points</caption>
+                <caption>Criterion Points</caption>
                 <thead>
                   <tr>
                     <th scope="col">Criterion</th>
-                    <th scope="col">Run A</th>
-                    <th scope="col">Run B</th>
-                    <th scope="col">B − A</th>
+                    {three ? (
+                      loaded.map((_, i) => <th key={NAMES[i]} scope="col">{NAMES[i]}</th>)
+                    ) : (
+                      <>
+                        <th scope="col">Run A</th>
+                        <th scope="col">Run B</th>
+                        <th scope="col">B − A</th>
+                      </>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
                   {criteriaKeys.map((k) => {
-                    const ca = find(A.run!, k);
-                    const cb = find(B.run!, k);
-                    const matched = comparable(ca, cb);
-                    const changed = !!ca && !!cb && !matched;
+                    const cells = loaded.map((run) => find(run, k));
+                    const matched = comparable(cells);
+                    const changed = cells.every(Boolean) && !matched;
+                    const [ca, cb] = cells;
+                    const named = cells.find(Boolean)!;
+                    const renamed = cells.every(Boolean) && cells.some((cell) => cell!.name !== cells[0]!.name);
+                                      const odd = three ? oddOneOut(cells.map(points)) : null;
+                    const rowChanged = changed || !cells.every((cell) => points(cell) === points(cells[0]));
                     return (
-                      <tr key={k} data-changed={changed || points(ca) !== points(cb)}>
-                        <th scope="row">{(ca ?? cb)!.name}</th>
-                        <td>
-                          {ca && cb && ca.name !== cb.name && <strong>{ca.name}</strong>}
-                          <div>{points(ca)}</div>
-                          {ca && <CriterionEvidence row={ca} run={A.run!} />}
-                        </td>
-                        <td>
-                          {ca && cb && ca.name !== cb.name && <strong>{cb.name}</strong>}
-                          <div>{points(cb)}</div>
-                          {cb && <CriterionEvidence row={cb} run={B.run!} />}
-                        </td>
-                        <td>{changed
-                          ? <span className="changed-badge">Rubric differs or is unavailable</span>
-                          : matched ? diff(ca?.score, cb?.score) : "—"}</td>
+                      <tr key={k} data-changed={rowChanged && odd === null}>
+                        <th scope="row" data-field-changed={rowChanged ? "true" : undefined}>{named.name}</th>
+                        {cells.map((cell, i) => (
+                          <td key={NAMES[i]} data-odd={odd === i ? "true" : undefined}>
+                            {renamed && cell && <strong>{cell.name}</strong>}
+                            <div>{points(cell)}</div>
+                            {cell && <CriterionEvidence row={cell} run={loaded[i]} />}
+                          </td>
+                        ))}
+                        {!three && (
+                          <td>{changed
+                            ? <span className="changed-badge">Rubric differs or is unavailable</span>
+                            : matched ? diff(ca?.score, cb?.score) : "—"}</td>
+                        )}
                       </tr>
                     );
                   })}
-                  <tr className="total-row" data-changed={A.run!.score !== B.run!.score}>
-                    <th scope="row">Automated total</th>
-                    <td>{total(A.run!)}</td>
-                    <td>{total(B.run!)}</td>
-                    <td>{comparableTotal ? diff(A.run!.score, B.run!.score) : "—"}</td>
+                  <tr className="total-row" data-changed={!sameScore && totalOdd === null}>
+                    <th scope="row" data-field-changed={!sameScore ? "true" : undefined}>Automated Total</th>
+                    {loaded.map((run, i) => (
+                      <td key={NAMES[i]} data-odd={totalOdd === i ? "true" : undefined}>{total(run)}</td>
+                    ))}
+                    {!three && <td>{comparableTotal ? diff(loaded[0].score, loaded[1].score) : "—"}</td>}
                   </tr>
                 </tbody>
               </table>
-              {(A.run!.score === null || B.run!.score === null) && (
+              {loaded.some((run) => run.score === null) && (
                 <p className="muted">
                   A total is unavailable when any selected criterion has no valid result.
                 </p>
@@ -326,60 +420,59 @@ export default function RunComparison({
                 <thead>
                   <tr>
                     <th scope="col">Measure</th>
-                    <th scope="col">Run A</th>
-                    <th scope="col">Run B</th>
-                    <th scope="col">B − A</th>
+                    {loaded.map((_, i) => (
+                      <th key={NAMES[i]} scope="col">{NAMES[i]}</th>
+                    ))}
+                    {!three && <th scope="col">B − A</th>}
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <th scope="row">Status</th>
-                    <td>{A.run!.status}</td>
-                    <td>{B.run!.status}</td>
-                    <td>—</td>
+                    {loaded.map((run, i) => <td key={NAMES[i]}>{capitalize(run.status)}</td>)}
+                    {!three && <td>—</td>}
                   </tr>
                   <tr>
-                    <th scope="row">Model used</th>
-                    <td>{A.run!.model}</td>
-                    <td>{B.run!.model}</td>
-                    <td>—</td>
+                    <th scope="row">Model Used</th>
+                    {loaded.map((run, i) => <td key={NAMES[i]}>{run.model}</td>)}
+                    {!three && <td>—</td>}
                   </tr>
                   <tr>
                     <th scope="row">Latency</th>
-                    <td>{A.run!.latency_ms === null ? "Unavailable" : `${A.run!.latency_ms} ms`}</td>
-                    <td>{B.run!.latency_ms === null ? "Unavailable" : `${B.run!.latency_ms} ms`}</td>
-                    <td>{diff(A.run!.latency_ms, B.run!.latency_ms, 0)} ms</td>
+                    {loaded.map((run, i) => (
+                      <td key={NAMES[i]}>
+                        {run.latency_ms === null ? "Unavailable" : `${run.latency_ms} ms`}
+                      </td>
+                    ))}
+                    {!three && <td>{diff(loaded[0].latency_ms, loaded[1].latency_ms, 0)} ms</td>}
                   </tr>
-                  {(["input", "output", "total"] as const).map((part) => {
-                    const ta = tokens(A.run!)[part];
-                    const tb = tokens(B.run!)[part];
-                    return (
-                      <tr key={part}>
-                        <th scope="row">{part[0].toUpperCase() + part.slice(1)} tokens</th>
-                        <td>{ta ?? "Not reported"}</td>
-                        <td>{tb ?? "Not reported"}</td>
-                        <td>{diff(ta, tb, 0)}</td>
-                      </tr>
-                    );
-                  })}
+                  {(["input", "output", "total"] as const).map((part) => (
+                    <tr key={part}>
+                      <th scope="row">{part[0].toUpperCase() + part.slice(1)} Tokens</th>
+                      {tokenParts.map((t, i) => (
+                        <td key={NAMES[i]}>
+                          {t[part] ?? "Not reported"}
+                        </td>
+                      ))}
+                      {!three && <td>{diff(tokenParts[0][part], tokenParts[1][part], 0)}</td>}
+                    </tr>
+                  ))}
                 </tbody>
               </table>
 
               <h3>Responses</h3>
               <p className="muted">
-                {A.run!.response === B.run!.response
-                  ? "The two responses are identical."
+                {sameResponse
+                  ? three ? "The three responses are identical." : "The two responses are identical."
                   : "The responses differ."}
               </p>
-              <div className="field-row">
-                <div className="response-box">
-                  <h4>Run A</h4>
-                  <p>{A.run!.response || "No response was saved."}</p>
-                </div>
-                <div className="response-box">
-                  <h4>Run B</h4>
-                  <p>{B.run!.response || "No response was saved."}</p>
-                </div>
+              <div className={`field-row${three ? " three" : ""}`}>
+                {loaded.map((run, i) => (
+                  <div className="response-box" key={NAMES[i]}>
+                    <h4>{NAMES[i]}</h4>
+                    <p>{run.response || "No response was saved."}</p>
+                  </div>
+                ))}
               </div>
             </>
           )}

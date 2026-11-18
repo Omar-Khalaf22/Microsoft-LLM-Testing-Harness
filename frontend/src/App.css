@@ -1231,3 +1231,274 @@ textarea {
 .criterion-evidence {
   overflow-wrap: anywhere;
 }
+
+/* ---------- Saved tests tree: suites > tests > versions > runs ---------- */
+.saved-tree { display: grid; gap: 16px; }
+.tree-toolbar { display: flex; gap: 6px; padding: 0 7px; }
+.tree-heading {
+  margin: 0 7px 6px;
+  color: var(--lime);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+.tree-list, .tree-children { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.tree-children { margin: 3px 0 4px 13px; padding-left: 9px; border-left: 1px solid #3d5648; }
+.tree-children[hidden] { display: none; }
+.tree-row { display: flex; align-items: flex-start; gap: 6px; }
+.tree-toggle {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  column-gap: 8px;
+  align-items: start;
+  text-align: left;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: #f4f7ee;
+}
+.tree-toggle:hover { background: #21392d; border-color: #4a6657; }
+.tree-chevron {
+  width: 0;
+  height: 0;
+  margin-top: 5px;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 6px solid #9fb8a6;
+  transition: transform .15s ease;
+}
+.tree-toggle[aria-expanded="true"] .tree-chevron { transform: rotate(90deg); }
+.tree-label { font-weight: 750; line-height: 1.3; overflow-wrap: anywhere; }
+.level-suite > .tree-row .tree-label { font-size: 14px; }
+.level-version > .tree-row .tree-label { font-weight: 650; font-size: 13px; }
+.tree-meta { grid-column: 2; margin-top: 1px; color: #c0d0c2; font-size: 11px; line-height: 1.4; }
+.tree-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 99px;
+  background: #2b4a38;
+  color: #dff3e8;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+.tree-badge.pinned { background: var(--lime); color: var(--ink); }
+.tree-action {
+  flex: none;
+  margin-top: 5px;
+  padding: 3px 9px;
+  border: 1px solid #566a5c;
+  border-radius: 8px;
+  background: #253d31;
+  color: #f4f7ee;
+  font-size: 12px;
+  font-weight: 700;
+}
+.tree-action:hover:not(:disabled) { background: var(--green); }
+.tree-action:disabled { opacity: .55; cursor: wait; }
+.tree-run { padding: 8px 10px; gap: 2px; }
+.tree-run-sub { color: #c0d0c2; font-size: 11px; line-height: 1.35; overflow-wrap: anywhere; }
+.tree-note { margin: 0; padding: 4px 8px; color: #b5c4b8; font-size: 12px; line-height: 1.4; }
+.tree-toggle:focus-visible, .tree-action:focus-visible { outline: 3px solid var(--lime); outline-offset: 1px; }
+@media (prefers-reduced-motion: reduce) { .tree-chevron { transition: none; } }
+
+/* Saved tests: search with suggestions, run numbers */
+.tree-search { display: grid; gap: 6px; padding: 0 7px; }
+.tree-search-label { color: #c0d0c2; font-size: 12px; font-weight: 700; }
+.tree-search-box { position: relative; }
+.tree-search-input {
+  width: 100%; box-sizing: border-box; padding: 9px 32px 9px 11px; border-radius: 8px;
+  border: 1px solid #4a6b57; background: #1b3126; color: #f4f7ee; font: inherit; font-size: 13px;
+}
+.tree-search-input::placeholder { color: #9db3a2; }
+.tree-search-input::-webkit-search-cancel-button { display: none; }
+.tree-search-input:focus-visible { outline: 2px solid var(--lime); outline-offset: 1px; }
+.tree-search-clear {
+  position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 26px; height: 26px;
+  border: 0; border-radius: 6px; background: transparent; color: #c0d0c2; font-size: 18px; line-height: 1; cursor: pointer;
+}
+.tree-search-clear:hover { background: #2b4a38; color: #f4f7ee; }
+.tree-search-clear:focus-visible { outline: 2px solid var(--lime); }
+.tree-suggestions {
+  list-style: none; margin: 0; padding: 4px; max-height: 18rem; overflow-y: auto; border-radius: 8px;
+  border: 1px solid #4a6b57; background: #172a20;
+}
+.tree-suggestions[hidden] { display: none; }
+.tree-suggestion { display: flex; gap: 8px; align-items: flex-start; padding: 7px 8px; border-radius: 6px; cursor: pointer; }
+.tree-suggestion.active { background: #2b4a38; }
+.tree-kind {
+  flex: none; min-width: 52px; text-align: center; padding: 2px 6px; border-radius: 999px;
+  background: #2b4a38; color: #c8f36a; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
+}
+.tree-kind.kind-run { background: var(--lime); color: var(--ink); }
+.tree-suggestion-text { display: grid; gap: 1px; min-width: 0; }
+.tree-suggestion-label { color: #f4f7ee; font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
+.tree-suggestion-detail { color: #c0d0c2; font-size: 11px; overflow-wrap: anywhere; }
+.tree-search-status { margin: 0; color: #c0d0c2; font-size: 11px; }
+.tree-run-number { color: var(--lime); }
+@keyframes tree-flash { from { background: rgba(200, 243, 106, .45); } to { background: transparent; } }
+.tree-flash { animation: tree-flash 1.8s ease-out; border-radius: 8px; }
+@media (prefers-reduced-motion: reduce) { .tree-flash { animation: none; background: rgba(200, 243, 106, .25); } }
+
+/* Criteria: Include checkbox sits in line with Remove, below Parameter format */
+.criterion-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; margin-top: 12px; }
+.criterion-actions .text-button { margin-top: 0; }
+.criteria-editor > .include-all { justify-self: start; }
+
+/* Home button: the top bar of the sidebar stays pinned so Home is always reachable */
+.sidebar-top { position: sticky; top: 0; z-index: 30; background: var(--ink); gap: 10px; }
+.sidebar-closed .sidebar-top { height: auto; flex-direction: column; padding: 14px 0; gap: 10px; }
+.home-button:focus-visible, .sidebar-toggle:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px; }
+@media (max-width: 760px) {
+  .history-sidebar, .sidebar-closed .history-sidebar { padding-top: 56px; }
+  .sidebar-top, .sidebar-closed .sidebar-top {
+    position: fixed; top: 0; left: 0; right: 0; height: 56px; flex-direction: row; padding: 0 18px; gap: 10px;
+  }
+}
+
+/* Ordered suites: New suite on its own line, then the Saved suite dropdown with Open suite beside it */
+.suite-select-row { display: flex; align-items: flex-end; gap: 10px; }
+.suite-select-row .field { flex: 1; min-width: 0; }
+.suite-select-row .secondary-button, .new-suite-button { flex: none; min-width: 112px; white-space: nowrap; }
+.saved-controls > .new-suite-button { justify-self: start; }
+@media (max-width: 520px) { .suite-select-row { flex-wrap: wrap; } .suite-select-row .field { flex-basis: 100%; order: -1; } }
+
+/* Suite items: drag handle for reordering */
+.drag-handle { cursor: grab; touch-action: none; user-select: none; margin-top: 0; }
+.drag-handle:disabled { cursor: not-allowed; }
+.suite-items.dragging { cursor: grabbing; user-select: none; }
+.suite-items.dragging .drag-handle { cursor: grabbing; }
+.suite-items li.drag-active { background: #eaf6d4; box-shadow: 0 0 0 2px var(--green), 0 6px 16px rgba(16, 35, 28, .18); border-radius: 8px; position: relative; z-index: 1; }
+.suite-items li { transition: background .15s ease, box-shadow .15s ease; }
+@media (prefers-reduced-motion: reduce) { .suite-items li { transition: none; } }
+
+/* Drag handle is a compact symbol beside the test name */
+.suite-item-title { display: flex; align-items: center; gap: 8px; }
+.drag-handle {
+  flex: none; width: 30px; height: 30px; padding: 0; display: grid; place-items: center;
+  border: 1px solid #a2b2a5; border-radius: 8px; background: #e7eee8; color: var(--ink); font-size: 16px; line-height: 1;
+}
+.drag-handle:hover:not(:disabled) { background: #d3e3d5; }
+.drag-handle:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px; }
+
+/* Remove is a compact symbol beside the test name */
+.icon-button {
+  flex: none; width: 30px; height: 30px; padding: 0; display: grid; place-items: center;
+  border: 1px solid #a2b2a5; border-radius: 8px; background: #e7eee8; color: var(--ink); font-size: 14px; line-height: 1; cursor: pointer;
+}
+.icon-button:hover:not(:disabled) { background: #d3e3d5; }
+.icon-button:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px; }
+.remove-item:hover:not(:disabled) { background: #f6d9d5; border-color: #b4483c; color: #8a2a20; }
+
+/* The whole name is a drag target, not only the grip */
+.suite-item-title.draggable { cursor: grab; touch-action: none; user-select: none; }
+.suite-items.dragging .suite-item-title.draggable { cursor: grabbing; }
+.suite-item-title .remove-item { cursor: pointer; }
+.suite-item-title { width: fit-content; max-width: 100%; }
+
+/* Compare runs: add a third run, brown CHANGED tag */
+.comparison-title-row { display: flex; align-items: center; gap: 10px; }
+.add-run-button { font-size: 20px; font-weight: 700; }
+.add-run-button:disabled { opacity: .5; cursor: not-allowed; }
+.field-row.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.comparison.three-runs .compare-table { min-width: 860px; }
+.changed-tag {
+  display: inline-block; margin-left: 10px; padding: 2px 9px; border-radius: 6px; background: #7a4a21; color: #fff;
+  font-size: 11px; font-weight: 800; letter-spacing: .08em; vertical-align: middle;
+}
+@media (max-width: 760px) { .field-row.three { grid-template-columns: 1fr; } }
+
+.swap-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-self: start; }
+.swap-row .text-button { margin-top: 0; }
+
+/* Three runs, two the same: only the run that differs is highlighted */
+.compare-table td[data-odd="true"] { background: #fff6dd; box-shadow: inset 0 0 0 2px #c28a1b; }
+
+/* The field name stays highlighted whenever any run differs, even when only one run's cell is marked */
+.compare-table th[data-field-changed="true"] { background: #fff6dd; box-shadow: inset 4px 0 0 #c28a1b; }
+
+/* Permanent black grid: a clear border between runs (columns) and between fields (rows) */
+.compare-table { border: 2px solid #000; }
+.compare-table th, .compare-table td, .compare-table thead th { border: 1px solid #000; }
+.compare-table thead th { border-bottom: 2px solid #000; }
+.compare-table .total-row th, .compare-table .total-row td { border-top: 2px solid #000; }
+
+/* Compare runs: black borders only. Other borders, outlines and coloured edges are removed. */
+.comparison select { border: 1px solid #000; }
+.comparison .change-summary { border: 0; }
+.comparison .response-box { border: 0; }
+.comparison .criterion-evidence { border: 0; }
+.compare-table td[data-odd="true"], .compare-table th[data-field-changed="true"] { box-shadow: none; }
+.compare-table tr[data-changed="true"] > th { box-shadow: none; }
+.comparison button { border: 1px solid #000; }
+
+/* Export Run sits directly under the "Execution: ..." status on an opened run */
+.result-status { display: grid; justify-items: end; gap: 8px; }
+.export-run { display: grid; justify-items: end; gap: 6px; }
+.export-run p { margin: 0; max-width: 260px; font-size: 12px; text-align: right; }
+@media (max-width: 760px) { .result-status, .export-run { justify-items: start; } .export-run p { text-align: left; } }
+
+/* Points box is only as wide as a value like 100.00 needs; the Parameters box keeps its original size */
+.criterion-edit-fields .field input[type="number"] { width: 5.5em; padding: 10px 8px; }
+
+/* Parameters box is half its former width (the Points box sits right beside it) */
+.criterion-edit-fields { grid-template-columns: calc((100% - 16px) / 2.6) max-content; }
+@media (max-width: 760px) { .criterion-edit-fields { grid-template-columns: 1fr; } }
+
+/* Criteria are listed two to a line (three when Run History is collapsed), with a border between
+   neighbours. A custom criterion is taller, so it spans two rows and two regular criteria fit
+   across from it. Every card draws a left border (the outer left one for the first column), and
+   the grid draws one outer right border. Rows are separated by a matching bottom border. */
+.criteria-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-flow: row dense;
+  position: relative;
+  margin: 0 -22px;
+}
+/* Outer right border; the first column's own left border is the outer left border. */
+.criteria-grid::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 2px;
+  background: #a2b2a5;
+  pointer-events: none;
+}
+.criteria-grid[hidden] { display: none; }
+.criteria-grid > .criterion-editor { padding: 16px 22px 20px 20px; border-left: 2px solid #a2b2a5; border-bottom: 2px solid #a2b2a5; }
+.criteria-grid > .criterion-editor.custom-criterion { grid-row: span 2; }
+.criteria-grid .criterion-edit-fields { grid-template-columns: minmax(0, 1fr) max-content; }
+@media (min-width: 1101px) {
+  .sidebar-closed .criteria-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .criteria-grid { grid-template-columns: 1fr; margin: 0; }
+  .criteria-grid::after { display: none; }
+  .criteria-grid > .criterion-editor { padding: 16px 0 20px; border-left: 0; }
+  .criteria-grid > .criterion-editor.custom-criterion { grid-row: auto; }
+}
+
+/* The page title acts as the Home button */
+.title-home {
+  display: inline;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.title-home:hover { text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
+.title-home:focus-visible { outline: 3px solid var(--lime); outline-offset: 4px; border-radius: 4px; }

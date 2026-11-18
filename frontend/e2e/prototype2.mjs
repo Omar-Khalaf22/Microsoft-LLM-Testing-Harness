@@ -22,31 +22,31 @@ try {
   await page.goto(process.env.HARNESS_UI_URL ?? "http://localhost:5173");
   await page.getByText("Backend ready", { exact: true }).waitFor();
   await page
-    .getByRole("textbox", { name: "Test name", exact: true })
+    .getByRole("textbox", { name: "Test Name", exact: true })
     .fill(name);
   await page
-    .getByRole("textbox", { name: "Testing objective" })
+    .getByRole("textbox", { name: "Testing Objective" })
     .fill("Return a JSON object with count 3");
   await page
-    .getByRole("textbox", { name: "Test prompt", exact: true })
+    .getByRole("textbox", { name: "Test Prompt", exact: true })
     .fill("Return JSON with count equal to 3.");
   await page.getByLabel("Model", { exact: true }).fill("demo-json-v1");
-  await page.getByText("System instructions", { exact: true }).click();
+  await page.getByText("System Instructions", { exact: true }).click();
   await page
     .getByRole("textbox", { name: "Base system instructions" })
     .fill("Return precise JSON.");
   await page
-    .getByRole("textbox", { name: "Additional system instructions" })
+    .getByRole("textbox", { name: "Additional System Instructions" })
     .fill("Use numeric count.");
   await page
-    .getByRole("button", { name: "Generate criteria", exact: true })
+    .getByRole("button", { name: "Generate Criteria", exact: true })
     .click();
   await page
     .getByText("Demo suggestions · no LLM request was made.", { exact: false })
     .waitFor();
   assert(
     await page
-      .getByRole("button", { name: "Run and save test", exact: true })
+      .getByRole("button", { name: "Run and Save Test", exact: true })
       .isDisabled(),
   );
   const objectRow = page
@@ -55,11 +55,11 @@ try {
   // Reject one suggestion, then add an implemented structured criterion manually.
   await objectRow.getByRole("button", { name: /Remove/ }).click();
   await page
-    .getByRole("combobox", { name: "Add a supported criterion" })
+    .getByRole("combobox", { name: "Add a Supported Criterion" })
     .fill("json_field_type");
   await page.getByRole("option", { name: /JSON field type/i }).click();
   await page
-    .getByRole("button", { name: "Add criterion", exact: true })
+    .getByRole("button", { name: "Add Criterion", exact: true })
     .click();
   const typeRow = page
     .locator(".criterion-editor")
@@ -70,7 +70,7 @@ try {
   });
   await approve.check();
   await page
-    .getByRole("button", { name: "Run and save test", exact: true })
+    .getByRole("button", { name: "Run and Save Test", exact: true })
     .click();
   await page.getByRole("heading", { name, exact: true }).waitFor();
   await page.getByText("100.00 / 100.00", { exact: true }).waitFor();
@@ -83,7 +83,7 @@ try {
     .click();
   await page.getByRole("heading", { name, exact: true }).waitFor();
   await page.getByRole("button", { name: "Back to Test", exact: true }).click();
-  await page.getByText("System instructions", { exact: true }).click();
+  await page.getByText("System Instructions", { exact: true }).click();
   assert.equal(
     await page
       .getByRole("textbox", { name: "Base system instructions" })
@@ -92,7 +92,7 @@ try {
   );
   assert.equal(
     await page
-      .getByRole("textbox", { name: "Additional system instructions" })
+      .getByRole("textbox", { name: "Additional System Instructions" })
       .inputValue(),
     "Use numeric count.",
   );
@@ -104,18 +104,18 @@ try {
   );
   await page.getByRole("checkbox", { name: /I reviewed and approve/ }).check();
   await page
-    .getByRole("button", { name: "Run and save test", exact: true })
+    .getByRole("button", { name: "Run and Save Test", exact: true })
     .click();
   await page.getByRole("heading", { name, exact: true }).waitFor();
   await page.getByText(/Version 1 ·/).waitFor();
   await page.getByRole("button", { name: "Back to Test", exact: true }).click();
-  await page.getByText("System instructions", { exact: true }).click();
+  await page.getByText("System Instructions", { exact: true }).click();
   await page
     .getByRole("textbox", { name: "Base system instructions" })
     .fill("Return precise JSON without Markdown.");
   await page.getByRole("checkbox", { name: /I reviewed and approve/ }).check();
   await page
-    .getByRole("button", { name: "Run and save test", exact: true })
+    .getByRole("button", { name: "Run and Save Test", exact: true })
     .click();
   await page.getByRole("heading", { name, exact: true }).waitFor();
   await page.getByText(/Version 2 ·/).waitFor();

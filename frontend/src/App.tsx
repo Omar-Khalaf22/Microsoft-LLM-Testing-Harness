@@ -31,6 +31,7 @@ function App() {
   const [editorKey, setEditorKey] = useState(0);
   const [view, setView] = useState<View>("configure");
   const [compareSeed, setCompareSeed] = useState<string | undefined>();
+  const [treeKey, setTreeKey] = useState(0);
 
   const refreshHistory = useCallback(async (signal?: AbortSignal) => {
     setHistoryLoading(true);
@@ -144,6 +145,12 @@ function App() {
     setView(next);
   }
 
+  // Shared by the Home button and the page title: back to the main Configure page, at the top.
+  function goHome() {
+    navigate("configure");
+    window.scrollTo({ top: 0 });
+  }
+
   function openComparison(seedId?: string) {
     setCompareSeed(seedId);
     navigate("compare");
@@ -193,15 +200,27 @@ function App() {
         loading={historyLoading}
         error={historyError}
         onToggle={() => setSidebarOpen((open) => !open)}
-        onRefresh={() => void refreshHistory()}
+        onRefresh={() => {
+          setTreeKey((key) => key + 1);
+          void refreshHistory();
+        }}
         onOpenRun={(run) => void openRun(run.id, true)}
         hasMore={!!nextCursor}
         onLoadMore={() => void loadMore()}
+        reloadKey={treeKey}
+        onHome={goHome}
+        onOpenVersion={async (reference) => {
+          handleOpenVersion(await getVersion(reference));
+        }}
       />
       <main className="workspace">
         <header className="page-header">
           <div>
-            <h1>LLM Testing Harness</h1>
+            <h1>
+              <button type="button" className="title-home" onClick={goHome} title="Home">
+                LLM Testing Harness
+              </button>
+            </h1>
             <p className="subtitle">
               Run prompts, evaluate responses, and inspect structured test
               results.
@@ -209,14 +228,14 @@ function App() {
           </div>
           <div className="header-actions">
             <button type="button" className="secondary-button" aria-pressed={view === "suite"}
-              onClick={() => navigate("suite")}>Ordered suites</button>
+              onClick={() => navigate("suite")}>Ordered Suites</button>
             <button
               type="button"
               className="secondary-button"
               aria-pressed={view === "compare"}
               onClick={() => openComparison(selectedRun?.id)}
             >
-              Compare runs
+              Compare Runs
             </button>
             <div className="status" data-status={health}>
               <span className="status-dot" aria-hidden="true" />
@@ -224,7 +243,7 @@ function App() {
             </div>
           </div>
         </header>
-        <EvidenceTransfer selectedRunId={selectedRun?.id} onImported={() => void refreshHistory()} />
+        <EvidenceTransfer onImported={() => void refreshHistory()} />
         {execution && <ExecutionProgress key={execution.execution_id} initial={execution}
           onFinished={onExecutionFinished} onOpen={onOpenAttempt} />}
         <div className="workspace-views">
@@ -268,7 +287,7 @@ function App() {
                   className="secondary-button"
                   onClick={() => openComparison(selectedRun.id)}
                 >
-                  Compare with another run
+                  Compare with Another Run
                 </button>
               )}
               {selectedRun?.metadata.execution_id &&

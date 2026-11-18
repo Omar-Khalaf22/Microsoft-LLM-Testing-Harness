@@ -85,7 +85,7 @@ export default function HumanReviews({ runId }: { runId: string }) {
 
   return (
     <section className="panel human-reviews" aria-labelledby="human-reviews-title">
-      <h2 id="human-reviews-title">Human reviews</h2>
+      <h2 id="human-reviews-title">Human Reviews</h2>
       <p className="muted">
         Separate from the automated score. A review never changes the automated total.
       </p>
@@ -125,13 +125,13 @@ export default function HumanReviews({ runId }: { runId: string }) {
       )}
 
       <form className="review-form" onSubmit={(e) => void submit(e)} aria-busy={submitting} noValidate>
-        <h3>Add a review</h3>
+        <h3>Add a Review</h3>
         <p className="muted">
           A new review from your authenticated identity creates a revision. Earlier revisions are kept.
         </p>
         <div className="field-row">
           <label className="field">
-            <span>Authenticated reviewer</span>
+            <span>Authenticated Reviewer</span>
             <input
               value={reviewer}
               maxLength={128}
@@ -191,7 +191,7 @@ export default function HumanReviews({ runId }: { runId: string }) {
         )}
         {saved && <p role="status">{saved}</p>}
         <button className="primary-button" type="submit" disabled={submitting}>
-          {submitting ? "Saving review…" : "Save review"}
+          {submitting ? "Saving Review…" : "Save Review"}
         </button>
       </form>
     </section>

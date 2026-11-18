@@ -402,7 +402,7 @@ function apiFetch(input: RequestInfo | URL, init: RequestInit = {}) {
 }
 export type RunSummary = Pick<RunResponse,
   "id" | "status" | "created_at" | "model" | "provider" | "score" | "latency_ms"> & {
-    metadata: { test_id?: string; test_version?: number; test_name?: string;
+    metadata: { test_id?: string; test_version?: number; test_name?: string; run_number?: number;
       execution_id?: string | null; rerun_of_run_id?: string | null };
   };
 export interface HistoryPage { items: RunSummary[]; next_cursor: string | null }

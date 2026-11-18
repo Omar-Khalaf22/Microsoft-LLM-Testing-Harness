@@ -67,7 +67,7 @@ export default function CriterionPicker({
 
   return (
     <div className="field criterion-picker">
-      <label htmlFor={id}>Add a supported criterion</label>
+      <label htmlFor={id}>Add a Supported Criterion</label>
       <input
         id={id}
         type="search"

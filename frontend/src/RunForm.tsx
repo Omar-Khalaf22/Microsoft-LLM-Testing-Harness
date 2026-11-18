@@ -276,7 +276,7 @@ export default function RunForm({
       aria-busy={busy}
     >
       <div className="run-form-heading">
-        <h2>Configure test</h2>
+        <h2>Configure Test</h2>
         {(initialRun || saved) && (
           <button
             type="button"
@@ -284,7 +284,7 @@ export default function RunForm({
             disabled={busy}
             onClick={onNewTest}
           >
-            New test
+            New Test
           </button>
         )}
       </div>
@@ -309,7 +309,7 @@ export default function RunForm({
       )}
       <fieldset className="form-fields" disabled={busy}>
         <label className="field">
-          <span>Test name</span>
+          <span>Test Name</span>
           <input
             required
             maxLength={100}
@@ -318,7 +318,7 @@ export default function RunForm({
           />
         </label>
         <label className="field">
-          <span>Testing objective</span>
+          <span>Testing Objective</span>
           <textarea
             rows={2}
             maxLength={2000}
@@ -332,7 +332,7 @@ export default function RunForm({
           />
         </label>
         <label className="field">
-          <span>Test prompt</span>
+          <span>Test Prompt</span>
           <textarea
             rows={4}
             required
@@ -373,11 +373,11 @@ export default function RunForm({
           </label>
         </div>}
         <details className="advanced-criteria">
-          <summary>System instructions</summary>
+          <summary>System Instructions</summary>
           <div className="advanced-criteria-controls">
             <label className="field">
               <span>
-                Base system instructions (blank uses the backend default)
+                Base System Instructions (blank uses the backend default)
               </span>
               <textarea
                 rows={3}
@@ -390,7 +390,7 @@ export default function RunForm({
               />
             </label>
             <label className="field">
-              <span>Additional system instructions</span>
+              <span>Additional System Instructions</span>
               <textarea
                 rows={3}
                 maxLength={10000}
@@ -407,7 +407,7 @@ export default function RunForm({
       {!legacy ? (
         <>
           <section className="suggestion-controls">
-            <h3>Recommend criteria</h3>
+            <h3>Recommend Criteria</h3>
             <p className="muted">
               Suggestions use your objective and prompt. Review them before
               running the test.
@@ -420,7 +420,7 @@ export default function RunForm({
               }
               onClick={() => void generate()}
             >
-              {generating ? "Generating suggestions…" : "Generate criteria"}
+              {generating ? "Generating Suggestions…" : "Generate Criteria"}
             </button>
             {recommendation && (
               <p role="status">
@@ -438,7 +438,7 @@ export default function RunForm({
                 type="button"
                 onClick={() => setCatalogRetry((x) => x + 1)}
               >
-                Reload criteria
+                Reload Criteria
               </button>
             </p>
           )}
@@ -481,30 +481,30 @@ export default function RunForm({
         </>
       ) : (
         <fieldset className="form-fields scoring-box" disabled={busy}>
-          <legend>Original six automatic checks (legacy)</legend>
+          <legend>Original Six Automatic Checks (Legacy)</legend>
           <button type="button" className="secondary-button" onClick={() => {
             setLegacy(false);
             clearApproval("the scoring mode changed");
           }}>
-            Switch to criterion picker
+            Switch to Criterion Picker
           </button>
           <div className="field-row">
             <label className="field">
-              <span>Expected keywords (comma separated)</span>
+              <span>Expected Keywords (comma separated)</span>
               <input
                 value={keywords}
                 onChange={(e) => { setKeywords(e.target.value); setDirty(true); }}
               />
             </label>
             <label className="field">
-              <span>Forbidden terms (comma separated)</span>
+              <span>Forbidden Terms (comma separated)</span>
               <input
                 value={forbidden}
                 onChange={(e) => { setForbidden(e.target.value); setDirty(true); }}
               />
             </label>
             <label className="field">
-              <span>Minimum length</span>
+              <span>Minimum Length</span>
               <input
                 type="number"
                 min={0}
@@ -514,7 +514,7 @@ export default function RunForm({
               />
             </label>
             <label className="field">
-              <span>Minimum sentences</span>
+              <span>Minimum Sentences</span>
               <input
                 type="number"
                 min={1}
@@ -563,14 +563,14 @@ export default function RunForm({
       )}
       <div className="saved-actions">
         <button type="button" className="secondary-button" disabled={busy || !canSave || (!!saved && !dirty)}
-          onClick={() => void write()}>Save draft</button>
+          onClick={() => void write()}>Save Draft</button>
         {saved?.state === "draft" && <button type="button" className="primary-button"
           disabled={busy || dirty || !canSave} onClick={() => void write(true)}>
-          Approve version
+          Approve Version
         </button>}
         {inline && <button className="primary-button" type="submit"
           disabled={busy || (legacy ? !legacyValid : !parsed || !approved)}>
-          {submitting ? "Running and saving…" : "Run and save test"}
+          {submitting ? "Running and Saving…" : "Run and Save Test"}
         </button>}
       </div>
       {saved?.state === "approved" && !dirty && (

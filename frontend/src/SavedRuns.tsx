@@ -1,11 +1,5 @@
-import type { KeyboardEvent } from "react";
-
-import type { RunSummary } from "./api";
-
-function formatDate(value: string): string {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
-}
+import type { RunSummary, TestReference } from "./api";
+import SavedTestTree from "./SavedTestTree";
 
 function SavedRuns({
   runs,
@@ -18,6 +12,9 @@ function SavedRuns({
   onOpenRun,
   hasMore,
   onLoadMore,
+  reloadKey,
+  onOpenVersion,
+  onHome,
 }: {
   runs: RunSummary[];
   hasMore: boolean;
@@ -29,20 +26,31 @@ function SavedRuns({
   onToggle: () => void;
   onRefresh: () => void;
   onOpenRun: (run: RunSummary) => void;
+  reloadKey: number;
+  onOpenVersion?: (version: TestReference) => Promise<void> | void;
+  onHome: () => void;
 }) {
-  function handleKeyDown(
-    event: KeyboardEvent<HTMLButtonElement>,
-    run: RunSummary,
-  ) {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      onOpenRun(run);
-    }
-  }
-
   return (
-    <aside className="history-sidebar" aria-label="Saved runs">
+    <aside className="history-sidebar" aria-label="Saved tests">
       <div className="sidebar-top">
+        <button
+          className="sidebar-toggle home-button"
+          type="button"
+          onClick={onHome}
+          aria-label="Home"
+          title="Home"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+            <path
+              d="M3 11.5 12 4l9 7.5M5.5 10v9.5h4.5v-5.5h4v5.5h4.5V10"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
         <button
           className="sidebar-toggle"
           type="button"
@@ -54,14 +62,14 @@ function SavedRuns({
         >
           <span aria-hidden="true">☰</span>
         </button>
-        {open && <span className="sidebar-brand">Run history</span>}
+        {open && <span className="sidebar-brand">Run History</span>}
       </div>
       {open && (
         <div id="saved-run-list" className="sidebar-content">
           <div className="sidebar-heading">
             <div>
               <p className="eyebrow">Your workspace</p>
-              <h2>Saved runs</h2>
+              <h2>Saved Tests</h2>
             </div>
             <button
               type="button"
@@ -69,57 +77,33 @@ function SavedRuns({
               onClick={onRefresh}
               disabled={loading}
               aria-label="Refresh saved runs"
-              title="Refresh saved runs"
+              title="Refresh Saved Tests and Runs"
             >
               ↻
             </button>
           </div>
           <p className="sidebar-hint">
-            Select a saved run to load its prompt, scoring points, and result.
+            Suites contain tests, tests contain versions, and each version lists its runs, newest
+            first. Select a run to open its result.
           </p>
           {error && (
             <p className="sidebar-error" role="alert">
               Could not load runs: {error}
             </p>
           )}
-          {loading && runs.length === 0 ? (
-            <p className="sidebar-empty">Loading saved runs…</p>
-          ) : runs.length === 0 ? (
-            <p className="sidebar-empty">
-              Your saved runs will appear here after the first evaluation.
-            </p>
-          ) : (
-            <ul className="saved-run-list">
-              {runs.map((run) => (
-                <li key={run.id}>
-                  <button
-                    className="saved-run-item"
-                    type="button"
-                    aria-pressed={selectedRunId === run.id}
-                    aria-label={`Load ${run.metadata.test_name || "Untitled test"}, run from ${formatDate(run.created_at)}`}
-                    onClick={() => onOpenRun(run)}
-                    onKeyDown={(event) => handleKeyDown(event, run)}
-                  >
-                    <span className="saved-run-name">
-                      {run.metadata.test_name || "Untitled test"}
-                    </span>
-                    <span className="saved-run-version">
-                      Version {run.metadata.test_version ?? "imported"}
-                    </span>
-                    <span className="saved-run-details">
-                      {formatDate(run.created_at)} ·{" "}
-                      {run.score === null
-                        ? "Score unavailable"
-                        : `${run.score.toFixed(2)}/100`}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+          <SavedTestTree
+            runs={runs}
+            selectedRunId={selectedRunId}
+            hasMore={hasMore}
+            reloadKey={reloadKey}
+            onOpenRun={onOpenRun}
+            onOpenVersion={onOpenVersion}
+          />
+          {hasMore && (
+            <button type="button" className="secondary-button" disabled={loading} onClick={onLoadMore}>
+              {loading ? "Loading…" : "Load More Runs"}
+            </button>
           )}
-          {hasMore && <button type="button" className="secondary-button" disabled={loading} onClick={onLoadMore}>
-            {loading ? "Loading�" : "Load more runs"}
-          </button>}
         </div>
       )}
     </aside>

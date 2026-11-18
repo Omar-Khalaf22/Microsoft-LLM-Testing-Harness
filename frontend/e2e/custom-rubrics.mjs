@@ -40,26 +40,26 @@ async function apiGet(path) {
 }
 
 async function fields(definition, label) {
-  await page.getByLabel("Test name", { exact: true }).fill(label);
-  await page.getByLabel("Testing objective", { exact: true }).fill(definition.objective);
-  await page.getByLabel("Test prompt", { exact: true }).fill(definition.prompt);
+  await page.getByLabel("Test Name", { exact: true }).fill(label);
+  await page.getByLabel("Testing Objective", { exact: true }).fill(definition.objective);
+  await page.getByLabel("Test Prompt", { exact: true }).fill(definition.prompt);
   if (definition.custom_system_prompt) {
-    await page.getByText("System instructions", { exact: true }).click();
-    await page.getByLabel("Additional system instructions", { exact: true }).fill(definition.custom_system_prompt);
+    await page.getByText("System Instructions", { exact: true }).click();
+    await page.getByLabel("Additional System Instructions", { exact: true }).fill(definition.custom_system_prompt);
   }
 }
 
 async function assertCustomRows(criteria) {
   assert.equal(await page.locator(".criterion-editor").count(), criteria.length);
   for (const [i, c] of criteria.entries()) {
-    assert.equal(await row(i).getByLabel("Criterion title", { exact: true }).inputValue(), c.parameters.title);
-    assert.equal(await row(i).getByLabel("Scoring instructions", { exact: true }).inputValue(), c.parameters.instructions);
-    assert.equal(await row(i).getByLabel(/Judge-only reference/).inputValue(), c.parameters.reference_evidence);
-    assert.equal(await row(i).getByLabel(/Maximum points/).inputValue(), String(c.weight));
+    assert.equal(await row(i).getByLabel("Criterion Title", { exact: true }).inputValue(), c.parameters.title);
+    assert.equal(await row(i).getByLabel("Scoring Instructions", { exact: true }).inputValue(), c.parameters.instructions);
+    assert.equal(await row(i).getByLabel(/Judge-only reference/i).inputValue(), c.parameters.reference_evidence);
+    assert.equal(await row(i).getByLabel(/Maximum points/i).inputValue(), String(c.weight));
   }
 }
 
-async function run(label = "Run approved version", path = "/executions", total = 75) {
+async function run(label = "Run Approved Version", path = "/executions", total = 75) {
   const plan = await action(label, path, 202);
   const id = plan.attempts[0].run_id;
   await page.locator(`[data-execution-id="${plan.execution_id}"]`)
@@ -72,10 +72,10 @@ async function run(label = "Run approved version", path = "/executions", total =
 }
 
 async function compare(left, right) {
-  await button("Compare with another run").click();
+  await button("Compare with Another Run").click();
   await page.getByLabel("Run A", { exact: true }).selectOption(left.id);
   await page.getByLabel("Run B", { exact: true }).selectOption(right.id);
-  const table = page.getByRole("table", { name: "Criterion points" });
+  const table = page.getByRole("table", { name: "Criterion Points" });
   await table.waitFor();
   return table;
 }
@@ -87,46 +87,46 @@ try {
   const outlook = demo.outlook.definition;
   await fields(outlook, name);
   for (const [i, criterion] of outlook.criteria.entries()) {
-    await button("Add custom criterion").click();
+    await button("Add Custom Criterion").click();
     const editor = row(i);
-    await editor.getByLabel("Criterion title", { exact: true }).fill(criterion.parameters.title);
-    await editor.getByLabel("Scoring instructions", { exact: true }).fill(criterion.parameters.instructions);
+    await editor.getByLabel("Criterion Title", { exact: true }).fill(criterion.parameters.title);
+    await editor.getByLabel("Scoring Instructions", { exact: true }).fill(criterion.parameters.instructions);
     await editor.getByLabel("Verifies factual claims").check();
     await editor.getByText("Enter reference evidence for factual verification.").waitFor();
-    await editor.getByLabel(/Judge-only reference/).fill(criterion.parameters.reference_evidence);
-    await editor.getByLabel(/Maximum points/).fill(String(criterion.weight));
+    await editor.getByLabel(/Judge-only reference/i).fill(criterion.parameters.reference_evidence);
+    await editor.getByLabel(/Maximum points/i).fill(String(criterion.weight));
   }
-  await button("Add custom criterion").click();
+  await button("Add Custom Criterion").click();
   await row(3).getByText("Enter a criterion title.").waitFor();
   await row(3).getByRole("button", { name: /Remove/ }).click();
-  await row(0).getByLabel(/Maximum points/).fill("39.99");
-  assert(await button("Save draft").isDisabled());
-  await row(0).getByLabel(/Maximum points/).fill("40");
-  await action("Generate criteria", "/assistant/suggest-criteria", 200);
+  await row(0).getByLabel(/Maximum points/i).fill("39.99");
+  assert(await button("Save Draft").isDisabled());
+  await row(0).getByLabel(/Maximum points/i).fill("40");
+  await action("Generate Criteria", "/assistant/suggest-criteria", 200);
   await page.getByText("Demo suggestions · no LLM request was made.", { exact: false }).waitFor();
   assert(await page.locator(".criterion-editor").count() > 3);
   while (await page.locator(".criterion-editor").count() > 3)
     await page.locator(".criterion-editor").last().getByRole("button", { name: /Remove/ }).click();
   await assertCustomRows(outlook.criteria);
-  const draft = await action("Save draft", "/tests", 201);
+  const draft = await action("Save Draft", "/tests", 201);
   await page.getByText("Draft version 1", { exact: true }).waitFor();
-  assert.equal(await button("Run approved version").count(), 0);
+  assert.equal(await button("Run Approved Version").count(), 0);
 
   await page.reload();
-  await page.getByLabel("Saved test", { exact: true }).selectOption(draft.test_id);
-  await button("Open version").click();
+  await page.getByLabel("Saved Test", { exact: true }).selectOption(draft.test_id);
+  await button("Open Version").click();
   await page.getByText("Draft version 1", { exact: true }).waitFor();
   await assertCustomRows(outlook.criteria);
   const versions = `/tests/${draft.test_id}/versions`;
-  const approved = await action("Approve version", `${versions}/1/approve`, 201);
+  const approved = await action("Approve Version", `${versions}/1/approve`, 201);
   await page.getByText("Approved version 2", { exact: true }).waitFor();
   assert.deepEqual(approved.definition.criteria, draft.definition.criteria);
   await page.getByLabel("Approved target profile").selectOption("demo-outlook-a");
-  await action("Request interpretation preview", "/previews", 201);
-  await page.getByRole("heading", { name: "Original task", exact: true }).waitFor();
-  for (const field of ["Purpose", "Deliverable", "Constraints", "Success conditions"])
+  await action("Request Interpretation Preview", "/previews", 201);
+  await page.getByRole("heading", { name: "Original Task", exact: true }).waitFor();
+  for (const field of ["Purpose", "Deliverable", "Constraints", "Success Conditions"])
     await page.locator(".preview-card").getByText(field, { exact: true }).waitFor();
-  assert(await button("Run approved version").isDisabled());
+  assert(await button("Run Approved Version").isDisabled());
   await page.getByLabel("I reviewed this interpretation").check();
   if (process.env.HARNESS_SCREENSHOT_DIR)
     await page.locator(".preview-card").screenshot({ path: join(process.env.HARNESS_SCREENSHOT_DIR, "preview.png") });
@@ -138,29 +138,29 @@ try {
 
   await page.getByLabel("Rating (0–100)").fill("82");
   await page.getByLabel("Rationale", { exact: true }).fill("Reviewer found the outlook clearly qualified.");
-  await button("Save review").click();
+  await button("Save Review").click();
   await page.getByText(/Review saved as revision 1/).waitFor();
   assert.equal((await apiGet(`/runs/${stronger.id}`)).score, 75);
 
   await button("Back to Test").click();
   await page.getByLabel("Approved target profile").selectOption("demo-outlook-b");
-  const weaker = await run("Run approved version", "/executions", 10);
+  const weaker = await run("Run Approved Version", "/executions", 10);
   assert.deepEqual(weaker.criteria.map((c) => c.score), [10, 0, 0]);
   let table = await compare(stronger, weaker);
   await table.getByText("30.00 / 40.00", { exact: true }).waitFor();
   await table.getByText("10.00 / 40.00", { exact: true }).waitFor();
   await table.getByText("-20.00", { exact: true }).waitFor();
   await table.getByText("Target answer", { exact: true }).first().waitFor();
-  await button("Close comparison").click();
+  await button("Close Comparison").click();
   await button("Back to Test").click();
 
-  await row(0).getByLabel("Scoring instructions", { exact: true })
+  await row(0).getByLabel("Scoring Instructions", { exact: true })
     .fill(outlook.criteria[0].parameters.instructions + " Include explicit next steps.");
-  const revisedDraft = await action("Save draft", versions, 201);
+  const revisedDraft = await action("Save Draft", versions, 201);
   assert.equal(revisedDraft.test_version, 3);
   assert.deepEqual(revisedDraft.definition.criteria.map((r) => r.criterion_id),
     approved.definition.criteria.map((r) => r.criterion_id));
-  await action("Approve version", `${versions}/3/approve`, 201);
+  await action("Approve Version", `${versions}/3/approve`, 201);
   await page.getByLabel("Approved target profile").selectOption("demo-outlook-a");
   const revised = await run();
   assert.equal(revised.metadata.test_version, 4);
@@ -173,7 +173,7 @@ try {
     .filter({ hasText: "Version 2" }).filter({ hasText: "75.00/100" }).click();
   await result.getByRole("heading", { name, exact: true }).waitFor();
   await page.getByText("82 / 100", { exact: true }).waitFor();
-  const rerun = await run("Rerun approved version", `/runs/${stronger.id}/rerun`);
+  const rerun = await run("Rerun Approved Version", `/runs/${stronger.id}/rerun`);
   assert.equal(rerun.metadata.test_version, 2);
   assert.equal(rerun.metadata.rerun_of_run_id, stronger.id);
   assert.deepEqual(rerun.criteria, stronger.criteria);
@@ -185,11 +185,11 @@ try {
   }
 
   await button("Back to Test").click();
-  await button("New test").click();
+  await button("New Test").click();
   const mining = demo.mining.definition;
   await fields(mining, miningName);
   assert.equal(await page.getByRole("checkbox", { name: /legacy scoring/i }).count(), 0);
-  const picker = page.getByRole("combobox", { name: "Add a supported criterion" });
+  const picker = page.getByRole("combobox", { name: "Add a Supported Criterion" });
   const options = page.getByRole("listbox", { name: "Supported criteria" });
   await picker.click();
   for (const check of ["Keyword coverage", "Prompt relevance", "Response length",
@@ -198,7 +198,7 @@ try {
   }
   await picker.fill("no matching criterion here");
   await page.getByText("No matching criteria.", { exact: true }).waitFor();
-  assert(await button("Add criterion").isDisabled());
+  assert(await button("Add Criterion").isDisabled());
   await picker.fill("JSON");
   assert((await options.getByRole("option").count()) > 1);
   await picker.press("End");
@@ -207,23 +207,23 @@ try {
   await picker.press("ArrowDown");
   await picker.press("Enter");
   assert.equal(await picker.inputValue(), "JSON schema");
-  await button("Add criterion").click();
+  await button("Add Criterion").click();
   await row(0).getByRole("textbox").fill(JSON.stringify(mining.criteria[0].parameters));
-  const miningDraft = await action("Save draft", "/tests", 201);
-  await action("Approve version", `/tests/${miningDraft.test_id}/versions/1/approve`, 201);
+  const miningDraft = await action("Save Draft", "/tests", 201);
+  await action("Approve Version", `/tests/${miningDraft.test_id}/versions/1/approve`, 201);
 
-  await button("Ordered suites").click();
+  await button("Ordered Suites").click();
   await page.getByLabel("Suite name").fill(`${name} suite`);
   await page.getByLabel("Suite test", { exact: true }).selectOption(miningDraft.test_id);
-  await button("Add to suite").click();
+  await button("Add to Suite").click();
   await page.getByLabel("Suite test", { exact: true }).selectOption(draft.test_id);
   await page.getByLabel("Suite test version", { exact: true }).selectOption("2");
-  await button("Add to suite").click();
+  await button("Add to Suite").click();
   await button("Move item 2 up").click();
-  const suite = await action("Save suite", "/suites", 201);
+  const suite = await action("Save Suite", "/suites", 201);
   assert.deepEqual(suite.items.map((item) => item.test_id), [draft.test_id, miningDraft.test_id]);
   await page.getByLabel("Suite target profile").selectOption("demo-outlook-a");
-  const execution = await action("Run suite", "/executions", 202);
+  const execution = await action("Run Suite", "/executions", 202);
   await page.getByText("2 completed · 0 failed · 0 running · 0 pending", { exact: true }).waitFor();
   assert.deepEqual(execution.attempts.map((a) => a.test_version), [2, 2]);
   await button("View item 2 model 1 result").click();
@@ -242,13 +242,13 @@ try {
     await route.continue();
   });
   const backgroundRun = await action(
-    "Rerun approved version", `/runs/${execution.attempts[0].run_id}/rerun`, 202,
+    "Rerun Approved Version", `/runs/${execution.attempts[0].run_id}/rerun`, 202,
   );
-  await button("Ordered suites").click();
+  await button("Ordered Suites").click();
   releaseProgress();
   await page.locator(`[data-execution-id="${backgroundRun.execution_id}"]`)
     .getByText("1 completed · 0 failed · 0 running · 0 pending", { exact: true }).waitFor();
-  await page.getByRole("heading", { name: "Ordered suites", exact: true }).waitFor();
+  await page.getByRole("heading", { name: "Ordered Suites", exact: true }).waitFor();
   await page.unroute(progressUrl);
   assert.deepEqual(errors, []);
   console.log("Rubrics browser passed: authoring, suggestions, draft reopening, approval, preview, scoring, comparison, review, exact rerun, and ordered suite.");

@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from "react";
 import { listTests, listVersions } from "./api";
 import type { TestReference } from "./api";
+import { capitalize } from "./titleCase";
 
 type Test = Awaited<ReturnType<typeof listTests>>[number];
 type Version = Awaited<ReturnType<typeof listVersions>>[number];
@@ -61,34 +62,34 @@ export default function SavedTestPicker({
     <fieldset className="saved-controls" disabled={disabled || opening}>
       <div className="field-row">
         <div className="field">
-          <label htmlFor={testField}>{approvedOnly ? "Suite test" : "Saved test"}</label>
+          <label htmlFor={testField}>{approvedOnly ? "Suite Test" : "Saved Test"}</label>
           <select id={testField} value={testId} onChange={(e) => {
             setTestId(e.target.value);
             setVersion("");
             setVersions([]);
             setError("");
           }}>
-            <option value="">{loading ? "Loading tests…" : "Choose a test"}</option>
+            <option value="">{loading ? "Loading Tests…" : "Choose a Test"}</option>
             {tests.map((t) => <option key={t.test_id} value={t.test_id}>{t.name}</option>)}
           </select>
         </div>
         <div className="field">
-          <label htmlFor={versionField}>{approvedOnly ? "Suite test version" : "Saved version"}</label>
+          <label htmlFor={versionField}>{approvedOnly ? "Suite Test Version" : "Saved Version"}</label>
           <select id={versionField} value={version} onChange={(e) => setVersion(e.target.value)} disabled={!versions.length}>
-            <option value="">Choose a version</option>
+            <option value="">Choose a Version</option>
             {[...versions].reverse().map((v) => (
               <option key={v.test_version} value={v.test_version}>
-                Version {v.test_version} · {v.state}
+                Version {v.test_version} · {capitalize(v.state)}
               </option>
             ))}
           </select>
         </div>
       </div>
       {error && <p role="alert" className="error-text">
-        {error} <button type="button" onClick={() => { setError(""); setRetry(retry + 1); }}>Reload saved tests</button>
+        {error} <button type="button" onClick={() => { setError(""); setRetry(retry + 1); }}>Reload Saved Tests</button>
       </p>}
       <button type="button" className="secondary-button" disabled={!choice} onClick={() => void selectVersion()}>
-        {approvedOnly ? "Add to suite" : "Open version"}
+        {approvedOnly ? "Add to Suite" : "Open Version"}
       </button>
     </fieldset>
   );

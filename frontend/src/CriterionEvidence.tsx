@@ -1,4 +1,5 @@
 import type { CriterionResult, RunResponse } from "./api";
+import { capitalize } from "./titleCase";
 
 export function isJudged(run: RunResponse, criterion: CriterionResult) {
   return !!(
@@ -16,7 +17,7 @@ export default function CriterionEvidence({ run, row }: { run: RunResponse; row:
       <p className="muted">
         {judged ? "Model judge" : run.provider === "imported" && !row.criterion_id ? "Archived evaluator" : "Built-in check"}
         {row.evaluator_model && ` · ${row.evaluator_model}`}
-        {" · "}{row.status === "error" ? "Incomplete" : row.status ?? "Recorded"}
+        {" · "}{row.status === "error" ? "Incomplete" : capitalize(row.status ?? "Recorded")}
       </p>
       {row.detail && <p>{row.detail}</p>}
       {row.rationale && row.rationale !== row.detail && <p>{row.rationale}</p>}

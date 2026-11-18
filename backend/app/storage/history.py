@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 
 from sqlalchemy import Numeric, cast, func, select, tuple_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 
 from app.models import Model, TestRun, TestVersion
 from app.storage.access import AccessContext
@@ -44,6 +44,19 @@ def list_history_summaries(
     if not 1 <= limit <= 100:
         raise ValueError("Limit must be between 1 and 100.")
     config = TestRun.configuration
+    # 1 for the first run of a saved test version, 2 for the next, and so on. Counting in SQL
+    # keeps the number correct on every page, however much history the client has loaded.
+    earlier = aliased(TestRun)
+    run_number = (
+        select(func.count(earlier.id))
+        .where(
+            earlier.test_version_id == TestRun.test_version_id,
+            earlier.project_id == TestRun.project_id,
+            tuple_(earlier.created_at, earlier.id) <= tuple_(TestRun.created_at, TestRun.id),
+        )
+        .correlate(TestRun)
+        .scalar_subquery()
+    )
     stmt = (
         select(
             TestRun.id,
@@ -55,6 +68,7 @@ def list_history_summaries(
             TestVersion.test_id,
             TestVersion.version,
             TestVersion.name,
+            run_number.label("run_number"),
             func.coalesce(
                 config["result_snapshot"]["model"].astext,
                 TestRun.evidence["target"]["actual_model"].astext,
@@ -96,6 +110,7 @@ def list_history_summaries(
                 "test_id": r.test_id,
                 "test_version": r.version,
                 "test_name": r.name,
+                "run_number": int(r.run_number),
                 "execution_id": r.execution_id,
                 "rerun_of_run_id": r.rerun_of_run_id,
             },

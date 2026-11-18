@@ -32,9 +32,13 @@ page.on("pageerror", error => errors.push(error.message));
 try {
   await page.goto(ui);
   await page.getByText("Backend ready",{exact:true}).waitFor();
-  assert.equal(await page.locator(".saved-run-item").count(),20);
-  await page.getByRole("button",{name:"Load more runs",exact:true}).click();
-  await page.waitForFunction(() => document.querySelectorAll(".saved-run-item").length > 20);
+  // The saved-tests tree can list one run under several suites, so count distinct run IDs.
+  const loadedRunIds = () => page.evaluate(() =>
+    new Set([...document.querySelectorAll(".saved-run-item")].map(item => item.dataset.runId)).size);
+  assert.equal(await loadedRunIds(),20);
+  await page.getByRole("button",{name:"Load More Runs",exact:true}).click();
+  await page.waitForFunction(() =>
+    new Set([...document.querySelectorAll(".saved-run-item")].map(item => item.dataset.runId)).size > 20);
   await page.getByRole("button",{name:new RegExp(`Load P3 browser ${suffix} 21,`)}).click();
   await page.getByRole("heading",{name:`P3 browser ${suffix} 21`,exact:true}).waitFor();
   const reviewer=page.getByLabel("Authenticated reviewer");
@@ -42,16 +46,16 @@ try {
   assert(await reviewer.getAttribute("readonly") !== null);
   await page.getByLabel("Rating (0–100)").fill("0");
   await page.getByLabel(/Rationale|Explanation/i).fill("Review <script>window.evidenceExecuted=true</script>");
-  await page.getByRole("button",{name:/Save review/i}).click();
+  await page.getByRole("button",{name:/Save Review/i}).click();
   await page.getByText(/Review saved as revision 1/).waitFor();
   assert.equal(await page.evaluate(() => window.evidenceExecuted),undefined);
   await page.getByLabel("Rating (0–100)").fill("80");
   await page.getByLabel(/Rationale|Explanation/i).fill("Revised opinion");
-  await page.getByRole("button",{name:/Save review/i}).click();
+  await page.getByRole("button",{name:/Save Review/i}).click();
   await page.getByText(/Review saved as revision 2/).waitFor();
   assert.equal((await (await fetch(`${api}/runs/${ids.at(-1)}`)).json()).score,100);
   const downloadPromise=page.waitForEvent("download");
-  await page.getByRole("button",{name:"Export opened run",exact:true}).click();
+  await page.getByRole("button",{name:"Export Run",exact:true}).click();
   const download=await downloadPromise;
   const path=await download.path();
   const bundle=JSON.parse(await fs.readFile(path,"utf8"));
@@ -59,7 +63,7 @@ try {
   assert.equal(bundle.runs[0].reviews.length,2);
   await page.locator('input[type="file"]').setInputFiles(path);
   await page.getByText("A run ID already exists. Strict import cannot overwrite evidence.",{exact:true}).waitFor();
-  await page.getByRole("button",{name:"Compare with another run",exact:true}).click();
+  await page.getByRole("button",{name:"Compare with Another Run",exact:true}).click();
   await page.getByRole("heading",{name:/Compare/i}).waitFor();
   if (process.env.HARNESS_SCREENSHOT_PATH) await page.screenshot({path:process.env.HARNESS_SCREENSHOT_PATH,fullPage:true});
   assert.deepEqual(errors,[]);

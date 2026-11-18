@@ -1,12 +1,14 @@
 import type { RunResponse } from "./api";
 import CriterionEvidence from "./CriterionEvidence";
+import { ExportRunButton } from "./EvidenceTransfer";
+import { capitalize } from "./titleCase";
 const available = (x: unknown): number | undefined =>
   typeof x === "number" && Number.isFinite(x) && x >= 0 ? x : undefined;
 export default function RunResults({ run }: { run: RunResponse | null }) {
   if (!run)
     return (
       <section className="panel result-panel">
-        <h2>Saved result</h2>
+        <h2>Saved Result</h2>
         <p className="muted">
           Run a test or open a saved run to inspect its evidence.
         </p>
@@ -22,13 +24,16 @@ export default function RunResults({ run }: { run: RunResponse | null }) {
     <section className="panel result-panel" aria-label="Selected run result" data-run-id={run.id}>
       <div className="result-heading">
         <div>
-          <h2>{run.metadata.test_name || "Saved result"}</h2>
+          <h2>{run.metadata.test_name || "Saved Result"}</h2>
           <p className="muted">
             Version {run.metadata.test_version ?? "unknown"} ·{" "}
             {new Date(run.created_at).toLocaleString()}
           </p>
         </div>
-        <span className="execution-status">Execution: {run.status}</span>
+        <div className="result-status">
+          <span className="execution-status">Execution: {capitalize(run.status)}</span>
+          <ExportRunButton runId={run.id} />
+        </div>
       </div>
       <p className="score-summary">
         Automated score{" "}
@@ -63,23 +68,23 @@ export default function RunResults({ run }: { run: RunResponse | null }) {
           <dd>{run.latency_ms === null ? "Unavailable" : `${run.latency_ms} ms`}</dd>
         </div>
         <div>
-          <dt>Input tokens</dt>
+          <dt>Input Tokens</dt>
           <dd>{input ?? "Not reported"}</dd>
         </div>
         <div>
-          <dt>Output tokens</dt>
+          <dt>Output Tokens</dt>
           <dd>{output ?? "Not reported"}</dd>
         </div>
         <div>
-          <dt>Total tokens</dt>
+          <dt>Total Tokens</dt>
           <dd>{total ?? "Not reported"}</dd>
         </div>
       </dl>
       <div className="response-box">
-        <h3>Model response</h3>
+        <h3>Model Response</h3>
         <p>{run.response || "No response was saved."}</p>
       </div>
-      <h3>Criterion evidence</h3>
+      <h3>Criterion Evidence</h3>
       <div className="criteria-list">
         {run.criteria.map((c, i) => (
           <div
@@ -104,7 +109,7 @@ export default function RunResults({ run }: { run: RunResponse | null }) {
         ))}
       </div>
       <details className="json-details">
-        <summary>Saved configuration</summary>
+        <summary>Saved Configuration</summary>
         <p>
           System instructions, approved criteria, and original suggestions are
           retained with this run.
@@ -128,7 +133,7 @@ export default function RunResults({ run }: { run: RunResponse | null }) {
         </pre>
       </details>
       <details className="json-details">
-        <summary>Complete run JSON</summary>
+        <summary>Complete Run JSON</summary>
         <pre>{JSON.stringify(run, null, 2)}</pre>
       </details>
     </section>

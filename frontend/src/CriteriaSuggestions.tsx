@@ -2,6 +2,7 @@ import { useState } from "react";
 import { customRubricMethod } from "./api";
 import type { CriterionConfiguration, CriterionDefinition, CustomRules } from "./api";
 import CriterionPicker from "./CriterionPicker";
+import { titleCase } from "./titleCase";
 export interface CriterionDraft {
   criterion_id: string;
   method?: string;
@@ -103,42 +104,36 @@ export default function CriteriaSuggestions({
   }
   return (
     <section className="criteria-editor" aria-labelledby="criteria-title">
-      <h3 id="criteria-title">Criteria to evaluate</h3>
+      <h3 id="criteria-title">Criteria to Evaluate</h3>
       <p className="muted">
         Review each condition, edit its parameters, and allocate exactly 100.00
         points.
       </p>
       {rows.length > 0 && (
-        <button
-          type="button"
-          className="secondary-button"
-          disabled={disabled}
-          onClick={() => onChange(rows.map((r) => ({ ...r, included: true })))}
-        >
-          Include all listed criteria
-        </button>
+        <label className="check-field include-all">
+          <input
+            type="checkbox"
+            disabled={disabled}
+            checked={rows.every((r) => r.included)}
+            onChange={(e) => onChange(rows.map((r) => ({ ...r, included: e.target.checked })))}
+          />
+          Include All
+        </label>
       )}
+      <div className="criteria-grid" hidden={rows.length === 0}>
       {rows.map((row, index) => {
         const def = catalog.find((c) => c.id === row.criterion_id);
         const problems = row.included ? rowProblems(row) : {};
-        const title = row.custom ? row.custom.title.trim() || "Custom criterion" : def?.name ?? row.criterion_id;
+        const title = row.custom ? row.custom.title.trim() || "Custom criterion" : titleCase(def?.name ?? row.criterion_id);
         const parametersError = `parameters-error-${row.criterion_id}`;
         const weightError = `points-error-${row.criterion_id}`;
         return (
           <fieldset
-            className="criterion-editor"
+            className={`criterion-editor${row.custom ? " custom-criterion" : ""}`}
             key={row.criterion_id}
             disabled={disabled}
           >
             <legend>{title}</legend>
-            <label className="check-field">
-              <input
-                type="checkbox"
-                checked={row.included}
-                onChange={(e) => change(index, { included: e.target.checked })}
-              />
-              Include {title}
-            </label>
             <p>{def?.description}</p>
             {row.reason && (
               <p className="suggestion-reason">{row.reason}</p>
@@ -153,9 +148,7 @@ export default function CriteriaSuggestions({
             )}
             <div className="criterion-edit-fields">
               {!row.custom && <label className="field">
-                <span>
-                  Parameters for {def?.name ?? row.criterion_id} (JSON)
-                </span>
+                <span>Parameters (JSON Only)</span>
                 <textarea
                   className="parameter-input"
                   spellCheck={false}
@@ -174,9 +167,10 @@ export default function CriteriaSuggestions({
                 )}
               </label>}
               <label className="field">
-                <span>Maximum points for {title}</span>
+                <span>Points</span>
                 <input
                   type="number"
+                  aria-label={`Maximum points for ${title}`}
                   min="0.01"
                   max="100"
                   step="0.01"
@@ -195,21 +189,34 @@ export default function CriteriaSuggestions({
               </label>
             </div>
             {!row.custom && <details>
-              <summary>Parameter format</summary>
+              <summary>Parameter Format</summary>
               <pre className="parameter-schema">
                 {JSON.stringify(def?.parameter_schema ?? {}, null, 2)}
               </pre>
             </details>}
-            <button
-              type="button"
-              className="text-button"
-              onClick={() => onChange(rows.filter((_, i) => i !== index))}
-            >
-              Remove {title}
-            </button>
+            <div className="criterion-actions">
+              <label className="check-field">
+                <input
+                  type="checkbox"
+                  aria-label={`Include ${title}`}
+                  checked={row.included}
+                  onChange={(e) => change(index, { included: e.target.checked })}
+                />
+                Include
+              </label>
+              <button
+                type="button"
+                className="text-button"
+                aria-label={`Remove ${title}`}
+                onClick={() => onChange(rows.filter((_, i) => i !== index))}
+              >
+                Remove
+              </button>
+            </div>
           </fieldset>
         );
       })}
+      </div>
       {rows.length === 0 && (
         <p className="muted">
           Generate suggestions above or add a criterion below.
@@ -228,7 +235,7 @@ export default function CriteriaSuggestions({
           disabled={disabled || !selected}
           onClick={add}
         >
-          Add criterion
+          Add Criterion
         </button>
         <button
           type="button"
@@ -236,7 +243,7 @@ export default function CriteriaSuggestions({
           disabled={disabled || rows.length >= 100}
           onClick={addCustom}
         >
-          Add custom criterion
+          Add Custom Criterion
         </button>
       </div>
     </section>
@@ -259,14 +266,14 @@ function CustomFields({
   return (
     <div className="custom-criterion-fields">
       <div className="field">
-        <label htmlFor={`${id}-title`}>Criterion title</label>
+        <label htmlFor={`${id}-title`}>Criterion Title</label>
         <input id={`${id}-title`} maxLength={100} value={row.title}
           aria-invalid={!!problems.title} aria-describedby={describedBy("title")}
           onChange={(e) => onChange({ title: e.target.value })} />
         {error("title")}
       </div>
       <div className="field">
-        <label htmlFor={`${id}-rules`}>Scoring instructions</label>
+        <label htmlFor={`${id}-rules`}>Scoring Instructions</label>
         <textarea id={`${id}-rules`} rows={4} maxLength={6000} value={row.instructions}
           aria-invalid={!!problems.rules} aria-describedby={describedBy("rules", "rules-hint")}
           onChange={(e) => onChange({ instructions: e.target.value })} />
@@ -281,7 +288,7 @@ function CustomFields({
         Verifies factual claims
       </label>
       <div className="field">
-        <label htmlFor={`${id}-reference`}>Judge-only reference evidence or example answer</label>
+        <label htmlFor={`${id}-reference`}>Judge-Only Reference Evidence or Example Answer</label>
         <textarea id={`${id}-reference`} rows={3} maxLength={10000} value={row.reference_evidence}
           aria-invalid={!!problems.reference} aria-describedby={describedBy("reference", "reference-hint")}
           onChange={(e) => onChange({ reference_evidence: e.target.value })} />

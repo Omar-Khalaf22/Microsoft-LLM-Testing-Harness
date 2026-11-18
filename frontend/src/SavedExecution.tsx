@@ -5,6 +5,7 @@ import {
 import type {
   Attempt, Execution, ExecutionSelection, ModelProfile, Preview, SavedTestVersion,
 } from "./api";
+import { capitalize } from "./titleCase";
 
 export function useReservation(onReserved: (execution: Execution) => void) {
   const request = useRef<{ fingerprint: string; key: string } | null>(null);
@@ -35,7 +36,7 @@ export function useReservation(onReserved: (execution: Execution) => void) {
 }
 
 export function ProfilePicker({
-  value, onChange, disabled, label = "Approved target profile",
+  value, onChange, disabled, label = "Approved Target Profile",
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -58,7 +59,7 @@ export function ProfilePicker({
       <div className="field">
         <label htmlFor={profileField}>{label}</label>
         <select id={profileField} value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled || !profiles?.length}>
-          <option value="">{profiles ? "Choose a profile" : "Loading profiles…"}</option>
+          <option value="">{profiles ? "Choose a Profile" : "Loading Profiles…"}</option>
           {profiles?.map((p) => <option key={p.profile_id} value={p.profile_id}>
             {p.profile_id} · {p.requested_model} · revision {p.profile_revision}
             {p.parameters.temperature !== undefined ? ` · temperature ${p.parameters.temperature}` : ""}
@@ -67,7 +68,7 @@ export function ProfilePicker({
       </div>
       {profiles?.length === 0 && <p className="muted">No approved target profiles are configured.</p>}
       {error && <p role="alert" className="error-text">
-        {error} <button type="button" onClick={() => { setError(""); setRetry(retry + 1); }}>Reload profiles</button>
+        {error} <button type="button" onClick={() => { setError(""); setRetry(retry + 1); }}>Reload Profiles</button>
       </p>}
     </>
   );
@@ -75,7 +76,7 @@ export function ProfilePicker({
 
 const previewFields = [
   ["purpose", "Purpose"], ["deliverable", "Deliverable"],
-  ["constraints", "Constraints"], ["success_conditions", "Success conditions"],
+  ["constraints", "Constraints"], ["success_conditions", "Success Conditions"],
 ];
 const previewErrors = {
   timeout: "The target timed out.",
@@ -132,7 +133,7 @@ export default function SavedExecution({
   });
   return (
     <section className="saved-execution" aria-label="Execute approved test">
-      <h3>Execute version {test.test_version}</h3>
+      <h3>Execute Version {test.test_version}</h3>
       <ProfilePicker value={profile} disabled={busy} onChange={(value) => {
         setProfile(value);
         setPreview(null);
@@ -140,15 +141,15 @@ export default function SavedExecution({
         setReviewed(false);
       }} />
       <button type="button" className="secondary-button" onClick={() => void interpret()} disabled={!profile || busy}>
-        {previewing ? "Requesting preview…" : preview || previewError ? "Retry preview" : "Request interpretation preview"}
+        {previewing ? "Requesting Preview…" : preview || previewError ? "Retry Preview" : "Request Interpretation Preview"}
       </button>
       {previewError && <p role="alert" className="error-text">{previewError}</p>}
       {preview && <div className="preview-card">
         <div className="response-box">
-          <h4>Original task</h4>
+          <h4>Original Task</h4>
           <p>{test.definition.prompt}</p>
           <details>
-            <summary>Effective system instructions</summary>
+            <summary>Effective System Instructions</summary>
             <p>{test.definition.resolved_system_prompt}</p>
           </details>
         </div>
@@ -177,7 +178,7 @@ export default function SavedExecution({
       {error && <p role="alert" className="error-text">{error}</p>}
       <button type="button" className="primary-button" onClick={() => void startRun()}
         disabled={!profile || busy || !!previewError || (!!preview && !reviewed)}>
-        {reserving ? "Reserving run…" : "Run approved version"}
+        {reserving ? "Reserving Run…" : "Run Approved Version"}
       </button>
     </section>
   );
@@ -191,7 +192,7 @@ export function RerunButton({ runId, onReserved }: {
     <>
       <button type="button" className="secondary-button" disabled={reserving}
         onClick={() => void reserve(runId, (key) => rerunVersion(runId, key))}>
-        {reserving ? "Reserving rerun…" : "Rerun approved version"}
+        {reserving ? "Reserving Rerun…" : "Rerun Approved Version"}
       </button>
       {error && <p role="alert" className="error-text">{error}</p>}
     </>
@@ -238,12 +239,12 @@ export function ExecutionProgress({ initial, onFinished, onOpen }: {
   return (
     <section className="panel execution-progress" aria-label="Execution progress"
       data-execution-id={plan.execution_id}>
-      <h2>Execution progress</h2>
+      <h2>Execution Progress</h2>
       <p role="status">{completed} completed · {failed} failed · {running} running · {pending} pending</p>
       {error && <p role="alert" className="error-text">{error}</p>}
       <ol className="attempt-list">
         {plan.attempts.map((attempt) => <li key={attempt.run_id}>
-          <span>Item {attempt.suite_position} · model {attempt.model_position} · version {attempt.test_version} · {attempt.status}</span>
+          <span>Item {attempt.suite_position} · model {attempt.model_position} · version {attempt.test_version} · {capitalize(attempt.status)}</span>
           {(attempt.status === "completed" || attempt.status === "failed") &&
             <button type="button" className="text-button" onClick={() => onOpen(attempt)}>
               View item {attempt.suite_position} model {attempt.model_position} result
