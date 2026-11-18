@@ -586,21 +586,25 @@
     "id": "xml_validity",
     "name": "XML validity",
     "category": "structure",
-    "description": "Candidate: xml validity. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Parse the complete response as a single well formed XML document without fetching external resources.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "prototype4",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "parameter_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    }
   },
   {
     "id": "markdown_format",
@@ -1509,21 +1513,39 @@
     "id": "list_length",
     "name": "List length",
     "category": "length",
-    "description": "Candidate: list length. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Count Markdown bullet or numbered list lines and require a configured inclusive range.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "prototype4",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "minimum": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "maximum": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        }
+      },
+      "required": [
+        "minimum",
+        "maximum"
+      ],
+      "additionalProperties": false
+    }
   },
   {
     "id": "table_structure",
@@ -1785,41 +1807,62 @@
     "id": "date_format",
     "name": "Date format",
     "category": "structure",
-    "description": "Candidate: date format. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Require a complete response to round trip through an exact Python datetime format.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "prototype4",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": [
+            "%Y-%m-%d",
+            "%d/%m/%Y",
+            "%m/%d/%Y",
+            "%Y-%m-%dT%H:%M:%S",
+            "%H:%M:%S"
+          ]
+        }
+      },
+      "required": [
+        "format"
+      ],
+      "additionalProperties": false
+    }
   },
   {
     "id": "code_syntax",
     "name": "Code syntax",
     "category": "structure",
-    "description": "Candidate: code syntax. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Parse the entire response as Python source using ast.parse; does not execute code.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "prototype4",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "parameter_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    }
   },
   {
     "id": "code_execution",
@@ -2342,21 +2385,34 @@
     "id": "numeric_units",
     "name": "Numeric units",
     "category": "numerical",
-    "description": "Candidate: numeric units. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Require the entire response to contain one numeric scalar followed by an exact unit string.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "prototype4",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20,
+          "pattern": "^[A-Za-z%°/]+$"
+        }
+      },
+      "required": [
+        "unit"
+      ],
+      "additionalProperties": false
+    }
   },
   {
     "id": "source_freshness",
@@ -2383,61 +2439,104 @@
     "id": "citation_presence",
     "name": "Citation presence",
     "category": "structure",
-    "description": "Candidate: citation presence. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Count citation markers like [1] or Markdown links. Checks presence, not source correctness.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "prototype4",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "minimum": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "minimum"
+      ],
+      "additionalProperties": false
+    }
   },
   {
     "id": "required_links",
     "name": "Required links",
     "category": "structure",
-    "description": "Candidate: required links. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Require configured exact URL strings to appear in the response; no destination verification.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "prototype4",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^https?://",
+            "minLength": 9,
+            "maxLength": 2000
+          },
+          "minItems": 1,
+          "maxItems": 50,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "urls"
+      ],
+      "additionalProperties": false
+    }
   },
   {
     "id": "markdown_links",
     "name": "Markdown links",
     "category": "structure",
-    "description": "Candidate: markdown links. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Count Markdown HTTP(S) links in the response without fetching their destinations.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "prototype4",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "minimum": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "minimum"
+      ],
+      "additionalProperties": false
+    }
   },
   {
     "id": "html_safety",
