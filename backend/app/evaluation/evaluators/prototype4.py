@@ -2,7 +2,6 @@
 import ast
 import re
 from datetime import datetime
-from urllib.parse import urlsplit
 from xml.etree import ElementTree
 
 MAX_LENGTH = 100_000
@@ -35,12 +34,12 @@ def evaluate(criterion_id: str, response: str, parameters: dict):
             ok = False
         return ok, float(ok), "Python syntax parsed without executing code"
     if criterion_id == "citation_presence":
-        count = len(re.findall(r"\\[[1-9][0-9]*\\]|\\[[^]\\n]+\\]\\(https?://[^)\\s]+\\)", response))
+        count = len(re.findall(r"\[[1-9][0-9]*\]|\[[^]\n]+\]\(https?://[^)\s]+\)", response))
         target = parameters["minimum"]
         ok = count >= target
         return ok, min(1.0, count / target), f"Found {count} citation markers; minimum {target}. Presence does not verify sources."
     if criterion_id == "markdown_links":
-        count = len(re.findall(r"\\[[^]\\n]+\\]\\(https?://[^)\\s]+\\)", response))
+        count = len(re.findall(r"\[[^]\n]+\]\(https?://[^)\s]+\)", response))
         target = parameters["minimum"]
         ok = count >= target
         return ok, min(1.0, count / target), f"Found {count} Markdown HTTP links; minimum {target}. Links were not fetched."
@@ -50,13 +49,13 @@ def evaluate(criterion_id: str, response: str, parameters: dict):
         ratio = len(found) / len(required)
         return ratio == 1, ratio, f"Found {len(found)} of {len(required)} required URL strings; no availability check"
     if criterion_id == "list_length":
-        count = sum(bool(re.match(r"^\\s*(?:[-*+]\\s+|[0-9]+[.)]\\s+)", line)) for line in response.splitlines())
+        count = sum(bool(re.match(r"^\s*(?:[-*+]\s+|[0-9]+[.)]\s+)", line)) for line in response.splitlines())
         lo, hi = parameters["minimum"], parameters["maximum"]
         ok = lo <= count <= hi
         return ok, float(ok), f"Found {count} Markdown list items; expected {lo} through {hi}"
     if criterion_id == "numeric_units":
-        number = r"[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][+-]?\\d+)?"
-        match = re.fullmatch(rf"\\s*({number})\\s*([A-Za-z%°/]+)\\s*", response)
+        number = r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?"
+        match = re.fullmatch(rf"\s*({number})\s*([A-Za-z%°/]+)\s*", response)
         ok = bool(match and match.group(2) == parameters["unit"])
         return ok, float(ok), f"Expected one numeric value followed by exact unit {parameters['unit']!r}"
     raise ValueError(f"Unsupported criterion: {criterion_id}")
