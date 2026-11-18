@@ -28,6 +28,14 @@ export interface CriterionConfiguration {
   criterion_id: string;
   parameters: Record<string, unknown>;
   weight: number;
+  method?: string;
+}
+export const customRubricMethod = "custom_rubric_v1";
+export interface CustomRules {
+  title: string;
+  instructions: string;
+  reference_evidence: string;
+  requires_reference: boolean;
 }
 export interface CriterionDefinition {
   id: string;
@@ -86,6 +94,7 @@ export interface CriterionResult {
   evaluator_model?: string | null;
   rationale?: string | null;
   evidence?: string[] | null;
+  evidence_excerpts?: { source: "reference" | "answer"; excerpt: string }[] | null;
 }
 export interface RunResponse {
   id: string;
@@ -126,6 +135,12 @@ export interface RunResponse {
     test_id?: string;
     test_version?: number;
     test_name?: string;
+    execution_id?: string | null;
+    rerun_of_run_id?: string | null;
+    profile?: ModelProfile;
+    criterion_definitions?: { id: string; name: string; evaluator_type: string; method?: string }[];
+    judge_profile_id?: string | null;
+    judge_profile_revision?: number | null;
   };
 }
 async function detail(
@@ -158,6 +173,140 @@ async function get<T>(path: string, signal?: AbortSignal): Promise<T> {
   if (!response.ok) throw new Error((await detail(response)).message);
   return response.json() as Promise<T>;
 }
+async function post<T>(path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
+  const response = await apiFetch(`${apiBaseUrl}${path}`, {
+    method: "POST",
+    headers: body === undefined ? undefined : { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+    signal,
+  });
+  if (!response.ok) throw new Error((await detail(response)).message);
+  return response.json() as Promise<T>;
+}
+
+export interface TestReference { test_id: string; test_version: number }
+type SavedState = "draft" | "approved" | "historical";
+interface LegacyChecks {
+  weights: ScoringWeights;
+  expected_keywords: string[];
+  forbidden_terms: string[];
+  minimum_length: number;
+  minimum_sentences: number;
+}
+export interface DraftDefinition {
+  name: string;
+  objective: string;
+  prompt: string;
+  base_system_prompt: string | null;
+  custom_system_prompt: string | null;
+  criteria?: CriterionConfiguration[] | null;
+  legacy?: LegacyChecks | null;
+}
+interface VersionSummary extends TestReference {
+  name: string;
+  state: SavedState;
+}
+export interface SavedTestVersion extends VersionSummary {
+  definition: DraftDefinition & { resolved_system_prompt: string };
+}
+interface TestSummary {
+  test_id: string;
+  name: string;
+  latest_version: number;
+  state: SavedState;
+}
+export interface ModelProfile {
+  profile_id: string;
+  profile_revision: number;
+  provider: string;
+  requested_model: string;
+  parameters: { temperature?: number };
+}
+export interface Preview {
+  preview_id: string;
+  status: "completed" | "technical_error";
+  actual_model: string | null;
+  error_category: "timeout" | "provider_unavailable" | "invalid_response" | null;
+  interpretation: Record<string, string>;
+}
+export interface SuiteReference { suite_id: string; suite_revision: number }
+export interface SuiteSummary extends SuiteReference { name: string }
+export interface SavedSuite extends SuiteSummary { items: TestReference[] }
+export type AttemptStatus = "pending" | "running" | "completed" | "failed";
+export interface Attempt extends TestReference {
+  run_id: string;
+  status: AttemptStatus;
+  suite_position: number;
+  model_position: number;
+}
+export interface Execution {
+  execution_id: string;
+  status: AttemptStatus;
+  progress: Record<AttemptStatus, number>;
+  attempts: Attempt[];
+}
+interface PreviewChoice {
+  preview_id: string;
+  confirmed?: boolean;
+  acknowledge_error?: boolean;
+}
+export type ExecutionSelection = ({ test: TestReference } | { suite: SuiteReference }) & {
+  profile_ids: string[];
+  previews?: Record<string, PreviewChoice>;
+};
+
+async function allPages<T>(path: string, cursorName: string, signal?: AbortSignal) {
+  const items: T[] = [];
+  let cursor: string | number | null = null;
+  do {
+    const page: { items: T[]; next_cursor: string | number | null } = await get(
+      cursor === null ? path : `${path}?${cursorName}=${encodeURIComponent(cursor)}`,
+      signal,
+    );
+    items.push(...page.items);
+    cursor = page.next_cursor;
+  } while (cursor !== null);
+  return items;
+}
+
+const testPath = (id: string) => `/tests/${encodeURIComponent(id)}/versions`;
+const versionPath = (test: TestReference) => `${testPath(test.test_id)}/${test.test_version}`;
+export const testReference = ({ test_id, test_version }: TestReference): TestReference =>
+  ({ test_id, test_version });
+export const listTests = (signal?: AbortSignal) => allPages<TestSummary>("/tests", "after", signal);
+export const listVersions = (id: string, signal?: AbortSignal) =>
+  allPages<VersionSummary>(testPath(id), "after_version", signal);
+export const getVersion = (test: TestReference, signal?: AbortSignal) =>
+  get<SavedTestVersion>(versionPath(test), signal);
+export function saveDraft(definition: DraftDefinition, previous?: TestReference) {
+  return previous
+    ? post<SavedTestVersion>(testPath(previous.test_id), {
+        definition, expected_version: previous.test_version,
+      })
+    : post<SavedTestVersion>("/tests", definition);
+}
+export const approveVersion = (test: TestReference) =>
+  post<SavedTestVersion>(`${versionPath(test)}/approve`);
+export const listProfiles = (signal?: AbortSignal) => get<ModelProfile[]>("/model-profiles", signal);
+export const requestPreview = (test: TestReference, profile_id: string, signal?: AbortSignal) =>
+  post<Preview>("/previews", { test: testReference(test), profile_id }, signal);
+export const reserveExecution = (selection: ExecutionSelection, idempotency_key: string) =>
+  post<Execution>("/executions", { ...selection, idempotency_key });
+export const getExecution = (id: string, signal?: AbortSignal) =>
+  get<Execution>(`/executions/${encodeURIComponent(id)}`, signal);
+export const rerunVersion = (runId: string, idempotency_key: string) =>
+  post<Execution>(`/runs/${encodeURIComponent(runId)}/rerun`, { idempotency_key });
+export const listSuites = (signal?: AbortSignal) => allPages<SuiteSummary>("/suites", "after", signal);
+export const getSuite = (s: SuiteReference) =>
+  get<SavedSuite>(`/suites/${encodeURIComponent(s.suite_id)}/revisions/${s.suite_revision}`);
+export function saveSuite(name: string, items: TestReference[], previous: SuiteReference | null) {
+  return previous
+    ? post<SavedSuite>(`/suites/${encodeURIComponent(previous.suite_id)}/revisions`, {
+        name, items, expected_revision: previous.suite_revision,
+      })
+    : post<SavedSuite>("/suites", { name, items });
+}
+
 export function listRuns(signal?: AbortSignal) {
   return get<RunResponse[]>("/runs?limit=100", signal);
 }

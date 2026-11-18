@@ -37,6 +37,7 @@ class TestRequest:
     recommendation_snapshot: dict | None = None
     reserved_run_id: str | None = None
     frozen_system_prompt: str | None = None
+    frozen_criterion_definitions: list[dict] | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> TestRequest:
@@ -119,6 +120,7 @@ class CriterionResult:
     evaluator_model: str | None = None
     rationale: str | None = None
     evidence: list[str] | None = None
+    evidence_excerpts: list[dict] | None = None
 
 
 @dataclass(frozen=True)

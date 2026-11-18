@@ -938,6 +938,44 @@ button:disabled {
 .add-criterion .field {
   flex: 1;
 }
+.criterion-picker {
+  position: relative;
+  min-width: 0;
+}
+.criterion-picker-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  inset-inline: 0;
+  z-index: 2;
+  max-height: 16rem;
+  overflow: auto;
+  border: 1px solid #a2b2a5;
+  border-radius: 8px;
+  background: white;
+  font-size: 14px;
+  font-weight: 400;
+}
+.criterion-picker-menu ul {
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+}
+.criterion-picker-menu li,
+.criterion-picker-menu p {
+  padding: 8px 10px;
+}
+.criterion-picker-menu li {
+  border-radius: 5px;
+  cursor: pointer;
+}
+.criterion-picker-menu li:hover,
+.criterion-picker-menu li[aria-selected="true"] {
+  background: #e7eee8;
+}
+.criterion-picker-menu p {
+  margin: 0;
+  color: var(--muted);
+}
 .field select {
   width: 100%;
   min-width: 0;
@@ -1098,3 +1136,98 @@ textarea {
 .same-text { color: var(--muted); }
 .evidence-excerpts { margin: 4px 0 0; padding-left: 18px; font-size: 12px; color: var(--muted); }
 .comparison > .text-button { justify-self: start; }
+
+.saved-controls {
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 12px 0;
+  border: 0;
+}
+
+.saved-controls > button,
+.saved-execution > button {
+  justify-self: start;
+}
+
+.saved-controls select,
+.saved-execution select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #c8cec4;
+  border-radius: 9px;
+  color: var(--ink);
+  background: #fff;
+}
+
+.saved-actions,
+.result-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.result-actions {
+  margin-bottom: 16px;
+}
+
+.result-actions .back-to-test {
+  margin-bottom: 0;
+}
+
+.saved-execution {
+  display: grid;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.preview-card,
+.custom-criterion-fields {
+  display: grid;
+  gap: 10px;
+}
+
+.preview-card {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.preview-card .execution-metrics-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.execution-progress {
+  max-width: 1200px;
+  min-height: 0;
+  margin: 0 auto 16px;
+  padding: 16px;
+}
+
+.execution-progress h2,
+.saved-execution h3,
+.preview-card h4 {
+  margin: 0;
+}
+
+.attempt-list,
+.suite-items {
+  padding-left: 24px;
+}
+
+.attempt-list li,
+.suite-items li {
+  margin-block: 8px;
+  overflow-wrap: anywhere;
+}
+
+.attempt-list button {
+  margin-inline-start: 10px;
+}
+
+.criterion-evidence {
+  overflow-wrap: anywhere;
+}

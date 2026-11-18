@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
+from .custom_rubric import CUSTOM_RUBRIC_METHOD, validated_excerpts
+
 RUBRICS = {
     "factual_accuracy": "Assess factual correctness against supplied reference evidence.",
     "completeness": "Assess whether all material prompt requirements were addressed.",
@@ -55,25 +57,7 @@ def judge_rubric(
         "evaluator_model": evaluator_model,
     }
     raw = invoke(payload)
-    if not isinstance(raw, Mapping) or set(raw) != {
-        "score",
-        "rationale",
-        "evidence",
-        "evaluator_model",
-    }:
-        raise InvalidJudgment("Malformed judge response")
-    score = raw["score"]
-    if type(score) not in (int, float, Decimal):
-        raise InvalidJudgment("Score must be a JSON number")
-    try:
-        value = Decimal(str(score))
-    except InvalidOperation as exc:
-        raise InvalidJudgment("Invalid score") from exc
-    if not value.is_finite() or not 0 <= value <= 1:
-        raise InvalidJudgment("Score must be finite and within 0 to 1")
-    rationale = raw["rationale"]
-    if not isinstance(rationale, str) or not rationale.strip() or len(rationale) > 4000:
-        raise InvalidJudgment("Invalid rationale")
+    value, rationale = _score_and_rationale(raw, {"evaluator_model"})
     evidence = raw["evidence"]
     if (
         not isinstance(evidence, list)
@@ -85,6 +69,48 @@ def judge_rubric(
         raise InvalidJudgment("Evidence excerpt not in reference")
     if raw["evaluator_model"] != evaluator_model:
         raise InvalidJudgment("Evaluator model mismatch")
-    return RubricJudgment(
-        criterion_id, float(value), rationale.strip(), evaluator_model, tuple(evidence)
+    return RubricJudgment(criterion_id, value, rationale, evaluator_model, tuple(evidence))
+
+
+def judge_custom_rubric(*, criterion_id, parameters, task, response, invoke):
+    reference = parameters["reference_evidence"]
+    raw = invoke(
+        {
+            "criterion_id": criterion_id,
+            "method": CUSTOM_RUBRIC_METHOD,
+            "rubric": {
+                "title": parameters["title"],
+                "scoring_rules": parameters["instructions"],
+                "requires_reference": parameters["requires_reference"],
+            },
+            "task": task,
+            "reference_evidence": reference,
+            "response": response,
+        }
     )
+    score, rationale = _score_and_rationale(raw)
+    evidence = validated_excerpts(raw["evidence"], reference=reference, answer=response)
+    return score, rationale, evidence
+
+
+def _score_and_rationale(raw, extra_keys=()):
+    if not isinstance(raw, Mapping) or set(raw) != {"score", "rationale", "evidence", *extra_keys}:
+        raise InvalidJudgment("Malformed judge response")
+    score = raw["score"]
+    if type(score) not in (int, float, Decimal):
+        raise InvalidJudgment("Score must be a JSON number")
+    try:
+        value = Decimal(str(score))
+    except InvalidOperation as exc:
+        raise InvalidJudgment("Invalid score") from exc
+    if not value.is_finite() or not 0 <= value <= 1:
+        raise InvalidJudgment("Score must be finite and within 0 to 1")
+    rationale = raw["rationale"]
+    if (
+        not isinstance(rationale, str)
+        or not rationale.strip()
+        or len(rationale) > 4000
+        or "\x00" in rationale
+    ):
+        raise InvalidJudgment("Invalid rationale")
+    return float(value), rationale.strip()

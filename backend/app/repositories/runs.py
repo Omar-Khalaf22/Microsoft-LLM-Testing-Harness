@@ -176,4 +176,6 @@ def get_run_result(
     }
     if run.execution_id is not None:
         result["created_at"] = run.created_at.isoformat()
+        result["execution_id"] = run.execution_id
+        result["rerun_of_run_id"] = run.rerun_of_run_id
     return result

@@ -90,6 +90,25 @@ def create_test_version(
     expected_version: int,
 ) -> TestVersion:
     definition = SavedDefinition.model_validate(definition.model_dump())
+    return _create_next_version(session, access, test_id, definition, expected_version)
+
+
+def approve_test_version(
+    session: Session, access: AccessContext, ref: TestReference
+) -> TestVersion:
+    draft = get_test_version(session, access, ref)
+    if (draft.approval or {}).get("state") != "draft":
+        raise Conflict("Only a saved draft can be approved.")
+    definition = SavedDefinition.model_validate(
+        {k: draft.evaluation_definition[k] for k in SavedDefinition.model_fields}
+    )
+    definition.state = "approved"
+    # Use the reviewed draft's effective defaults and saved definitions.
+    frozen = {**draft.evaluation_definition, "state": "approved"}
+    return _create_next_version(session, access, ref.test_id, definition, ref.test_version, frozen)
+
+
+def _create_next_version(session, access, test_id, definition, expected_version, frozen=None):
     row = session.scalar(
         select(Test)
         .where(Test.id == test_id, Test.project_id == access.project_id)
@@ -102,11 +121,11 @@ def create_test_version(
     )
     if latest != expected_version:
         raise Conflict("Test changed. Reload the latest version.")
-    return _version(session, access, row, definition, latest + 1)
+    return _version(session, access, row, definition, latest + 1, frozen=frozen)
 
 
-def _version(session, access, test, definition, number):
-    frozen = definition.frozen()
+def _version(session, access, test, definition, number, *, frozen=None):
+    frozen = definition.frozen() if frozen is None else frozen
     version = TestVersion(
         test_id=test.id,
         version=number,
@@ -123,18 +142,26 @@ def _version(session, access, test, definition, number):
     session.add(version)
     session.flush()
     if definition.criteria is not None:
-        selected = [(c["criterion_id"], c["weight"]) for c in definition.criteria]
+        selected = [
+            (row["criterion_id"], row["weight"], criterion)
+            for row, criterion in zip(
+                definition.criteria, frozen["criterion_definitions"], strict=True
+            )
+        ]
     else:
-        selected = [(cid, definition.legacy["weights"][key]) for key, cid in WEIGHT_IDS.items()]
+        selected = [
+            (cid, definition.legacy["weights"][key], get_criterion(cid))
+            for key, cid in WEIGHT_IDS.items()
+        ]
     session.add_all(
         [
             VersionCriterion(
                 test_version_id=version.id,
                 criterion_id=cid,
                 maximum_points=Decimal(str(points)),
-                definition=get_criterion(cid),
+                definition=criterion,
             )
-            for cid, points in selected
+            for cid, points, criterion in selected
         ]
     )
     session.flush()

@@ -55,8 +55,9 @@ try {
   // Reject one suggestion, then add an implemented structured criterion manually.
   await objectRow.getByRole("button", { name: /Remove/ }).click();
   await page
-    .getByLabel("Add a supported criterion")
-    .selectOption("json_field_type");
+    .getByRole("combobox", { name: "Add a supported criterion" })
+    .fill("json_field_type");
+  await page.getByRole("option", { name: /JSON field type/i }).click();
   await page
     .getByRole("button", { name: "Add criterion", exact: true })
     .click();

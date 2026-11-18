@@ -117,6 +117,13 @@ def test_empty_api_key_is_rejected():
         OpenAICompatibleProvider("", "https://example.invalid/v1")
 
 
+def test_large_provider_response_is_rejected_before_json_parsing(http_response, monkeypatch):
+    monkeypatch.setattr(providers, "MAX_PROVIDER_BODY_BYTES", 32)
+    http_response(b" " * 33)
+    with pytest.raises(ValueError, match="exceeds the supported size"):
+        generate()
+
+
 @pytest.mark.parametrize(
     "error",
     [

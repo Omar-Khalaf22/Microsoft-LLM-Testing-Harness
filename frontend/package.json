@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test:e2e": "node e2e/prototype2.mjs",
-    "test:e2e:p3": "node e2e/prototype3.mjs"
+    "test:e2e:p3": "node e2e/prototype3.mjs",
+    "test:e2e:rubrics": "node e2e/custom-rubrics.mjs"
   },
   "dependencies": {
     "react": "^19.1.1",

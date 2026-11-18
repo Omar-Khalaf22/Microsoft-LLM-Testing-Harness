@@ -1,4 +1,5 @@
 import type { RunResponse } from "./api";
+import CriterionEvidence from "./CriterionEvidence";
 const available = (x: unknown): number | undefined =>
   typeof x === "number" && Number.isFinite(x) && x >= 0 ? x : undefined;
 export default function RunResults({ run }: { run: RunResponse | null }) {
@@ -18,7 +19,7 @@ export default function RunResults({ run }: { run: RunResponse | null }) {
     available(usage?.total_tokens) ??
     (input !== undefined && output !== undefined ? input + output : undefined);
   return (
-    <section className="panel result-panel" aria-label="Selected run result">
+    <section className="panel result-panel" aria-label="Selected run result" data-run-id={run.id}>
       <div className="result-heading">
         <div>
           <h2>{run.metadata.test_name || "Saved result"}</h2>
@@ -87,26 +88,11 @@ export default function RunResults({ run }: { run: RunResponse | null }) {
           >
             <div>
               <strong>{c.name}</strong>
-              <p>{c.detail}</p>
+              <CriterionEvidence row={c} run={run} />
               {c.normalized_score !== null &&
                 c.normalized_score !== undefined && (
                   <p>Completion value: {c.normalized_score.toFixed(4)}</p>
                 )}
-              <p>
-                Evaluation:{" "}
-                {c.status === "error" ? "Incomplete" : (c.status ?? "Recorded")}
-              </p>
-              {c.evaluator_model && <p>Judged by {c.evaluator_model}</p>}
-              {c.rationale && <p>Rationale: {c.rationale}</p>}
-              {c.evidence && c.evidence.length > 0 && (
-                <ul className="evidence-excerpts" aria-label="Reference excerpts">
-                  {c.evidence.map((excerpt, i) => (
-                    <li key={i}>
-                      <q>{excerpt}</q>
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
             <span className="points">
               {c.score === null ? "Unavailable" : c.score.toFixed(2)}
@@ -132,6 +118,7 @@ export default function RunResults({ run }: { run: RunResponse | null }) {
               resolved_system_prompt: run.metadata.resolved_system_prompt,
               criteria: run.metadata.criteria,
               scoring_weights: run.metadata.scoring_weights,
+              profile: run.metadata.profile,
               configuration_state: run.metadata.configuration_state,
               generated_configuration: run.metadata.generated_configuration,
             },

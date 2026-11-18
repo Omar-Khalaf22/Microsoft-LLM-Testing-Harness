@@ -9,6 +9,10 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from app.assistant.prompts import DEFAULT_SYSTEM_PROMPT
+from app.evaluation.demo_rubrics import demo_answer, demo_interpretation, demo_judgment
+from app.evaluation.interpretation import PREVIEW_INSTRUCTIONS
+
+MAX_PROVIDER_BODY_BYTES = 2_000_000
 
 
 @dataclass(frozen=True)
@@ -33,7 +37,12 @@ class DemoProvider:
     ) -> ProviderResponse:
         words = re.findall(r"[A-Za-z0-9']+", prompt)
         topic = " ".join(words[:8]) if words else "the requested topic"
-        if model == "demo-partial-v1":
+        scripted = demo_answer(model)
+        if system_prompt == PREVIEW_INSTRUCTIONS:
+            text = json.dumps(demo_interpretation(json.loads(prompt)["task_prompt"]))
+        elif scripted is not None:
+            text = scripted
+        elif model == "demo-partial-v1":
             text = (
                 f"Partial response for: {topic}. "
                 "This answer provides a short overview but leaves out several requested details "
@@ -60,6 +69,13 @@ class DemoProvider:
             model=model if model.startswith("demo-") else "demo-strong-v1",
             usage={"input_tokens": None, "output_tokens": None},
         )
+
+
+class DemoJudgeProvider:
+    name = "local_demo_judge"
+
+    def generate(self, prompt, model, temperature, system_prompt):
+        return ProviderResponse(json.dumps(demo_judgment(json.loads(prompt))), model, {})
 
 
 class OpenAICompatibleProvider:
@@ -101,9 +117,12 @@ class OpenAICompatibleProvider:
         )
         try:
             with urlopen(request, timeout=30) as response:
-                body = json.load(response)
+                raw = response.read(MAX_PROVIDER_BODY_BYTES + 1)
         except (HTTPError, URLError, TimeoutError) as exc:
             raise RuntimeError(f"Model request failed: {exc}") from exc
+        if len(raw) > MAX_PROVIDER_BODY_BYTES:
+            raise ValueError("Model response exceeds the supported size.")
+        body = json.loads(raw)
 
         usage = body.get("usage")
         usage = usage if isinstance(usage, dict) else {}

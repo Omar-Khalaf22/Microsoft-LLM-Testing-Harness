@@ -13,6 +13,7 @@ from pydantic import (
 )
 
 from app.evaluation.configuration import CriterionConfiguration, validate_selection
+from app.evaluation.custom_rubric import EvidenceExcerpt
 from app.evaluation.weights import ScoringWeights
 
 NonemptyText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
@@ -59,6 +60,8 @@ class RunCreateRequest(BaseModel):
             validate_selection([x.model_dump() for x in self.criteria])
             if self.configuration_state != "approved":
                 raise ValueError("Review and approve the selected criteria before execution.")
+            if any(row.method for row in self.criteria):
+                raise ValueError("Save and approve a test version to run custom criteria.")
             if {
                 "weights",
                 "expected_keywords",
@@ -92,6 +95,7 @@ class CriterionResultResponse(BaseModel):
     evaluator_model: str | None = None
     rationale: str | None = None
     evidence: list[str] | None = None
+    evidence_excerpts: list[EvidenceExcerpt] | None = None
 
 
 class RunResponse(BaseModel):

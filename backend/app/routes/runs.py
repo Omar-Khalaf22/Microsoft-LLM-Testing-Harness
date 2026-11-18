@@ -77,17 +77,16 @@ def post_run(
                     raise HTTPException(
                         status_code=404, detail="The selected test no longer exists."
                     )
+                versions = select(TestVersion).where(TestVersion.test_id == request.test_id)
                 if request.test_version is not None:
-                    version = session.scalar(
-                        select(TestVersion.id).where(
-                            TestVersion.test_id == request.test_id,
-                            TestVersion.version == request.test_version,
-                        )
+                    versions = versions.where(TestVersion.version == request.test_version)
+                version = session.scalar(versions.order_by(TestVersion.version.desc()).limit(1))
+                if request.test_version is not None and version is None:
+                    raise HTTPException(
+                        status_code=404, detail="The selected test version no longer exists."
                     )
-                    if version is None:
-                        raise HTTPException(
-                            status_code=404, detail="The selected test version no longer exists."
-                        )
+                if version is not None and version.definition_hash:
+                    raise HTTPException(409, "Use the saved-version workflow to execute this test.")
         except HTTPException:
             raise
         except Exception:

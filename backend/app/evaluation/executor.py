@@ -8,7 +8,7 @@ from uuid import uuid4
 from app.assistant.prompts import resolve_system_prompt
 from app.config import get_settings
 
-from .configuration import validate_selection
+from .configuration import criterion_definition, validate_selection
 from .models import CriterionResult, TestRequest, TestResult
 from .providers import DemoProvider, OpenAICompatibleProvider
 from .registry import CATALOG_REVISION, get_criterion
@@ -36,6 +36,9 @@ class TestExecutor:
             ScoringWeights.model_validate(request.weights)
         if selected and request.configuration_state != "approved":
             raise ValueError("Approve the criteria before execution.")
+        definitions = request.frozen_criterion_definitions
+        if definitions is None and selected:
+            definitions = [criterion_definition(row) for row in selected]
         started_at = datetime.now(UTC).isoformat()
         started = perf_counter()
         instructions = request.frozen_system_prompt or resolve_system_prompt(
@@ -56,7 +59,7 @@ class TestExecutor:
             )
             if not isinstance(generated.text, str):
                 raise TypeError("The provider returned no textual response.")
-            if len(generated.text) > 100_000:
+            if len(generated.text) > 100_000 or "\x00" in generated.text:
                 raise ValueError("Provider response exceeds the supported size.")
             response, model, usage = (
                 generated.text,
@@ -107,11 +110,12 @@ class TestExecutor:
                         for key, cid in WEIGHT_IDS.items()
                     ]
             else:
-                context = {"prompt": request.prompt, "approved_instructions": instructions}
-                if any(
-                    get_criterion(item["criterion_id"])["evaluator_type"] == "rubric"
-                    for item in selected
-                ):
+                context = {
+                    "prompt": request.prompt,
+                    "objective": request.objective,
+                    "approved_instructions": instructions,
+                }
+                if any(d["evaluator_type"] == "rubric" for d in definitions):
                     settings = get_settings()
                     context.update(
                         self.judge_context
@@ -132,8 +136,11 @@ class TestExecutor:
                         )
                 score, outcomes = evaluate_selected(response, selected, context)
                 criteria = [
-                    CriterionResult(**{k: v for k, v in row.items() if k != "id"})
-                    for row in outcomes
+                    CriterionResult(
+                        name=definition["name"],
+                        **{k: v for k, v in row.items() if k not in {"id", "name"}},
+                    )
+                    for row, definition in zip(outcomes, definitions, strict=True)
                 ]
                 if score is None:
                     error = {
@@ -143,7 +150,7 @@ class TestExecutor:
         elif selected:
             criteria = [
                 CriterionResult(
-                    get_criterion(x["criterion_id"])["name"],
+                    definition["name"],
                     None,
                     None,
                     "Evaluation did not run because the model request failed.",
@@ -152,7 +159,7 @@ class TestExecutor:
                     None,
                     "error",
                 )
-                for x in selected
+                for x, definition in zip(selected, definitions, strict=True)
             ]
         if error and selected is None and not criteria:
             from .evaluators.legacy import WEIGHT_IDS
@@ -211,9 +218,7 @@ class TestExecutor:
                 "recommendation_id": request.recommendation_id,
                 "generated_configuration": request.recommendation_snapshot,
                 "approved_at": started_at,
-                "criterion_definitions": [get_criterion(x["criterion_id"]) for x in selected]
-                if selected
-                else None,
+                "criterion_definitions": definitions,
                 "endpoint": endpoint,
                 "rubric_evidence": context.get("rubric_evidence", {}) if selected else {},
                 "target_metrics": {"latency_ms": target_ms, "usage": usage},
@@ -225,6 +230,8 @@ class TestExecutor:
                 "latency_semantics": "target_plus_evaluation",
                 "judge_profile_id": context.get("judge_profile_id"),
                 "judge_profile_revision": context.get("judge_profile_revision"),
+                "judge_model": context.get("judge_model"),
+                "judge_provider": getattr(context.get("judge_provider"), "name", None),
                 "resolved_judge_models": (
                     context.get("resolved_judge_models", {}) if selected else {}
                 ),

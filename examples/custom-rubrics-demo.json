@@ -1,0 +1,154 @@
+{
+  "mining": {
+    "definition": {
+      "name": "Mining white-space ranking",
+      "objective": "Choose five promising accounts from the fictional pipeline.",
+      "prompt": "Rank five distinct fictional account IDs by opportunity. M-101 is expanding processing capacity. M-205 has a funded retrofit. M-318 is reviewing efficiency. M-832 is exploring new tooling. M-841 has a delayed project. M-902 is collecting estimates. M-905 has a renewal only. M-917 is at an early exploratory stage. Return only a JSON array of exactly five strings, highest opportunity first.",
+      "criteria": [
+        {
+          "criterion_id": "json_schema",
+          "parameters": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 5,
+              "maxItems": 5,
+              "uniqueItems": true,
+              "allOf": [
+                {
+                  "contains": {
+                    "const": "M-101"
+                  }
+                },
+                {
+                  "contains": {
+                    "const": "M-205"
+                  }
+                },
+                {
+                  "contains": {
+                    "const": "M-318"
+                  }
+                }
+              ]
+            }
+          },
+          "weight": 100
+        }
+      ]
+    },
+    "cases": [
+      {
+        "profile": "demo-mining-a",
+        "answer": [
+          "M-205",
+          "M-902",
+          "M-101",
+          "M-318",
+          "M-917"
+        ],
+        "points": 100
+      },
+      {
+        "profile": "demo-mining-b",
+        "answer": [
+          "M-318",
+          "M-101",
+          "M-832",
+          "M-205",
+          "M-841"
+        ],
+        "points": 100
+      },
+      {
+        "profile": "demo-mining-missing",
+        "answer": [
+          "M-205",
+          "M-902",
+          "M-101",
+          "M-905",
+          "M-917"
+        ],
+        "points": 0
+      },
+      {
+        "profile": "demo-mining-duplicate",
+        "answer": [
+          "M-205",
+          "M-101",
+          "M-318",
+          "M-205",
+          "M-917"
+        ],
+        "points": 0
+      }
+    ]
+  },
+  "outlook": {
+    "definition": {
+      "name": "Alder Rail Systems outlook",
+      "objective": "Explain material challenges and write a qualified two-year outlook.",
+      "prompt": "Write a concise outlook for fictional Alder Rail Systems for 2027–2028. Identify material challenges, tie major claims to the supplied planning notes, and explain the outlook and its uncertainties.",
+      "custom_system_prompt": "Public planning notes (November 2026). One battery-module supplier accounted for 62% of volume. Service margin moved from 18% to 12%. A backup line is in qualification. The service contract renewal date has not been settled. Planning assumes a modest recovery if the line qualifies.",
+      "criteria": [
+        {
+          "criterion_id": "custom_00000000000000000000000000000001",
+          "method": "custom_rubric_v1",
+          "parameters": {
+            "title": "Material challenges",
+            "instructions": "Full credit (1.00) names supplier concentration and margin decline and explains how each affects execution. Give 0.75 for both challenges with little impact analysis, 0.50 for one with a clear impact, or 0.25 for naming one alone. Zero credit for neither. A vague mention of costs without identifying the service margin does not count.",
+            "reference_evidence": "Alder Rail Systems reference packet (fictional, 2026-11-03)\n62% of battery modules came from one supplier.\nService margin declined from 18% to 12%.\nBackup line qualification remains uncertain.\nThe service contract renewal window is open and the timing is uncertain.\nThe planning case assumes modest recovery in 2027–2028 only if the backup line qualifies. No committed growth rate is documented.",
+            "requires_reference": true
+          },
+          "weight": 40
+        },
+        {
+          "criterion_id": "custom_00000000000000000000000000000002",
+          "method": "custom_rubric_v1",
+          "parameters": {
+            "title": "Support for major claims",
+            "instructions": "Full credit (1.00) supports each material claim with the dated reference or a reasonable explicitly conditional inference. Give 0.50 when most claims are supported but an important claim lacks backing. Zero credit if a central conclusion is contradicted or presented as certain without evidence. Avoid counting a speculative growth rate as a verified fact.",
+            "reference_evidence": "Alder Rail Systems reference packet (fictional, 2026-11-03)\n62% of battery modules came from one supplier.\nService margin declined from 18% to 12%.\nBackup line qualification remains uncertain.\nThe service contract renewal window is open and the timing is uncertain.\nThe planning case assumes modest recovery in 2027–2028 only if the backup line qualifies. No committed growth rate is documented.",
+            "requires_reference": true
+          },
+          "weight": 35
+        },
+        {
+          "criterion_id": "custom_00000000000000000000000000000003",
+          "method": "custom_rubric_v1",
+          "parameters": {
+            "title": "Two-year outlook with uncertainties",
+            "instructions": "Full credit (1.00) gives a 2027–2028 direction conditional on qualification and addresses both qualification and renewal timing. Give 0.40 for a direction and one named uncertainty, 0.20 for a qualified direction with neither uncertainty named. Zero credit for a missing outlook or a claim of guaranteed growth.",
+            "reference_evidence": "Alder Rail Systems reference packet (fictional, 2026-11-03)\n62% of battery modules came from one supplier.\nService margin declined from 18% to 12%.\nBackup line qualification remains uncertain.\nThe service contract renewal window is open and the timing is uncertain.\nThe planning case assumes modest recovery in 2027–2028 only if the backup line qualifies. No committed growth rate is documented.",
+            "requires_reference": true
+          },
+          "weight": 25
+        }
+      ]
+    },
+    "cases": [
+      {
+        "profile": "demo-outlook-a",
+        "answer": "Alder Rail Systems depends on one supplier for 62% of its battery modules. The service margin fell from 18% to 12%. A backup line could support a modest recovery in 2027–2028 if qualification succeeds.",
+        "earned": [
+          30,
+          35,
+          10
+        ],
+        "total": 75
+      },
+      {
+        "profile": "demo-outlook-b",
+        "answer": "Alder Rail Systems should grow quickly over the next two years. One supplier covers 62% of the modules. Growth is certain.",
+        "earned": [
+          10,
+          0,
+          0
+        ],
+        "total": 10
+      }
+    ]
+  }
+}

@@ -8,8 +8,8 @@ from urllib.parse import urlsplit
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 
 from app.assistant.prompts import resolve_system_prompt
-from app.evaluation.configuration import validate_selection
-from app.evaluation.registry import CATALOG_REVISION, get_criterion
+from app.evaluation.configuration import criterion_definition, validate_selection
+from app.evaluation.registry import CATALOG_REVISION
 from app.evaluation.weights import ScoringWeights
 
 
@@ -71,9 +71,7 @@ class SavedDefinition(Record):
             self.base_system_prompt, self.custom_system_prompt
         )
         body["catalog_revision"] = CATALOG_REVISION
-        body["criterion_definitions"] = [
-            get_criterion(c["criterion_id"]) for c in self.criteria or []
-        ]
+        body["criterion_definitions"] = [criterion_definition(c) for c in self.criteria or []]
         return body
 
 

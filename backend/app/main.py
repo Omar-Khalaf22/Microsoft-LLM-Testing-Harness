@@ -18,11 +18,13 @@ from app.routes.evidence import router as evidence_router
 from app.routes.history import router as history_router
 from app.routes.human_reviews import router as human_reviews_router
 from app.routes.runs import router as runs_router
+from app.routes.saved import router as saved_router
+from app.services.execution_coordinator import execution_lifespan
 from app.storage.access import AccessContext, get_access
 
 settings = get_settings()
 
-app = FastAPI(title="LLM Testing Harness API", version="0.1.0")
+app = FastAPI(title="LLM Testing Harness API", version="0.1.0", lifespan=execution_lifespan)
 
 logger = logging.getLogger("harness.operations")
 
@@ -67,6 +69,7 @@ app.include_router(criteria_router, dependencies=[Depends(get_access)])
 app.include_router(human_reviews_router)
 app.include_router(history_router)
 app.include_router(evidence_router)
+app.include_router(saved_router)
 
 
 @app.get("/health")

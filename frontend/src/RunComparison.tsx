@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getRun } from "./api";
 import type { CriterionResult, RunResponse, RunSummary } from "./api";
+import CriterionEvidence, { isJudged } from "./CriterionEvidence";
 
 type Loaded = { run: RunResponse | null; loading: boolean; error: string };
 
@@ -48,9 +49,7 @@ const showText = (value: unknown, missing = "Not saved") =>
 function rubricOf(run: RunResponse): unknown {
   const m = run.metadata;
   if (m.criteria)
-    return [...m.criteria]
-      .map((c) => ({ id: c.criterion_id, points: c.weight, parameters: c.parameters }))
-      .sort((a, b) => a.id.localeCompare(b.id));
+    return m.criteria;
   return {
     legacy_check_points: m.scoring_weights ?? null,
     expected_keywords: m.expected_keywords ?? [],
@@ -103,12 +102,30 @@ function fieldRows(a: RunResponse, b: RunResponse): FieldRow[] {
   return rows;
 }
 
-const key = (c: CriterionResult) => c.criterion_id ?? c.name;
+function key(run: RunResponse, c: CriterionResult) {
+  const config = run.metadata.criteria?.find((item) => item.criterion_id === c.criterion_id);
+  const id = c.criterion_id ?? c.name;
+  return config?.method || id.startsWith("custom_")
+    ? `custom/${run.metadata.test_id ?? run.id}/${id}` : `catalog/${id}`;
+}
+
+function savedRow(run: RunResponse, c: CriterionResult) {
+  const config = run.metadata.criteria?.find((item) => item.criterion_id === c.criterion_id);
+  if (!config) return run.metadata.scoring_weights ? rubricOf(run) : null;
+  const definition = run.metadata.criterion_definitions?.find((item) => item.id === c.criterion_id);
+  return {
+    config,
+    revision: config.method ?? run.metadata.catalog_revision,
+    definition,
+    judge: isJudged(run, c) ? [run.metadata.judge_profile_id, run.metadata.judge_profile_revision] : undefined,
+  };
+}
+
 const points = (c: CriterionResult | undefined) =>
   !c
     ? "Not evaluated"
     : c.score === null
-      ? "Unavailable"
+      ? `Unavailable${c.maximum_points == null ? "" : ` / ${c.maximum_points.toFixed(2)}`}`
       : `${c.score.toFixed(2)}${
           c.maximum_points !== null && c.maximum_points !== undefined
             ? ` / ${c.maximum_points.toFixed(2)}`
@@ -147,15 +164,26 @@ export default function RunComparison({
   const changedLabels = rows.filter((r) => r.changed).map((r) => r.label);
 
   const criteriaKeys: string[] = [];
-  if (ready)
-    for (const c of [...A.run!.criteria, ...B.run!.criteria])
-      if (!criteriaKeys.includes(key(c))) criteriaKeys.push(key(c));
-  const find = (run: RunResponse, k: string) => run.criteria.find((c) => key(c) === k);
+  if (ready) {
+    criteriaKeys.push(...new Set([
+      ...A.run!.criteria.map((c) => key(A.run!, c)),
+      ...B.run!.criteria.map((c) => key(B.run!, c)),
+    ]));
+  }
+  const find = (run: RunResponse, k: string) => run.criteria.find((c) => key(run, c) === k);
+  const comparable = (ca?: CriterionResult, cb?: CriterionResult) => {
+    if (!ca || !cb) return false;
+    const left = savedRow(A.run!, ca);
+    return left !== null && same(left, savedRow(B.run!, cb));
+  };
+  const comparableTotal = ready && criteriaKeys.length > 0 &&
+    same(rubricOf(A.run!), rubricOf(B.run!)) &&
+    criteriaKeys.every((k) => comparable(find(A.run!, k), find(B.run!, k)));
 
-  const select = (label: string, value: string, set: (v: string) => void) => (
-    <label className="field">
-      <span>{label}</span>
-      <select value={value} onChange={(e) => set(e.target.value)}>
+  const select = (id: string, label: string, value: string, set: (v: string) => void) => (
+    <div className="field">
+      <label htmlFor={id}>{label}</label>
+      <select id={id} value={value} onChange={(e) => set(e.target.value)}>
         <option value="">Choose a saved run</option>
         {runs.map((r) => (
           <option key={r.id} value={r.id}>
@@ -163,7 +191,7 @@ export default function RunComparison({
           </option>
         ))}
       </select>
-    </label>
+    </div>
   );
 
   return (
@@ -180,8 +208,8 @@ export default function RunComparison({
       ) : (
         <>
           <div className="field-row">
-            {select("Run A", aId, setAId)}
-            {select("Run B", bId, setBId)}
+            {select("compare-a", "Run A", aId, setAId)}
+            {select("compare-b", "Run B", bId, setBId)}
           </div>
           <button
             type="button"
@@ -258,12 +286,24 @@ export default function RunComparison({
                   {criteriaKeys.map((k) => {
                     const ca = find(A.run!, k);
                     const cb = find(B.run!, k);
+                    const matched = comparable(ca, cb);
+                    const changed = !!ca && !!cb && !matched;
                     return (
-                      <tr key={k} data-changed={points(ca) !== points(cb)}>
+                      <tr key={k} data-changed={changed || points(ca) !== points(cb)}>
                         <th scope="row">{(ca ?? cb)!.name}</th>
-                        <td>{points(ca)}</td>
-                        <td>{points(cb)}</td>
-                        <td>{diff(ca?.score, cb?.score)}</td>
+                        <td>
+                          {ca && cb && ca.name !== cb.name && <strong>{ca.name}</strong>}
+                          <div>{points(ca)}</div>
+                          {ca && <CriterionEvidence row={ca} run={A.run!} />}
+                        </td>
+                        <td>
+                          {ca && cb && ca.name !== cb.name && <strong>{cb.name}</strong>}
+                          <div>{points(cb)}</div>
+                          {cb && <CriterionEvidence row={cb} run={B.run!} />}
+                        </td>
+                        <td>{changed
+                          ? <span className="changed-badge">Rubric differs or is unavailable</span>
+                          : matched ? diff(ca?.score, cb?.score) : "—"}</td>
                       </tr>
                     );
                   })}
@@ -271,7 +311,7 @@ export default function RunComparison({
                     <th scope="row">Automated total</th>
                     <td>{total(A.run!)}</td>
                     <td>{total(B.run!)}</td>
-                    <td>{diff(A.run!.score, B.run!.score)}</td>
+                    <td>{comparableTotal ? diff(A.run!.score, B.run!.score) : "—"}</td>
                   </tr>
                 </tbody>
               </table>

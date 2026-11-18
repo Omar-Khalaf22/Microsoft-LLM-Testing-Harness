@@ -20,6 +20,14 @@ def get_recommendation_repository():
 
 def get_assistant_provider():
     settings = get_settings()
+    if not settings.assistant_enabled:
+        raise HTTPException(
+            503,
+            detail={
+                "code": "assistant_unavailable",
+                "message": "Assist is disabled. Add criteria manually.",
+            },
+        )
     if settings.llm_provider.strip().lower() == "demo":
         return DemoProvider()
     if settings.llm_provider.strip().lower() != "openai":

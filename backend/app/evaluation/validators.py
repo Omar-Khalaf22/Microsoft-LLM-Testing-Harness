@@ -1,8 +1,9 @@
 """Registry dispatcher. Failed evaluations retain unavailable scores and a null total."""
 
-from .configuration import validate_selection
+from .configuration import criterion_definition, validate_selection
 from .points import earned_points, total_points
-from .registry import evaluate_criterion, get_criterion
+from .registry import evaluate_criterion
+from .rubric_integration import evaluate_rubric
 
 
 def evaluate_selected(response: str, selected: list[dict], context: dict | None = None):
@@ -14,24 +15,30 @@ def evaluate_selected(response: str, selected: list[dict], context: dict | None 
         for x in selected
     ]
     selected = validate_selection(selected)
+    context = context if context is not None else {}
     results = []
     for item in selected:
         cid = item["criterion_id"]
         result = dict(
             id=cid,
             criterion_id=cid,
-            name=get_criterion(cid)["name"],
+            name=criterion_definition(item)["name"],
             maximum_points=item["weight"],
             status="completed",
         )
         try:
-            met, normalized, detail = evaluate_criterion(
-                cid, response, item["parameters"], context or {}
-            )
+            if item.get("method"):
+                met, normalized, detail = evaluate_rubric(
+                    cid, response, item["parameters"], context, custom=True
+                )
+            else:
+                met, normalized, detail = evaluate_criterion(
+                    cid, response, item["parameters"], context
+                )
             score = earned_points(normalized, item["weight"])
             result.update(passed=met, normalized_score=normalized, score=score, detail=detail)
-            if cid in (context or {}).get("rubric_evidence", {}):
-                result.update((context or {})["rubric_evidence"][cid])
+            if cid in context.get("rubric_evidence", {}):
+                result.update(context["rubric_evidence"][cid])
         except Exception:
             result.update(
                 status="error",

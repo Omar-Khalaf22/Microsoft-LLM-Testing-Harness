@@ -1,14 +1,25 @@
 import os
 from functools import lru_cache
 
-from pydantic import AnyHttpUrl, Field, SecretStr, model_validator
+from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class TargetProfile(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    profile_id: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
+    profile_revision: int = Field(default=1, gt=0)
+    model: str = Field(min_length=1, max_length=256, pattern=r"\S")
+    temperature: float | None = Field(default=None, ge=0, le=2, allow_inf_nan=False)
 
 
 class Settings(BaseSettings):
     app_env: str = "development"
     database_url: str
     llm_provider: str = "demo"
+    target_profiles: list[TargetProfile] = Field(default_factory=list, max_length=100)
+    assistant_enabled: bool = True
     assistant_model: str = "gpt-4o-mini"
     judge_model: str = ""
     judge_profile_id: str = ""
@@ -34,6 +45,8 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def shared_endpoints(self):
+        if len({p.profile_id for p in self.target_profiles}) != len(self.target_profiles):
+            raise ValueError("Target profile identifiers must be unique.")
         if self.app_env != "development":
             if (
                 self.openai_base_url not in self.approved_model_endpoints

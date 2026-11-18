@@ -12,6 +12,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
+from app.evaluation.custom_rubric import CUSTOM_RUBRIC_METHOD, validated_excerpts
 from app.evaluation.models import TestRequest, TestResult
 from app.models import (
     EvaluationResult,
@@ -54,6 +55,7 @@ def reserve_attempts(
     idempotency_key: str | None = None,
     previews: dict[str, dict] | None = None,
     rerun_of_run_id: str | None = None,
+    dispatch: bool = False,
 ) -> dict:
     if not 1 <= len(profiles) <= 10:
         raise ValueError("Select between 1 and 10 server-resolved profiles.")
@@ -70,6 +72,8 @@ def reserve_attempts(
         "previews": previews or {},
         "rerun_of_run_id": rerun_of_run_id,
     }
+    if dispatch:
+        request["dispatch"] = True
     digest = canonical_hash(request)
     if idempotency_key:
         # Transaction-scoped advisory lock also serializes the absent-row case.
@@ -118,6 +122,8 @@ def reserve_attempts(
         "tests": [_version_snapshot(v) for v in versions],
         "profiles": [p.model_dump(mode="json") for p in profiles],
     }
+    if dispatch:
+        snapshot["dispatch"] = True
     execution = Execution(
         id="exec_" + uuid4().hex,
         project_id=access.project_id,
@@ -345,10 +351,29 @@ def finalize_attempt(
         raise Conflict("Result criteria do not match the frozen rubric.")
     total = Decimal(0)
     complete = True
+    custom_rows = {
+        item["criterion_id"]: item["parameters"]
+        for item in frozen["definition"].get("criteria") or []
+        if item.get("method") == CUSTOM_RUBRIC_METHOD
+    }
+    if custom_rows and [c.criterion_id for c in result.criteria] != [
+        item["criterion_id"] for item in frozen["definition"]["criteria"]
+    ]:
+        raise Conflict("Result criteria do not follow the frozen rubric order.")
     for c in result.criteria:
         member = membership[c.criterion_id]
         if c.maximum_points is None or Decimal(str(c.maximum_points)) != member.maximum_points:
             raise ValueError("Criterion maximum does not match the frozen version.")
+        custom = custom_rows.get(c.criterion_id)
+        if custom is not None:
+            if c.name != custom["title"] or c.passed is not None:
+                raise ValueError("Custom result does not match the frozen row.")
+            if c.status == "completed":
+                validated_excerpts(
+                    c.evidence_excerpts,
+                    reference=custom["reference_evidence"],
+                    answer=result.response,
+                )
         if c.status == "completed":
             if c.score is None or c.normalized_score is None:
                 raise ValueError("Completed criteria require numerical evidence.")
@@ -383,6 +408,11 @@ def finalize_attempt(
                     "evaluator_model": c.evaluator_model,
                     "rationale": c.rationale,
                     "evidence": c.evidence,
+                    **(
+                        {"evidence_excerpts": c.evidence_excerpts}
+                        if c.evidence_excerpts is not None
+                        else {}
+                    ),
                 },
             )
         )
@@ -404,6 +434,9 @@ def finalize_attempt(
         "profile": frozen["profile"],
         "approved_at": row.test_version.approval["recorded_at"],
         "approval": row.test_version.approval,
+        "catalog_revision": frozen["definition"]["catalog_revision"],
+        "criteria": frozen["definition"]["criteria"],
+        "criterion_definitions": frozen["definition"]["criterion_definitions"],
     }
     from dataclasses import replace
 
@@ -427,6 +460,15 @@ def recover_expired_attempt(session: Session, access: AccessContext, run_id: str
     if row.status != "running" or row.lease_until > now(session):
         raise Conflict("Attempt is terminal or still owned by a live lease.")
     # Do not retry an ambiguous remote side effect. Explicit rerun gets new IDs.
+    _interrupt(session, row, parent)
+
+
+def interrupt_owned_attempt(session: Session, access: AccessContext, run_id: str, token: str):
+    row, parent = _owned(session, access, run_id, token)
+    _interrupt(session, row, parent)
+
+
+def _interrupt(session, row, parent):
     row.status, row.completed_at, row.error = "failed", now(session), "interrupted"
     row.lease_token, row.lease_until = None, None
     update_parent_progress(session, parent)
@@ -479,7 +521,9 @@ def save_preview(
     return row
 
 
-def validate_preview(session, access, version, profile, preview_id, acknowledge_error=False):
+def validate_preview(
+    session, access, version, profile, preview_id, acknowledge_error=False, confirmed=None
+):
     row = get_preview(session, access, preview_id)
     if row.test_version_id != version.id or row.configuration_hash != configuration_hash(
         version.evaluation_definition, profile
@@ -487,6 +531,8 @@ def validate_preview(session, access, version, profile, preview_id, acknowledge_
         raise Conflict("Preview is stale or belongs to another test/model configuration.")
     if row.status == "technical_error" and acknowledge_error is not True:
         raise Conflict("Acknowledge the technical preview failure or retry it.")
+    if row.status == "completed" and (confirmed is False or acknowledge_error):
+        raise Conflict("Confirm the interpretation before running.")
 
 
 def get_preview(session: Session, access: AccessContext, preview_id: str) -> Preview:
@@ -505,6 +551,7 @@ def create_rerun_plan(
     test: TestReference | None = None,
     idempotency_key: str | None = None,
     resolve_profile=None,
+    dispatch: bool = False,
 ):
     original = get_attempt(session, access, run_id)
     if original.status not in ("completed", "failed"):
@@ -540,6 +587,7 @@ def create_rerun_plan(
         test=test,
         idempotency_key=idempotency_key,
         rerun_of_run_id=run_id,
+        dispatch=dispatch,
     )
 
 
@@ -566,6 +614,7 @@ def request_for_attempt(session: Session, access: AccessContext, run_id: str) ->
         base_system_prompt=definition["base_system_prompt"],
         custom_system_prompt=definition["custom_system_prompt"],
         frozen_system_prompt=definition["resolved_system_prompt"],
+        frozen_criterion_definitions=definition.get("criterion_definitions"),
         reserved_run_id=row.id,
         test_id=frozen["test_id"],
         test_version=frozen["test_version"],

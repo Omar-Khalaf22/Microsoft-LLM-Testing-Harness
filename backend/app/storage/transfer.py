@@ -5,7 +5,7 @@ kept in attribution; local review row IDs remain local database identity keys.
 """
 
 from datetime import UTC, datetime
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from functools import wraps
 from typing import Literal
 
@@ -13,6 +13,7 @@ from pydantic import AwareDatetime, Field, JsonValue, model_validator
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.evaluation.custom_rubric import CUSTOM_ROW_ID, CUSTOM_RUBRIC_METHOD, validated_excerpts
 from app.models import (
     EvaluationResult,
     Execution,
@@ -238,6 +239,16 @@ class EvidenceBundle(Record):
                     for c in selected
                 ):
                     raise ValueError("Definition and relational allocations disagree.")
+                if selected is not None and len(selected) != len(members):
+                    raise ValueError("Duplicate selected row identity.")
+                for row in selected or []:
+                    if row.get("method") == CUSTOM_RUBRIC_METHOD and (
+                        not CUSTOM_ROW_ID.fullmatch(row["criterion_id"])
+                        or members[row["criterion_id"]].definition.get("method") != row["method"]
+                        or members[row["criterion_id"]].definition.get("name")
+                        != row["parameters"]["title"]
+                    ):
+                        raise ValueError("Custom definition and relational membership disagree.")
         for suite in self.suites:
             if any((i.test_id, i.test_version) not in defs for i in suite.items):
                 raise ValueError("Missing suite test version.")
@@ -302,8 +313,22 @@ class EvidenceBundle(Record):
                     ):
                         raise ValueError("Result snapshot disagrees with relational evidence.")
                     captured = {c.get("criterion_id"): c for c in snap.get("criteria", [])}
-                    if len(captured) != len(r.evaluations):
+                    if set(captured) != {e.criterion_id for e in r.evaluations} or len(
+                        captured
+                    ) != len(snap.get("criteria", [])):
                         raise ValueError("Result snapshot criterion mismatch.")
+                    custom_rows = {
+                        row["criterion_id"]: row["parameters"]
+                        for row in d.definition.get("criteria") or []
+                        if row.get("method") == CUSTOM_RUBRIC_METHOD
+                    }
+                    if custom_rows and (
+                        list(captured) != [row["criterion_id"] for row in d.definition["criteria"]]
+                        or snap["metadata"].get("criteria") != d.definition["criteria"]
+                        or snap["metadata"].get("criterion_definitions")
+                        != d.definition["criterion_definitions"]
+                    ):
+                        raise ValueError("Result snapshot does not preserve the saved rubric.")
                     for evaluation in r.evaluations:
                         c = captured.get(evaluation.criterion_id, {})
                         for field, value in (
@@ -312,15 +337,33 @@ class EvidenceBundle(Record):
                             ("normalized_score", evaluation.normalized_score),
                         ):
                             actual = c.get(field)
-                            if (actual is None) != (value is None) or (
-                                actual is not None and Decimal(str(actual)) != value
-                            ):
+                            actual = Decimal(str(actual)) if actual is not None else None
+                            if actual is not None and field == "normalized_score":
+                                actual = actual.quantize(Decimal("0.0000000001"), ROUND_HALF_UP)
+                            if actual != value:
                                 raise ValueError("Result snapshot numerical evidence mismatch.")
                         if (
                             c.get("status") != evaluation.status
                             or c.get("passed") != evaluation.passed
                         ):
                             raise ValueError("Result snapshot status mismatch.")
+                        custom = custom_rows.get(evaluation.criterion_id)
+                        if custom is not None:
+                            if (
+                                c.get("name") != evaluation.method
+                                or c["name"] != custom["title"]
+                                or c.get("passed") is not None
+                            ):
+                                raise ValueError("Custom result title does not match its row.")
+                            for field in ("rationale", "evaluator_model", "evidence_excerpts"):
+                                if c.get(field) != evaluation.details.get(field):
+                                    raise ValueError("Custom result evidence mismatch.")
+                            if evaluation.status == "completed":
+                                validated_excerpts(
+                                    c["evidence_excerpts"],
+                                    reference=custom["reference_evidence"],
+                                    answer=r.response or "",
+                                )
                     score = snap.get("score")
                     failed = any(e.status != "completed" for e in r.evaluations)
                     if failed and score is not None:

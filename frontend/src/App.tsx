@@ -1,17 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { checkHealth, getRun, listHistory, type RunResponse, type RunSummary } from "./api";
+import {
+  checkHealth, getExecution, getRun, getVersion, listHistory,
+  type Attempt, type Execution, type RunResponse, type RunSummary, type SavedTestVersion,
+} from "./api";
 import EvidenceTransfer from "./EvidenceTransfer";
 import HumanReviews from "./HumanReviews";
 import RunComparison from "./RunComparison";
 import RunForm from "./RunForm";
 import RunResults from "./RunResults";
+import { ExecutionProgress, RerunButton } from "./SavedExecution";
 import SavedRuns from "./SavedRuns";
+import SuiteRunner from "./SuiteRunner";
 
 type HealthState = "checking" | "ok" | "unavailable";
+type View = "configure" | "results" | "compare" | "suite";
 
 function App() {
   const openSequence = useRef(0);
+  const autoOpen = useRef<{ id: string; sequence: number } | null>(null);
   const [health, setHealth] = useState<HealthState>("checking");
   const [runs, setRuns] = useState<RunSummary[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -19,10 +26,10 @@ function App() {
   const [historyError, setHistoryError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedRun, setSelectedRun] = useState<RunResponse | null>(null);
+  const [selectedVersion, setSelectedVersion] = useState<SavedTestVersion | null>(null);
+  const [execution, setExecution] = useState<Execution | null>(null);
   const [editorKey, setEditorKey] = useState(0);
-  const [view, setView] = useState<"configure" | "results" | "compare">(
-    "configure",
-  );
+  const [view, setView] = useState<View>("configure");
   const [compareSeed, setCompareSeed] = useState<string | undefined>();
 
   const refreshHistory = useCallback(async (signal?: AbortSignal) => {
@@ -71,19 +78,29 @@ function App() {
       [run, ...previous.filter((item) => item.id !== run.id)],
     );
     setSelectedRun(run);
+    setSelectedVersion(null);
     setEditorKey((previous) => previous + 1);
     setView("results");
   }
 
-  async function handleOpenRun(run: RunSummary) {
+  const openRun = useCallback(async (id: string, resumeProgress = false) => {
     const sequence = ++openSequence.current;
     setHistoryError("");
     try {
-      const saved = await getRun(run.id);
+      const saved = await getRun(id);
       if (sequence !== openSequence.current) return;
       setView("results");
       setSelectedRun(saved);
+      setSelectedVersion(null);
       setEditorKey((previous) => previous + 1);
+      if (resumeProgress && saved.metadata.execution_id &&
+        (saved.status === "pending" || saved.status === "running")) {
+        const plan = await getExecution(saved.metadata.execution_id);
+        if (sequence === openSequence.current) {
+          autoOpen.current = { id: plan.execution_id, sequence };
+          setExecution(plan);
+        }
+      }
     } catch (error) {
       if (sequence === openSequence.current)
         setHistoryError(
@@ -92,7 +109,22 @@ function App() {
             : "Could not open the saved run",
         );
     }
+  }, []);
+  const reservationSequence = openSequence.current;
+  function onReserved(plan: Execution) {
+    autoOpen.current = { id: plan.execution_id, sequence: reservationSequence };
+    setExecution(plan);
+    void refreshHistory();
   }
+  const onExecutionFinished = useCallback((plan: Execution) => {
+    void refreshHistory();
+    const intent = autoOpen.current;
+    if (intent?.id !== plan.execution_id) return;
+    autoOpen.current = null;
+    if (intent.sequence === openSequence.current && plan.attempts.length === 1)
+      void openRun(plan.attempts[0].run_id);
+  }, [openRun, refreshHistory]);
+  const onOpenAttempt = (attempt: Attempt) => void openRun(attempt.run_id);
 
   async function loadMore() {
     if (!nextCursor || historyLoading) return;
@@ -107,16 +139,47 @@ function App() {
     } finally { setHistoryLoading(false); }
   }
 
+  function navigate(next: View) {
+    openSequence.current += 1;
+    setView(next);
+  }
+
   function openComparison(seedId?: string) {
     setCompareSeed(seedId);
-    setView("compare");
+    navigate("compare");
   }
 
   function handleNewTest() {
     openSequence.current += 1;
     setView("configure");
     setSelectedRun(null);
+    setSelectedVersion(null);
     setEditorKey((previous) => previous + 1);
+  }
+
+  function handleOpenVersion(version: SavedTestVersion) {
+    openSequence.current += 1;
+    setSelectedVersion(version);
+    setSelectedRun(null);
+    setEditorKey((previous) => previous + 1);
+    setView("configure");
+  }
+
+  async function backToTest() {
+    const m = selectedRun?.metadata;
+    if (!m?.execution_id || !m.test_id || !m.test_version) {
+      navigate("configure");
+      return;
+    }
+    const sequence = ++openSequence.current;
+    setHistoryError("");
+    try {
+      const version = await getVersion({ test_id: m.test_id, test_version: m.test_version });
+      if (sequence === openSequence.current) handleOpenVersion(version);
+    } catch (e) {
+      if (sequence === openSequence.current)
+        setHistoryError(e instanceof Error ? e.message : "The saved test could not be opened.");
+    }
   }
 
   return (
@@ -131,7 +194,7 @@ function App() {
         error={historyError}
         onToggle={() => setSidebarOpen((open) => !open)}
         onRefresh={() => void refreshHistory()}
-        onOpenRun={handleOpenRun}
+        onOpenRun={(run) => void openRun(run.id, true)}
         hasMore={!!nextCursor}
         onLoadMore={() => void loadMore()}
       />
@@ -145,6 +208,8 @@ function App() {
             </p>
           </div>
           <div className="header-actions">
+            <button type="button" className="secondary-button" aria-pressed={view === "suite"}
+              onClick={() => navigate("suite")}>Ordered suites</button>
             <button
               type="button"
               className="secondary-button"
@@ -160,46 +225,57 @@ function App() {
           </div>
         </header>
         <EvidenceTransfer selectedRunId={selectedRun?.id} onImported={() => void refreshHistory()} />
+        {execution && <ExecutionProgress key={execution.execution_id} initial={execution}
+          onFinished={onExecutionFinished} onOpen={onOpenAttempt} />}
         <div className="workspace-views">
           <div hidden={view !== "configure"}>
             <RunForm
               key={editorKey}
               initialRun={selectedRun}
+              initialVersion={selectedVersion}
               onNewTest={handleNewTest}
               onRunCreated={handleRunCreated}
+              onOpenVersion={handleOpenVersion}
+              onReserved={onReserved}
             />
           </div>
           <div hidden={view !== "results"}>
-            <button
-              type="button"
-              className="back-to-test"
-              onClick={() => setView("configure")}
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="m12 19-7-7 7-7M5 12h14" />
-              </svg>
-              Back to Test
-            </button>
-            {selectedRun && (
+            <div className="result-actions">
               <button
                 type="button"
-                className="secondary-button"
-                onClick={() => openComparison(selectedRun.id)}
+                className="back-to-test"
+                onClick={() => void backToTest()}
               >
-                Compare with another run
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path d="m12 19-7-7 7-7M5 12h14" />
+                </svg>
+                Back to Test
               </button>
-            )}
+              {selectedRun && (
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => openComparison(selectedRun.id)}
+                >
+                  Compare with another run
+                </button>
+              )}
+              {selectedRun?.metadata.execution_id &&
+                (selectedRun.status === "completed" || selectedRun.status === "failed") && (
+                  <RerunButton key={selectedRun.id} runId={selectedRun.id} onReserved={onReserved} />
+                )}
+            </div>
             <RunResults run={selectedRun} />
             {selectedRun && (
               <HumanReviews key={selectedRun.id} runId={selectedRun.id} />
@@ -210,9 +286,10 @@ function App() {
               key={compareSeed ?? "none"}
               runs={runs}
               seedId={compareSeed}
-              onBack={() => setView(selectedRun ? "results" : "configure")}
+              onBack={() => navigate(selectedRun ? "results" : "configure")}
             />
           )}
+          {view === "suite" && <SuiteRunner onReserved={onReserved} onBack={() => navigate("configure")} />}
         </div>
       </main>
     </div>

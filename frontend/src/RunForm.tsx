@@ -6,90 +6,86 @@ import {
   runEvaluation,
   listCriteria,
   suggestCriteria,
+  approveVersion,
+  getVersion,
+  saveDraft,
 } from "./api";
 import type {
   CriterionConfiguration,
   CriterionDefinition,
+  DraftDefinition,
+  Execution,
+  SavedTestVersion,
   ScoringWeights,
   RunResponse,
   Recommendation,
 } from "./api";
-import CriteriaSuggestions from "./CriteriaSuggestions";
+import CriteriaSuggestions, { criterionDraft, rowProblems } from "./CriteriaSuggestions";
 import type { CriterionDraft } from "./CriteriaSuggestions";
+import SavedExecution from "./SavedExecution";
+import SavedTestPicker from "./SavedTestPicker";
 
 const terms = (value: string) =>
   value
     .split(",")
     .map((x) => x.trim())
     .filter(Boolean);
-const centsValid = (value: number) =>
-  Number.isFinite(value) &&
-  value > 0 &&
-  value <= 100 &&
-  Math.abs(value * 100 - Math.round(value * 100)) < 1e-8;
 function selection(rows: CriterionDraft[]): CriterionConfiguration[] | null {
-  try {
-    const chosen = rows.filter((r) => r.included);
-    if (!chosen.length) return null;
-    const parsed = chosen.map((r) => ({
-      criterion_id: r.criterion_id,
-      parameters: JSON.parse(r.parametersText) as Record<string, unknown>,
-      weight: Number(r.weightText),
-    }));
-    if (
-      parsed.some(
-        (c) =>
-          !centsValid(c.weight) ||
-          !c.parameters ||
-          Array.isArray(c.parameters) ||
-          typeof c.parameters !== "object",
-      )
-    )
-      return null;
-    if (parsed.reduce((s, c) => s + Math.round(c.weight * 100), 0) !== 10000)
-      return null;
-    return parsed;
-  } catch {
+  const chosen = rows.filter((r) => r.included);
+  if (!chosen.length || chosen.length > 100 || chosen.some((r) => Object.keys(rowProblems(r)).length))
     return null;
-  }
+  const parsed = chosen.map((r) => ({
+    criterion_id: r.criterion_id,
+    ...(r.method ? { method: r.method } : {}),
+    parameters: r.custom ? { ...r.custom } : JSON.parse(r.parametersText) as Record<string, unknown>,
+    weight: Number(r.weightText),
+  }));
+  if (parsed.reduce((s, c) => s + Math.round(c.weight * 100), 0) !== 10000) return null;
+  return parsed;
 }
 export default function RunForm({
   initialRun,
+  initialVersion,
   onNewTest,
   onRunCreated,
+  onOpenVersion,
+  onReserved,
 }: {
   initialRun: RunResponse | null;
+  initialVersion: SavedTestVersion | null;
   onNewTest: () => void;
   onRunCreated: (run: RunResponse) => void;
+  onOpenVersion: (version: SavedTestVersion) => void;
+  onReserved: (execution: Execution) => void;
 }) {
   const m = initialRun?.metadata;
-  const [testName, setTestName] = useState(m?.test_name ?? "");
-  const [prompt, setPrompt] = useState(initialRun?.prompt ?? "");
-  const [objective, setObjective] = useState(m?.objective ?? "");
+  const d = initialVersion?.definition;
+  const l = d?.legacy;
+  const [saved, setSaved] = useState(initialVersion);
+  const [dirty, setDirty] = useState(false);
+  const [writing, setWriting] = useState(false);
+  const [testName, setTestName] = useState(initialVersion?.name ?? m?.test_name ?? "");
+  const [prompt, setPrompt] = useState(d?.prompt ?? initialRun?.prompt ?? "");
+  const [objective, setObjective] = useState(d?.objective ?? m?.objective ?? "");
   const [model, setModel] = useState(m?.requested_model ?? "gpt-4.1-mini");
   const [temperature, setTemperature] = useState(m?.temperature ?? 0.2);
-  const [base, setBase] = useState(m?.base_system_prompt ?? "");
-  const [custom, setCustom] = useState(m?.custom_system_prompt ?? "");
-  const [legacy, setLegacy] = useState(Boolean(initialRun && !m?.criteria));
+  const [base, setBase] = useState(d?.base_system_prompt ?? m?.base_system_prompt ?? "");
+  const [custom, setCustom] = useState(d?.custom_system_prompt ?? m?.custom_system_prompt ?? "");
+  const [legacy, setLegacy] = useState(d ? !!l : Boolean(initialRun && !m?.criteria));
   const [weights, setWeights] = useState<ScoringWeights>({
     ...defaultWeights,
-    ...(m?.scoring_weights ?? {}),
+    ...(l?.weights ?? m?.scoring_weights ?? {}),
   });
   const [keywords, setKeywords] = useState(
-    (m?.expected_keywords ?? []).join(", "),
+    (l?.expected_keywords ?? m?.expected_keywords ?? []).join(", "),
   );
   const [forbidden, setForbidden] = useState(
-    (m?.forbidden_terms ?? []).join(", "),
+    (l?.forbidden_terms ?? m?.forbidden_terms ?? []).join(", "),
   );
-  const [minLength, setMinLength] = useState(m?.minimum_length ?? 80);
-  const [sentences, setSentences] = useState(m?.minimum_sentences ?? 3);
+  const [minLength, setMinLength] = useState(l?.minimum_length ?? m?.minimum_length ?? 80);
+  const [sentences, setSentences] = useState(l?.minimum_sentences ?? m?.minimum_sentences ?? 3);
   const [rows, setRows] = useState<CriterionDraft[]>(
-    (m?.criteria ?? []).map((c) => ({
-      criterion_id: c.criterion_id,
-      parametersText: JSON.stringify(c.parameters, null, 2),
-      weightText: String(c.weight),
-      included: true,
-    })),
+    (d?.criteria ?? m?.criteria ?? []).map(criterionDraft),
   );
   const [recommendation, setRecommendation] = useState<Recommendation | null>(
     m?.generated_configuration ?? null,
@@ -141,7 +137,9 @@ export default function RunForm({
     ) &&
     Object.values(weights).reduce((s, v) => s + Math.round(v * 100), 0) ===
       10000;
-  const busy = generating || submitting;
+  const busy = generating || submitting || writing;
+  const inline = !saved && !m?.execution_id && (legacy || !rows.some((row) => row.custom));
+  const canSave = !!testName.trim() && !!prompt.trim() && (legacy ? legacyValid : !!parsed);
   // Any edit that changes what the user reviewed withdraws approval and says why, because
   // some of these fields (system instructions) sit in a collapsed section away from the box.
   function clearApproval(reason: string) {
@@ -150,6 +148,7 @@ export default function RunForm({
         `Approval was cleared because ${reason}. Review the criteria and approve them again.`,
       );
     setApproved(false);
+    setDirty(true);
   }
   function changeRows(
     next: CriterionDraft[],
@@ -174,16 +173,15 @@ export default function RunForm({
       if (c.signal.aborted) return;
       setRecommendation(result);
       setLegacy(false);
-      changeRows(
-        result.suggestions.map((s) => ({
-          criterion_id: s.criterion_id,
-          parametersText: JSON.stringify(s.parameters, null, 2),
-          weightText: String(s.maximum_points),
-          reason: s.reason,
-          included: true,
-        })),
-        "new suggestions were loaded",
-      );
+      const manual = rows.filter((r) => !r.reason);
+      changeRows([
+        ...manual,
+        ...result.suggestions.filter((s) => !manual.some((r) => r.criterion_id === s.criterion_id))
+          .map((s) => ({
+            ...criterionDraft({ criterion_id: s.criterion_id, parameters: s.parameters, weight: s.maximum_points }),
+            reason: s.reason,
+          })),
+      ], "new suggestions were loaded");
     } catch (e) {
       if (!c.signal.aborted)
         setError(
@@ -193,10 +191,33 @@ export default function RunForm({
       if (!c.signal.aborted) setGenerating(false);
     }
   }
+  async function write(approveDraft = false) {
+    if (busy || !canSave || (approveDraft && (!saved || dirty || saved.state !== "draft"))) return;
+    setWriting(true);
+    setError("");
+    const definition: DraftDefinition = {
+      name: testName.trim(), objective, prompt, base_system_prompt: base, custom_system_prompt: custom,
+      ...(legacy ? { legacy: {
+        weights, expected_keywords: terms(keywords), forbidden_terms: terms(forbidden),
+        minimum_length: minLength, minimum_sentences: sentences,
+      } } : { criteria: parsed }),
+    };
+    const previous = saved ?? (m?.test_id && m.test_version
+      ? { test_id: m.test_id, test_version: m.test_version } : undefined);
+    try {
+      setSaved(approveDraft ? await approveVersion(saved!) : await saveDraft(definition, previous));
+      setDirty(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "The version could not be saved.");
+    } finally {
+      setWriting(false);
+    }
+  }
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (
       inFlight.current ||
+      !inline ||
       busy ||
       !testName.trim() ||
       !prompt.trim() ||
@@ -256,7 +277,7 @@ export default function RunForm({
     >
       <div className="run-form-heading">
         <h2>Configure test</h2>
-        {initialRun && (
+        {(initialRun || saved) && (
           <button
             type="button"
             className="new-test-button"
@@ -267,14 +288,20 @@ export default function RunForm({
           </button>
         )}
       </div>
-      {m?.test_id && (
+      <SavedTestPicker key={saved ? `${saved.test_id}/${saved.test_version}` : "library"}
+        disabled={busy} onSelect={async (ref) => onOpenVersion(await getVersion(ref))} />
+      {saved && <p role="status" className="muted">
+        {saved.state === "approved" ? "Approved" : "Draft"} version {saved.test_version}
+        {dirty ? " · Unsaved changes" : ""}
+      </p>}
+      {!saved && m?.test_id && (
         <p className="muted">
           Loaded version {m.test_version}. Changes to the prompt, system
           instructions, objective, or criteria create a new version. Earlier
           runs remain saved.
         </p>
       )}
-      {initialRun && m?.base_system_prompt === undefined && (
+      {initialRun && !saved && m?.base_system_prompt === undefined && (
         <p className="muted">
           This historical run has no saved system instructions. Configure
           instructions before creating a new run.
@@ -287,7 +314,7 @@ export default function RunForm({
             required
             maxLength={100}
             value={testName}
-            onChange={(e) => setTestName(e.target.value)}
+            onChange={(e) => { setTestName(e.target.value); if (saved) clearApproval("the test name changed"); }}
           />
         </label>
         <label className="field">
@@ -315,7 +342,7 @@ export default function RunForm({
             placeholder="What should the model respond to?"
           />
         </label>
-        <div className="field-row">
+        {inline && <div className="field-row">
           <label className="field">
             <span>Model</span>
             <input
@@ -327,6 +354,8 @@ export default function RunForm({
             />
             <datalist id="models">
               <option value="gpt-4.1-mini" />
+              <option value="gpt-5.4-mini" />
+              <option value="gpt-5.4" />
               <option value="demo-json-v1" />
               <option value="demo-strong-v1" />
             </datalist>
@@ -342,7 +371,7 @@ export default function RunForm({
               onChange={(e) => setTemperature(Number(e.target.value))}
             />
           </label>
-        </div>
+        </div>}
         <details className="advanced-criteria">
           <summary>System instructions</summary>
           <div className="advanced-criteria-controls">
@@ -374,17 +403,6 @@ export default function RunForm({
             </label>
           </div>
         </details>
-        <label className="check-field">
-          <input
-            type="checkbox"
-            checked={legacy}
-            onChange={(e) => {
-              setLegacy(e.target.checked);
-              clearApproval("the scoring mode changed");
-            }}
-          />
-          Use the original six automatic checks (legacy scoring)
-        </label>
       </fieldset>
       {!legacy ? (
         <>
@@ -442,7 +460,7 @@ export default function RunForm({
               positive points with up to two decimals totaling 100.00.
             </p>
           )}
-          <label className="check-field approval">
+          {inline && <label className="check-field approval">
             <input
               type="checkbox"
               checked={approved}
@@ -454,7 +472,7 @@ export default function RunForm({
             />
             I reviewed and approve these criteria, parameters, and point
             allocations.
-          </label>
+          </label>}
           {approvalNotice && !approved && (
             <p role="status" className="approval-notice">
               {approvalNotice}
@@ -464,19 +482,25 @@ export default function RunForm({
       ) : (
         <fieldset className="form-fields scoring-box" disabled={busy}>
           <legend>Original six automatic checks (legacy)</legend>
+          <button type="button" className="secondary-button" onClick={() => {
+            setLegacy(false);
+            clearApproval("the scoring mode changed");
+          }}>
+            Switch to criterion picker
+          </button>
           <div className="field-row">
             <label className="field">
               <span>Expected keywords (comma separated)</span>
               <input
                 value={keywords}
-                onChange={(e) => setKeywords(e.target.value)}
+                onChange={(e) => { setKeywords(e.target.value); setDirty(true); }}
               />
             </label>
             <label className="field">
               <span>Forbidden terms (comma separated)</span>
               <input
                 value={forbidden}
-                onChange={(e) => setForbidden(e.target.value)}
+                onChange={(e) => { setForbidden(e.target.value); setDirty(true); }}
               />
             </label>
             <label className="field">
@@ -486,7 +510,7 @@ export default function RunForm({
                 min={0}
                 max={10000}
                 value={minLength}
-                onChange={(e) => setMinLength(Number(e.target.value))}
+                onChange={(e) => { setMinLength(Number(e.target.value)); setDirty(true); }}
               />
             </label>
             <label className="field">
@@ -496,7 +520,7 @@ export default function RunForm({
                 min={1}
                 max={20}
                 value={sentences}
-                onChange={(e) => setSentences(Number(e.target.value))}
+                onChange={(e) => { setSentences(Number(e.target.value)); setDirty(true); }}
               />
             </label>
           </div>
@@ -511,12 +535,13 @@ export default function RunForm({
                     max={100}
                     step={0.01}
                     value={weights[key]}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setWeights((w) => ({
                         ...w,
                         [key]: Number(e.target.value),
-                      }))
-                    }
+                      }));
+                      setDirty(true);
+                    }}
                   />
                 </label>
               ),
@@ -536,13 +561,21 @@ export default function RunForm({
           {error}
         </p>
       )}
-      <button
-        className="primary-button"
-        type="submit"
-        disabled={busy || (legacy ? !legacyValid : !parsed || !approved)}
-      >
-        {submitting ? "Running and saving…" : "Run and save test"}
-      </button>
+      <div className="saved-actions">
+        <button type="button" className="secondary-button" disabled={busy || !canSave || (!!saved && !dirty)}
+          onClick={() => void write()}>Save draft</button>
+        {saved?.state === "draft" && <button type="button" className="primary-button"
+          disabled={busy || dirty || !canSave} onClick={() => void write(true)}>
+          Approve version
+        </button>}
+        {inline && <button className="primary-button" type="submit"
+          disabled={busy || (legacy ? !legacyValid : !parsed || !approved)}>
+          {submitting ? "Running and saving…" : "Run and save test"}
+        </button>}
+      </div>
+      {saved?.state === "approved" && !dirty && (
+        <SavedExecution key={saved.test_version} test={saved} onReserved={onReserved} />
+      )}
     </form>
   );
 }
