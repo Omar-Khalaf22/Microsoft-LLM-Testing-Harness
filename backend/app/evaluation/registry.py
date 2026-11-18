@@ -7,7 +7,7 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
-from .evaluators import content, legacy, patterns, structured
+from .evaluators import content, legacy, patterns, structured, prototype4
 from .rubric_integration import evaluate_rubric
 
 CATALOG_REVISION = "p2.1"
@@ -18,6 +18,7 @@ _EVALUATORS = {
     "structured": structured.evaluate_structured,
     "legacy": legacy.evaluate,
     "rubric": evaluate_rubric,
+    "prototype4": prototype4.evaluate,
 }
 
 
@@ -52,6 +53,8 @@ def validate_criterion(criterion_id: str, parameters: dict) -> dict:
     item = get_criterion(criterion_id)
     if item["status"] != "supported" or item.get("evaluator_type") not in _EVALUATORS:
         raise ValueError(f"Criterion is not executable: {criterion_id}")
+    if not isinstance(parameters, dict):
+        raise ValueError("Parameters must be an object.")
     if criterion_id in {"factual_accuracy", "evidence_grounding"} and (
         not isinstance(parameters.get("reference_evidence"), str)
         or not parameters["reference_evidence"].strip()
@@ -71,6 +74,8 @@ def validate_criterion(criterion_id: str, parameters: dict) -> dict:
         structured.validate_structured_parameters(criterion_id, parameters)
     if item["evaluator_type"] == "patterns":
         patterns.validate_pattern_parameters(criterion_id, parameters)
+    if criterion_id == "list_length" and parameters["minimum"] > parameters["maximum"]:
+        raise ValueError("Minimum list length cannot exceed maximum.")
     return item
 
 
