@@ -968,21 +968,43 @@
     "id": "reading_level",
     "name": "Reading level",
     "category": "length",
-    "description": "Candidate: reading level. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Approximate English Flesch Kincaid reading grade based on response words, vowel groups and sentence boundaries; not a validated phonetic or multilingual measure.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "prototype4",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "minimum_grade": {
+          "type": "number",
+          "minimum": -10,
+          "maximum": 30
+        },
+        "maximum_grade": {
+          "type": "number",
+          "minimum": -10,
+          "maximum": 30
+        }
+      },
+      "required": [
+        "minimum_grade",
+        "maximum_grade"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "minimum_grade": 0,
+      "maximum_grade": 12
+    }
   },
   {
     "id": "source_attribution",
