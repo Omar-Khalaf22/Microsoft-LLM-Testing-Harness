@@ -74,9 +74,15 @@ def validate_criterion(criterion_id: str, parameters: dict) -> dict:
         patterns.validate_pattern_parameters(criterion_id, parameters)
     if criterion_id == "list_length" and parameters["minimum"] > parameters["maximum"]:
         raise ValueError("Minimum list length cannot exceed maximum.")
-    if criterion_id == "reading_level" and parameters["minimum_grade"] > parameters["maximum_grade"]:
+    if (
+        criterion_id == "reading_level"
+        and parameters["minimum_grade"] > parameters["maximum_grade"]
+    ):
         raise ValueError("Minimum reading grade cannot exceed maximum.")
-    if criterion_id == "keyword_density" and parameters["minimum_ratio"] > parameters["maximum_ratio"]:
+    if (
+        criterion_id == "keyword_density"
+        and parameters["minimum_ratio"] > parameters["maximum_ratio"]
+    ):
         raise ValueError("Minimum keyword density cannot exceed maximum.")
     return item
 
