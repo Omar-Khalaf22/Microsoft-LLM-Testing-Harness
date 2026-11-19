@@ -1193,43 +1193,73 @@
     "id": "latency_budget",
     "name": "Latency budget",
     "category": "performance",
-    "description": "Candidate: latency budget. Requires recorded_execution_metrics, configured_budget; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Score actual recorded execution telemetry against a configured maximum; missing telemetry causes an explicit evaluation error.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "recorded_execution_metrics",
       "configured_budget"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "metrics",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "maximum": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1000000000
+        }
+      },
+      "required": [
+        "maximum"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "maximum": 5000
+    }
   },
   {
     "id": "token_budget",
     "name": "Token budget",
     "category": "performance",
-    "description": "Candidate: token budget. Requires recorded_execution_metrics, configured_budget; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Score actual recorded execution telemetry against a configured maximum; missing telemetry causes an explicit evaluation error.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "recorded_execution_metrics",
       "configured_budget"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "metrics",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "maximum": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1000000000
+        }
+      },
+      "required": [
+        "maximum"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "maximum": 1000
+    }
   },
   {
     "id": "cost_budget",
@@ -2774,22 +2804,37 @@
     "id": "response_time",
     "name": "Response time",
     "category": "performance",
-    "description": "Candidate: response time. Requires recorded_execution_metrics, configured_budget; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Score actual recorded execution telemetry against a configured maximum; missing telemetry causes an explicit evaluation error.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "recorded_execution_metrics",
       "configured_budget"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "metrics",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "maximum": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1000000000
+        }
+      },
+      "required": [
+        "maximum"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "maximum": 5000
+    }
   },
   {
     "id": "json_object",
