@@ -9,7 +9,6 @@ from xml.etree import ElementTree
 MAX_LENGTH = 100_000
 
 
-
 def _estimate_syllables(word: str) -> int:
     """Approximate English syllables without claiming phonetic precision."""
     groups = re.findall(r"[aeiouy]+", word.casefold())
