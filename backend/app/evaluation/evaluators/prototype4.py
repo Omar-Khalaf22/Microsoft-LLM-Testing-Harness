@@ -79,4 +79,35 @@ def evaluate(criterion_id: str, response: str, parameters: dict):
             float(ok),
             f"Expected one numeric value followed by exact unit {parameters['unit']!r}",
         )
+    if criterion_id == "duplicate_detection":
+        lines = [line.strip().casefold() for line in response.splitlines() if line.strip()]
+        duplicates = len(lines) - len(set(lines))
+        maximum = parameters["maximum_duplicate_lines"]
+        ok = duplicates <= maximum
+        return ok, float(ok), f"Found {duplicates} repeated nonempty lines; maximum {maximum}"
+    if criterion_id == "table_structure":
+        lines = [line.strip() for line in response.splitlines() if line.strip()]
+        tables = []
+        for index in range(len(lines) - 1):
+            header = [cell.strip() for cell in lines[index].strip("|").split("|")]
+            separator = [cell.strip() for cell in lines[index + 1].strip("|").split("|")]
+            if len(header) < 2 or len(header) != len(separator):
+                continue
+            if not all(re.fullmatch(r":?-{3,}:?", cell) for cell in separator):
+                continue
+            rows = 0
+            for line in lines[index + 2 :]:
+                if "|" not in line:
+                    break
+                cells = [cell.strip() for cell in line.strip("|").split("|")]
+                if len(cells) != len(header):
+                    break
+                rows += 1
+            tables.append((len(header), rows))
+        ok = any(
+            columns >= parameters["minimum_columns"]
+            and rows >= parameters["minimum_data_rows"]
+            for columns, rows in tables
+        )
+        return ok, float(ok), f"Checked {len(tables)} Markdown tables for column and row minimums"
     raise ValueError(f"Unsupported criterion: {criterion_id}")
