@@ -26,4 +26,5 @@ def evaluate(criterion_id: str, response: str, parameters: dict, context: dict):
     else:
         raise ValueError("Unknown retrieval criterion")
     minimum = parameters["minimum_score"]
-    return score >= minimum, score, f"First relevant document rank: {first_rank}; score: {score:.4f}"
+    detail = f"First relevant document rank: {first_rank}; score: {score:.4f}"
+    return score >= minimum, score, detail
