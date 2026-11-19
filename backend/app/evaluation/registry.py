@@ -16,6 +16,7 @@ from .evaluators import (
     prototype4,
     retrieval,
     structured,
+    tool_calls,
 )
 from .rubric_integration import evaluate_rubric
 
@@ -31,6 +32,7 @@ _EVALUATORS = {
     "metrics": metrics.evaluate,
     "retrieval": retrieval.evaluate,
     "operational": operational.evaluate,
+    "tool_calls": tool_calls.evaluate,
 }
 
 
@@ -105,7 +107,7 @@ def evaluate_criterion(criterion_id: str, response: str, parameters: dict, conte
     if item["evaluator_type"] == "structured":
         result = evaluator(criterion_id, response, parameters, context)
         return result.passed, result.normalized_score, result.detail
-    if item["evaluator_type"] in {"metrics", "retrieval", "operational"}:
+    if item["evaluator_type"] in {"metrics", "retrieval", "operational", "tool_calls"}:
         return evaluator(criterion_id, response, parameters, context)
     if item["evaluator_type"] == "rubric":
         return evaluator(criterion_id, response, parameters, context)
