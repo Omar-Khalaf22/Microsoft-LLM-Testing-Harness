@@ -46,5 +46,5 @@ def test_invalid_retrieval_evidence_fails_explicitly(context):
 
 
 def test_retrieval_threshold_validation():
-    with pytest.raises(ValueError, match="minimum_score"):
+    with pytest.raises(ValueError, match="greater than the maximum of 1"):
         validate_criterion("retrieval_hit_rate", {"minimum_score": 1.5})
