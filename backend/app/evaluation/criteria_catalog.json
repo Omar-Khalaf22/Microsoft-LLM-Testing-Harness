@@ -611,21 +611,40 @@
     "id": "markdown_format",
     "name": "Markdown format",
     "category": "structure",
-    "description": "Candidate: markdown format. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Require a Markdown heading, list, link, or fenced code block.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "prototype4",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "required_element": {
+          "type": "string",
+          "enum": [
+            "heading",
+            "list",
+            "link",
+            "code_block"
+          ]
+        }
+      },
+      "required": [
+        "required_element"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "required_element": "heading"
+    }
   },
   {
     "id": "regex_match",
@@ -1598,43 +1617,89 @@
     "id": "schema_required_keys",
     "name": "Schema required keys",
     "category": "structure",
-    "description": "Candidate: schema required keys. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Require specified top level keys in a JSON object.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "prototype4",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation.",
-    "consolidate_with": "json_required_keys"
+    "consolidate_with": "json_required_keys",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "minItems": 1,
+          "maxItems": 50,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "keys": [
+        "answer"
+      ]
+    }
   },
   {
     "id": "schema_forbidden_keys",
     "name": "Schema forbidden keys",
     "category": "structure",
-    "description": "Candidate: schema forbidden keys. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Disallow specified top level keys in a JSON object.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "prototype4",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation.",
-    "consolidate_with": "json_forbidden_keys"
+    "consolidate_with": "json_forbidden_keys",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "minItems": 1,
+          "maxItems": 50,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "keys": [
+        "password"
+      ]
+    }
   },
   {
     "id": "json_field_type",
@@ -2055,21 +2120,50 @@
     "id": "keyword_density",
     "name": "Keyword density",
     "category": "content",
-    "description": "Candidate: keyword density. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Check exact case insensitive word frequency as a fraction of response tokens.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "prototype4",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "minimum_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "maximum_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "keyword",
+        "minimum_ratio",
+        "maximum_ratio"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "keyword": "test",
+      "minimum_ratio": 0,
+      "maximum_ratio": 0.5
+    }
   },
   {
     "id": "duplicate_detection",
@@ -2110,21 +2204,36 @@
     "id": "repetition_penalty",
     "name": "Repetition penalty",
     "category": "content",
-    "description": "Candidate: repetition penalty. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Check fraction of repeated case insensitive word occurrences.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "prototype4",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "maximum_repeat_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "maximum_repeat_ratio"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "maximum_repeat_ratio": 0.5
+    }
   },
   {
     "id": "answerability",
