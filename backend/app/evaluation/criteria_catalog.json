@@ -372,91 +372,161 @@
     "id": "semantic_similarity",
     "name": "Semantic similarity",
     "category": "semantic",
-    "description": "Candidate: semantic similarity. Requires response, objective, reference_or_rubric, reference_output; implementation and scoring validation are pending.",
+    "description": "Evaluate semantic similarity using an evidence grounded model judge. A configured judge model and approved reference evidence are mandatory; missing inputs cause an explicit error.",
     "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "objective",
-      "reference_or_rubric",
-      "reference_output"
+      "prompt",
+      "configured_judge_model",
+      "reference_evidence"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "llm_judge_with_reference",
+    "evaluator_type": "rubric",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Executable with configured judge provider and supplied reference evidence; requires calibration against human ratings.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "reference_evidence": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        }
+      },
+      "required": [
+        "reference_evidence"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "reference_evidence": "Approved reference answer or source evidence for this task."
+    }
   },
   {
     "id": "factual_consistency",
     "name": "Factual consistency",
     "category": "semantic",
-    "description": "Candidate: factual consistency. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
+    "description": "Evaluate factual consistency using an evidence grounded model judge. A configured judge model and approved reference evidence are mandatory; missing inputs cause an explicit error.",
     "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "objective",
-      "reference_or_rubric"
+      "prompt",
+      "configured_judge_model",
+      "reference_evidence"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "llm_judge_with_reference",
+    "evaluator_type": "rubric",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Executable with configured judge provider and supplied reference evidence; requires calibration against human ratings.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "reference_evidence": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        }
+      },
+      "required": [
+        "reference_evidence"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "reference_evidence": "Approved reference answer or source evidence for this task."
+    }
   },
   {
     "id": "citation_accuracy",
     "name": "Citation accuracy",
     "category": "semantic",
-    "description": "Candidate: citation accuracy. Requires response, objective, reference_or_rubric, source_evidence; implementation and scoring validation are pending.",
+    "description": "Evaluate citation accuracy using an evidence grounded model judge. A configured judge model and approved reference evidence are mandatory; missing inputs cause an explicit error.",
     "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "objective",
-      "reference_or_rubric",
-      "source_evidence"
+      "prompt",
+      "configured_judge_model",
+      "reference_evidence"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "llm_judge_with_reference",
+    "evaluator_type": "rubric",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Executable with configured judge provider and supplied reference evidence; requires calibration against human ratings.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "reference_evidence": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        }
+      },
+      "required": [
+        "reference_evidence"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "reference_evidence": "Approved reference answer or source evidence for this task."
+    }
   },
   {
     "id": "hallucination_detection",
     "name": "Hallucination detection",
     "category": "semantic",
-    "description": "Candidate: hallucination detection. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
+    "description": "Evaluate hallucination detection using an evidence grounded model judge. A configured judge model and approved reference evidence are mandatory; missing inputs cause an explicit error.",
     "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "objective",
-      "reference_or_rubric"
+      "prompt",
+      "configured_judge_model",
+      "reference_evidence"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "llm_judge_with_reference",
+    "evaluator_type": "rubric",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Executable with configured judge provider and supplied reference evidence; requires calibration against human ratings.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "reference_evidence": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        }
+      },
+      "required": [
+        "reference_evidence"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "reference_evidence": "Approved reference answer or source evidence for this task."
+    }
   },
   {
     "id": "toxicity",
@@ -1010,24 +1080,41 @@
     "id": "source_attribution",
     "name": "Source attribution",
     "category": "semantic",
-    "description": "Candidate: source attribution. Requires response, objective, reference_or_rubric, source_evidence; implementation and scoring validation are pending.",
+    "description": "Evaluate source attribution using an evidence grounded model judge. A configured judge model and approved reference evidence are mandatory; missing inputs cause an explicit error.",
     "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "objective",
-      "reference_or_rubric",
-      "source_evidence"
+      "prompt",
+      "configured_judge_model",
+      "reference_evidence"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "llm_judge_with_reference",
+    "evaluator_type": "rubric",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Executable with configured judge provider and supplied reference evidence; requires calibration against human ratings.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "reference_evidence": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        }
+      },
+      "required": [
+        "reference_evidence"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "reference_evidence": "Approved reference answer or source evidence for this task."
+    }
   },
   {
     "id": "context_relevance",
@@ -1056,23 +1143,41 @@
     "id": "answer_relevance",
     "name": "Answer relevance",
     "category": "semantic",
-    "description": "Candidate: answer relevance. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
+    "description": "Evaluate answer relevance using an evidence grounded model judge. A configured judge model and approved reference evidence are mandatory; missing inputs cause an explicit error.",
     "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "objective",
-      "reference_or_rubric"
+      "prompt",
+      "configured_judge_model",
+      "reference_evidence"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "llm_judge_with_reference",
+    "evaluator_type": "rubric",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Executable with configured judge provider and supplied reference evidence; requires calibration against human ratings.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "reference_evidence": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        }
+      },
+      "required": [
+        "reference_evidence"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "reference_evidence": "Approved reference answer or source evidence for this task."
+    }
   },
   {
     "id": "faithfulness",
@@ -2082,47 +2187,81 @@
     "id": "translation_accuracy",
     "name": "Translation accuracy",
     "category": "semantic",
-    "description": "Candidate: translation accuracy. Requires response, objective, reference_or_rubric, reference_output; implementation and scoring validation are pending.",
+    "description": "Evaluate translation accuracy using an evidence grounded model judge. A configured judge model and approved reference evidence are mandatory; missing inputs cause an explicit error.",
     "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "objective",
-      "reference_or_rubric",
-      "reference_output"
+      "prompt",
+      "configured_judge_model",
+      "reference_evidence"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "llm_judge_with_reference",
+    "evaluator_type": "rubric",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Executable with configured judge provider and supplied reference evidence; requires calibration against human ratings.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "reference_evidence": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        }
+      },
+      "required": [
+        "reference_evidence"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "reference_evidence": "Approved reference answer or source evidence for this task."
+    }
   },
   {
     "id": "summarization_coverage",
     "name": "Summarization coverage",
     "category": "semantic",
-    "description": "Candidate: summarization coverage. Requires response, objective, reference_or_rubric, reference_output; implementation and scoring validation are pending.",
+    "description": "Evaluate summarization coverage using an evidence grounded model judge. A configured judge model and approved reference evidence are mandatory; missing inputs cause an explicit error.",
     "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "objective",
-      "reference_or_rubric",
-      "reference_output"
+      "prompt",
+      "configured_judge_model",
+      "reference_evidence"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "llm_judge_with_reference",
+    "evaluator_type": "rubric",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Executable with configured judge provider and supplied reference evidence; requires calibration against human ratings.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "reference_evidence": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        }
+      },
+      "required": [
+        "reference_evidence"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "reference_evidence": "Approved reference answer or source evidence for this task."
+    }
   },
   {
     "id": "entity_extraction",
