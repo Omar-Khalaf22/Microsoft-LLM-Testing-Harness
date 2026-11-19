@@ -60,8 +60,6 @@ def validate_criterion(criterion_id: str, parameters: dict) -> dict:
         or not parameters["reference_evidence"].strip()
     ):
         raise ValueError("Reference evidence is required for factual/grounding evaluation.")
-    if not isinstance(parameters, dict):
-        raise ValueError("Parameters must be an object.")
     try:
         if len(json.dumps(parameters, allow_nan=False)) > 32_000:
             raise ValueError("Criterion parameters exceed the 32,000 character limit.")
