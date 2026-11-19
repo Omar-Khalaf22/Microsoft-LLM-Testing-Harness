@@ -10,6 +10,14 @@ from .custom_rubric import CUSTOM_RUBRIC_METHOD, validated_excerpts
 RUBRICS = {
     "factual_accuracy": "Assess factual correctness against supplied reference evidence.",
     "completeness": "Assess whether all material prompt requirements were addressed.",
+    "semantic_similarity": "Compare the meaning of the answer with the supplied reference answer; do not require identical wording.",
+    "factual_consistency": "Assess whether the answer contradicts any supplied reference facts. Do not rely on outside knowledge.",
+    "citation_accuracy": "Check whether cited claims are actually supported by the supplied source evidence; unsupported citations lose credit.",
+    "hallucination_detection": "Give high scores only when the answer avoids unsupported factual claims relative to supplied evidence.",
+    "source_attribution": "Assess whether claims are attributed to appropriate supplied sources, without inventing sources.",
+    "answer_relevance": "Assess whether the answer addresses the supplied task and objective, using the reference as the task benchmark.",
+    "translation_accuracy": "Compare meaning, omissions, and additions against the supplied reference translation; avoid relying on external facts.",
+    "summarization_coverage": "Evaluate coverage of material points in the supplied reference summary, without rewarding invented details.",
     "evidence_grounding": (
         "Assess whether factual claims are supported by supplied reference evidence."
     ),
