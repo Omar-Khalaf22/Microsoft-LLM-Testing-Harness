@@ -2,6 +2,7 @@
 
 import pytest
 
+from app.evaluation.executor import _total_tokens
 from app.evaluation.registry import evaluate_criterion
 
 
@@ -42,3 +43,11 @@ def test_invalid_latency_metric(value):
 def test_missing_telemetry_is_not_assumed():
     with pytest.raises(ValueError, match="Recorded execution metrics"):
         evaluate_criterion("token_budget", "response", {"maximum": 100}, {})
+
+
+def test_reported_token_usage_normalization():
+    assert _total_tokens({"input_tokens": 30, "output_tokens": 20}) == 50
+    assert _total_tokens({"total_tokens": 40}) == 40
+    assert _total_tokens({"input_tokens": None, "output_tokens": 20}) is None
+    assert _total_tokens({"input_tokens": True, "output_tokens": 20}) is None
+    assert _total_tokens({}) is None
