@@ -9,12 +9,39 @@ from xml.etree import ElementTree
 MAX_LENGTH = 100_000
 
 
+
+def _estimate_syllables(word: str) -> int:
+    """Approximate English syllables without claiming phonetic precision."""
+    groups = re.findall(r"[aeiouy]+", word.casefold())
+    count = len(groups)
+    if len(word) > 3 and word.casefold().endswith("e") and not word.casefold().endswith("le"):
+        count -= 1
+    return max(1, count)
+
+
+def _reading_grade(response: str) -> float | None:
+    """Estimate Flesch Kincaid grade level for English prose."""
+    words = re.findall(r"[A-Za-z]+(?:'[A-Za-z]+)?", response)
+    if not words:
+        return None
+    sentences = max(1, len(re.findall(r"[.!?]+", response)))
+    syllables = sum(_estimate_syllables(word) for word in words)
+    return 0.39 * len(words) / sentences + 11.8 * syllables / len(words) - 15.59
+
+
 def evaluate(criterion_id: str, response: str, parameters: dict):
     if not isinstance(response, str):
         raise TypeError("Response must be text")
     if len(response) > MAX_LENGTH:
         raise RuntimeError("Response exceeds the evaluator input limit")
     text = response.strip()
+    if criterion_id == "reading_level":
+        grade = _reading_grade(response)
+        if grade is None:
+            return False, 0.0, "No English words available for readability estimation"
+        lo, hi = parameters["minimum_grade"], parameters["maximum_grade"]
+        ok = lo <= grade <= hi
+        return ok, float(ok), f"Estimated English Flesch Kincaid grade: {grade:.2f}"
     if criterion_id == "xml_validity":
         try:
             ElementTree.fromstring(text)
