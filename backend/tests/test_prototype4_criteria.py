@@ -24,6 +24,20 @@ from app.evaluation.registry import evaluate_criterion, validate_criterion
         ("list_length", "- one", {"minimum": 2, "maximum": 2}, False),
         ("numeric_units", "12 kg", {"unit": "kg"}, True),
         ("numeric_units", "12 lb", {"unit": "kg"}, False),
+        ("duplicate_detection", "A\nB", {"maximum_duplicate_lines": 0}, True),
+        ("duplicate_detection", "A\na", {"maximum_duplicate_lines": 0}, False),
+        (
+            "table_structure",
+            "| A | B |\n| --- | --- |\n| 1 | 2 |",
+            {"minimum_columns": 2, "minimum_data_rows": 1},
+            True,
+        ),
+        (
+            "table_structure",
+            "| A | B |\n| 1 | 2 |",
+            {"minimum_columns": 2, "minimum_data_rows": 1},
+            False,
+        ),
     ],
 )
 def test_new_criteria(criterion, response, params, expected):
@@ -41,6 +55,8 @@ def test_new_criteria(criterion, response, params, expected):
         ("required_links", {"urls": []}),
         ("list_length", {"minimum": 2, "maximum": 1}),
         ("numeric_units", {"unit": ""}),
+        ("duplicate_detection", {"maximum_duplicate_lines": -1}),
+        ("table_structure", {"minimum_columns": 1, "minimum_data_rows": 1}),
     ],
 )
 def test_invalid_configurations(criterion, params):
