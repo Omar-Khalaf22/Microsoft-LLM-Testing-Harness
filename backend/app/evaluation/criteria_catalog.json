@@ -1434,23 +1434,39 @@
     "id": "tool_call_accuracy",
     "name": "Tool call accuracy",
     "category": "instruction_following",
-    "description": "Candidate: tool call accuracy. Requires response, tool_schema, expected_and_actual_tool_calls; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Exact name and argument matching of recorded tool calls against approved expected calls, using multiset F1; requires validated tool schemas.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
-      "response",
-      "tool_schema",
-      "expected_and_actual_tool_calls"
+      "expected_tool_calls",
+      "actual_tool_calls",
+      "tool_schemas"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "tool_calls",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Executable with explicit recorded tool calls and approved schemas; no inferred tool execution.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "minimum_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "minimum_score"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "minimum_score": 1
+    }
   },
   {
     "id": "tool_selection",
@@ -1493,23 +1509,38 @@
     "id": "function_argument_validation",
     "name": "Function argument validation",
     "category": "instruction_following",
-    "description": "Candidate: function argument validation. Requires response, tool_schema, expected_and_actual_tool_calls; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Checks each recorded tool call argument object against its approved JSON Schema and scores the valid proportion.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
-      "response",
-      "tool_schema",
-      "expected_and_actual_tool_calls"
+      "actual_tool_calls",
+      "tool_schemas"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "tool_calls",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Executable with explicit recorded tool calls and approved schemas; no inferred tool execution.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "minimum_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "minimum_score"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "minimum_score": 1
+    }
   },
   {
     "id": "refusal_accuracy",
