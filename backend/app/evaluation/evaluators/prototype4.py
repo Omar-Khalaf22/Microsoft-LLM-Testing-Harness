@@ -1,6 +1,7 @@
 """Additional bounded deterministic criteria for Prototype 4."""
 
 import ast
+import json
 import re
 from datetime import datetime
 from xml.etree import ElementTree
@@ -109,4 +110,44 @@ def evaluate(criterion_id: str, response: str, parameters: dict):
             for columns, rows in tables
         )
         return ok, float(ok), f"Checked {len(tables)} Markdown tables for column and row minimums"
+    if criterion_id in {"schema_required_keys", "schema_forbidden_keys"}:
+        try:
+            obj = json.loads(text)
+        except (ValueError, RecursionError):
+            return False, 0.0, "Response is not valid JSON"
+        if not isinstance(obj, dict):
+            return False, 0.0, "Response must be a JSON object"
+        keys = parameters["keys"]
+        if criterion_id == "schema_required_keys":
+            matched = sum(key in obj for key in keys)
+            score = matched / len(keys)
+            return score == 1.0, score, f"Found {matched} of {len(keys)} required top level keys"
+        absent = sum(key not in obj for key in keys)
+        score = absent / len(keys)
+        return score == 1.0, score, f"Absent {absent} of {len(keys)} forbidden top level keys"
+    if criterion_id == "keyword_density":
+        words = re.findall(r"\b\w+\b", response.casefold())
+        keyword = parameters["keyword"].casefold()
+        count = sum(word == keyword for word in words)
+        density = count / len(words) if words else 0.0
+        ok = parameters["minimum_ratio"] <= density <= parameters["maximum_ratio"]
+        return ok, float(ok), f"Exact token density {density:.4f} ({count}/{len(words)})"
+    if criterion_id == "repetition_penalty":
+        words = re.findall(r"\b\w+\b", response.casefold())
+        if not words:
+            return False, 0.0, "No words to evaluate"
+        repeated = len(words) - len(set(words))
+        ratio = repeated / len(words)
+        ok = ratio <= parameters["maximum_repeat_ratio"]
+        return ok, float(ok), f"Repeated word occurrence ratio {ratio:.4f}"
+    if criterion_id == "markdown_format":
+        marker = parameters["required_element"]
+        checks = {
+            "heading": r"(?m)^#{1,6} +\S",
+            "list": r"(?m)^\s*(?:[-*+] |\d+[.)] )\S",
+            "link": r"\[[^]\n]+\]\(https?://[^)\s]+\)",
+            "code_block": r"(?m)^\x60{3}[^\n]*\n[\s\S]*?^\x60{3}\s*$",
+        }
+        ok = bool(re.search(checks[marker], response))
+        return ok, float(ok), f"Required Markdown element {marker}: {'found' if ok else 'missing'}"
     raise ValueError(f"Unsupported criterion: {criterion_id}")
