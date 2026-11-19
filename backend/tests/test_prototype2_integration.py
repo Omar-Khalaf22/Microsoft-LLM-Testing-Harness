@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from app.database import SessionLocal
+from app.evaluation.registry import list_supported_criteria
 from app.evaluation.executor import TestExecutor as Executor
 from app.evaluation.providers import DemoProvider
 from app.models import EvaluationResult, TestVersion
@@ -54,7 +55,7 @@ def test_suggestions_approval_execution_and_exact_snapshot_reload(app):
     body = config()
     with TestClient(app) as client:
         definitions = client.get("/evaluation/criteria").json()
-        assert len(definitions["criteria"]) == 38
+        assert len(definitions["criteria"]) == len(list_supported_criteria())
         rec = client.post(
             "/assistant/suggest-criteria",
             json={"objective": body["objective"], "test_prompt": body["prompt"]},
