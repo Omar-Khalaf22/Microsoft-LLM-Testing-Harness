@@ -18,6 +18,20 @@ from .validators import evaluate_selected
 from .weights import ScoringWeights
 
 
+def _total_tokens(usage: dict) -> int | None:
+    """Return reported token usage without inventing missing values."""
+    if not isinstance(usage, dict):
+        return None
+    total = usage.get("total_tokens")
+    if type(total) is int and total >= 0:
+        return total
+    input_tokens = usage.get("input_tokens")
+    output_tokens = usage.get("output_tokens")
+    if all(type(value) is int and value >= 0 for value in (input_tokens, output_tokens)):
+        return input_tokens + output_tokens
+    return None
+
+
 class TestExecutor:
     def __init__(
         self,
@@ -116,17 +130,7 @@ class TestExecutor:
                     "approved_instructions": instructions,
                     "recorded_execution_metrics": {
                         "latency_ms": target_ms,
-                        "total_tokens": (
-                            usage.get("total_tokens")
-                            if isinstance(usage, dict) and isinstance(usage.get("total_tokens"), (int, float))
-                            and not isinstance(usage.get("total_tokens"), bool)
-                            else (
-                                usage["input_tokens"] + usage["output_tokens"]
-                                if isinstance(usage, dict)
-                                and all(isinstance(usage.get(key), (int, float)) and not isinstance(usage.get(key), bool) for key in ("input_tokens", "output_tokens"))
-                                else None
-                            )
-                        ),
+                        "total_tokens": _total_tokens(usage),
                     },
                 }
                 if any(d["evaluator_type"] == "rubric" for d in definitions):
