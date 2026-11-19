@@ -62,7 +62,7 @@ def test_semantic_criteria_execute_with_reference(criterion_id):
 
 @pytest.mark.parametrize("criterion_id", IDS)
 def test_semantic_criteria_reject_missing_reference(criterion_id):
-    with pytest.raises(ValueError, match="Reference evidence"):
+    with pytest.raises(ValueError, match="reference_evidence.*required property"):
         validate_criterion(criterion_id, {})
 
 
