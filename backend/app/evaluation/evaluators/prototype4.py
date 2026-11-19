@@ -1,4 +1,5 @@
 """Additional bounded deterministic criteria for Prototype 4."""
+
 import ast
 import re
 from datetime import datetime
@@ -104,8 +105,7 @@ def evaluate(criterion_id: str, response: str, parameters: dict):
                 rows += 1
             tables.append((len(header), rows))
         ok = any(
-            columns >= parameters["minimum_columns"]
-            and rows >= parameters["minimum_data_rows"]
+            columns >= parameters["minimum_columns"] and rows >= parameters["minimum_data_rows"]
             for columns, rows in tables
         )
         return ok, float(ok), f"Checked {len(tables)} Markdown tables for column and row minimums"
