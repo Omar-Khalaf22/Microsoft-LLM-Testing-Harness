@@ -27,11 +27,7 @@ def evaluate(criterion_id: str, response: str, parameters: dict, context: dict):
         matched = sum((wanted & observed).values())
         precision = matched / len(actual) if actual else float(not expected)
         recall = matched / len(expected) if expected else float(not actual)
-        score = (
-            2 * precision * recall / (precision + recall)
-            if precision + recall
-            else 0.0
-        )
+        score = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
         passed = score >= parameters["minimum_score"]
         return passed, score, f"Matched calls: {matched}; F1: {score:.4f}"
 
