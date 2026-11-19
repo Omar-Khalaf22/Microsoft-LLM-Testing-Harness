@@ -1252,47 +1252,75 @@
     "id": "retrieval_hit_rate",
     "name": "Retrieval hit rate",
     "category": "rag",
-    "description": "Candidate: retrieval hit rate. Requires response, query, retrieved_contexts, reference_contexts_or_answer; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Binary hit rate for one query: one if any approved relevant document appears in ranked retrieval results, otherwise zero.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
-      "response",
-      "query",
-      "retrieved_contexts",
-      "reference_contexts_or_answer"
+      "retrieved_document_ids",
+      "relevant_document_ids"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "retrieval",
     "research_sources": [
       "https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Executable with ranked retrieval IDs and approved relevance labels; per query scoring, not aggregate dataset MRR.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "minimum_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "minimum_score"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "minimum_score": 1
+    }
   },
   {
     "id": "retrieval_mrr",
     "name": "Retrieval MRR",
     "category": "rag",
-    "description": "Candidate: retrieval mrr. Requires response, query, retrieved_contexts, reference_contexts_or_answer; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Reciprocal rank for one query: one divided by rank of first approved relevant retrieved document, otherwise zero.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
-      "response",
-      "query",
-      "retrieved_contexts",
-      "reference_contexts_or_answer"
+      "retrieved_document_ids",
+      "relevant_document_ids"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "retrieval",
     "research_sources": [
       "https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Executable with ranked retrieval IDs and approved relevance labels; per query scoring, not aggregate dataset MRR.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "minimum_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "minimum_score"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "minimum_score": 0.5
+    }
   },
   {
     "id": "latency_budget",
