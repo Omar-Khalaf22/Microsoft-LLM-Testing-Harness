@@ -10,8 +10,8 @@ from sqlalchemy import select
 
 from app.database import SessionLocal
 from app.evaluation.executor import TestExecutor as Executor
-from app.evaluation.registry import list_supported_criteria
 from app.evaluation.providers import DemoProvider
+from app.evaluation.registry import list_supported_criteria
 from app.models import EvaluationResult, TestVersion
 from app.models.recommendation import CriteriaRecommendation
 from app.repositories.prototype_runs import PostgresResultRepository
