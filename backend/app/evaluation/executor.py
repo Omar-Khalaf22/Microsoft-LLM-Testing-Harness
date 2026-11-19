@@ -114,6 +114,20 @@ class TestExecutor:
                     "prompt": request.prompt,
                     "objective": request.objective,
                     "approved_instructions": instructions,
+                    "recorded_execution_metrics": {
+                        "latency_ms": target_ms,
+                        "total_tokens": (
+                            usage.get("total_tokens")
+                            if isinstance(usage, dict) and isinstance(usage.get("total_tokens"), (int, float))
+                            and not isinstance(usage.get("total_tokens"), bool)
+                            else (
+                                usage["input_tokens"] + usage["output_tokens"]
+                                if isinstance(usage, dict)
+                                and all(isinstance(usage.get(key), (int, float)) and not isinstance(usage.get(key), bool) for key in ("input_tokens", "output_tokens"))
+                                else None
+                            )
+                        ),
+                    },
                 }
                 if any(d["evaluator_type"] == "rubric" for d in definitions):
                     settings = get_settings()
