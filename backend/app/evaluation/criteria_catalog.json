@@ -1398,24 +1398,37 @@
     "id": "cost_budget",
     "name": "Cost budget",
     "category": "performance",
-    "description": "Candidate: cost budget. Requires recorded_execution_metrics, configured_budget, known_token_usage, versioned_price_map; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Computes USD cost from recorded input and output token counts and a supplied versioned model price map; compares against budget.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "recorded_execution_metrics",
-      "configured_budget",
-      "known_token_usage",
       "versioned_price_map"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "operational",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Executable from explicit recorded evidence; does not infer absent telemetry.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "maximum_usd": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "maximum_usd"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "maximum_usd": 0.05
+    }
   },
   {
     "id": "tool_call_accuracy",
@@ -1443,23 +1456,38 @@
     "id": "tool_selection",
     "name": "Tool selection",
     "category": "instruction_following",
-    "description": "Candidate: tool selection. Requires response, tool_schema, expected_and_actual_tool_calls; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Multiset F1 for expected versus actual tool names, with repeated calls counted. Requires approved expected and recorded actual tool call names.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
-      "response",
-      "tool_schema",
-      "expected_and_actual_tool_calls"
+      "expected_tool_names",
+      "actual_tool_names"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "operational",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Executable from explicit recorded evidence; does not infer absent telemetry.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "minimum_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "minimum_score"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "minimum_score": 1
+    }
   },
   {
     "id": "function_argument_validation",
