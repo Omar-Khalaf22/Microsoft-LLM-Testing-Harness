@@ -604,7 +604,8 @@
       "properties": {},
       "required": [],
       "additionalProperties": false
-    }
+    },
+    "example_parameters": {}
   },
   {
     "id": "markdown_format",
@@ -1545,6 +1546,10 @@
         "maximum"
       ],
       "additionalProperties": false
+    },
+    "example_parameters": {
+      "minimum": 1,
+      "maximum": 3
     }
   },
   {
@@ -1583,6 +1588,10 @@
         "minimum_data_rows"
       ],
       "additionalProperties": false
+    },
+    "example_parameters": {
+      "minimum_columns": 2,
+      "minimum_data_rows": 1
     }
   },
   {
@@ -1856,6 +1865,9 @@
         "format"
       ],
       "additionalProperties": false
+    },
+    "example_parameters": {
+      "format": "%Y-%m-%d"
     }
   },
   {
@@ -1880,7 +1892,8 @@
       "properties": {},
       "required": [],
       "additionalProperties": false
-    }
+    },
+    "example_parameters": {}
   },
   {
     "id": "code_execution",
@@ -2088,6 +2101,9 @@
         "maximum_duplicate_lines"
       ],
       "additionalProperties": false
+    },
+    "example_parameters": {
+      "maximum_duplicate_lines": 0
     }
   },
   {
@@ -2442,6 +2458,9 @@
         "unit"
       ],
       "additionalProperties": false
+    },
+    "example_parameters": {
+      "unit": "kg"
     }
   },
   {
@@ -2495,6 +2514,9 @@
         "minimum"
       ],
       "additionalProperties": false
+    },
+    "example_parameters": {
+      "minimum": 1
     }
   },
   {
@@ -2534,6 +2556,11 @@
         "urls"
       ],
       "additionalProperties": false
+    },
+    "example_parameters": {
+      "urls": [
+        "https://example.org"
+      ]
     }
   },
   {
@@ -2566,6 +2593,9 @@
         "minimum"
       ],
       "additionalProperties": false
+    },
+    "example_parameters": {
+      "minimum": 1
     }
   },
   {
