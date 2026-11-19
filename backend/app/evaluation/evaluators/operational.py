@@ -52,9 +52,7 @@ def evaluate(criterion_id: str, response: str, parameters: dict, context: dict):
         output_tokens = _number(metrics.get("output_tokens"), "output_tokens")
         input_price = _number(entry.get("input_per_million"), "input_per_million")
         output_price = _number(entry.get("output_per_million"), "output_per_million")
-        cost = (
-            input_tokens * input_price + output_tokens * output_price
-        ) / 1_000_000
+        cost = (input_tokens * input_price + output_tokens * output_price) / 1_000_000
         budget = parameters["maximum_usd"]
         score = 1.0 if cost == 0 else min(1.0, budget / cost)
         return cost <= budget, score, f"Recorded cost USD: {cost:.8f}; budget: {budget}"
