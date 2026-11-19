@@ -9,6 +9,9 @@ from app.evaluation.registry import evaluate_criterion, validate_criterion
     "criterion,response,params,expected",
     [
         ("xml_validity", "<root/>", {}, True),
+        ("reading_level", "The cat sat.", {"minimum_grade": -10, "maximum_grade": 10}, True),
+        ("reading_level", "", {"minimum_grade": -10, "maximum_grade": 10}, False),
+        ("reading_level", "The cat sat.", {"minimum_grade": 20, "maximum_grade": 30}, False),
         ("schema_required_keys", '{"answer": 1}', {"keys": ["answer"]}, True),
         ("schema_required_keys", '{"other": 1}', {"keys": ["answer"]}, False),
         ("schema_forbidden_keys", '{"answer": 1}', {"keys": ["password"]}, True),
@@ -71,6 +74,8 @@ def test_new_criteria(criterion, response, params, expected):
     "criterion,params",
     [
         ("date_format", {}),
+        ("reading_level", {"minimum_grade": 10, "maximum_grade": 0}),
+        ("keyword_density", {"keyword": "test", "minimum_ratio": 0.9, "maximum_ratio": 0.1}),
         ("citation_presence", {"minimum": 0}),
         ("required_links", {"urls": []}),
         ("list_length", {"minimum": 2, "maximum": 1}),
