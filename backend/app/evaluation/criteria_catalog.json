@@ -1551,21 +1551,39 @@
     "id": "table_structure",
     "name": "Table structure",
     "category": "structure",
-    "description": "Candidate: table structure. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Check for a Markdown pipe table with consistent columns and minimum data rows.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "prototype4",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "minimum_columns": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 100
+        },
+        "minimum_data_rows": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        }
+      },
+      "required": [
+        "minimum_columns",
+        "minimum_data_rows"
+      ],
+      "additionalProperties": false
+    }
   },
   {
     "id": "schema_required_keys",
@@ -2044,21 +2062,33 @@
     "id": "duplicate_detection",
     "name": "Duplicate detection",
     "category": "content",
-    "description": "Candidate: duplicate detection. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Count repeated nonempty response lines after trimming and case folding.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "prototype4",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "maximum_duplicate_lines": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        }
+      },
+      "required": [
+        "maximum_duplicate_lines"
+      ],
+      "additionalProperties": false
+    }
   },
   {
     "id": "repetition_penalty",
