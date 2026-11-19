@@ -57,9 +57,7 @@ def test_semantic_criteria_execute_with_reference(criterion_id):
     assert passed is True
     assert score == pytest.approx(0.9)
     assert detail
-    assert context["rubric_evidence"][criterion_id]["evidence"] == [
-        "Verified source statement."
-    ]
+    assert context["rubric_evidence"][criterion_id]["evidence"] == ["Verified source statement."]
 
 
 @pytest.mark.parametrize("criterion_id", IDS)
