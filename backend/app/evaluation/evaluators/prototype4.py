@@ -4,7 +4,6 @@ import re
 from datetime import datetime
 from xml.etree import ElementTree
 
-
 MAX_LENGTH = 100_000
 
 
