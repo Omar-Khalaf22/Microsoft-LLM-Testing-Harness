@@ -7,7 +7,7 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
-from .evaluators import content, legacy, patterns, structured, prototype4
+from .evaluators import content, legacy, patterns, prototype4, structured
 from .rubric_integration import evaluate_rubric
 
 CATALOG_REVISION = "p2.1"
