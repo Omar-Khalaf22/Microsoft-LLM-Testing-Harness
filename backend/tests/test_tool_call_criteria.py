@@ -1,6 +1,7 @@
 """Regression tests for tool call scoring with explicit recorded evidence."""
 
 import pytest
+
 from app.evaluation.registry import evaluate_criterion, validate_criterion
 
 
