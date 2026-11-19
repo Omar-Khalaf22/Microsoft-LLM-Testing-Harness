@@ -7,7 +7,16 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
-from .evaluators import content, legacy, metrics, patterns, prototype4, retrieval, structured
+from .evaluators import (
+    content,
+    legacy,
+    metrics,
+    operational,
+    patterns,
+    prototype4,
+    retrieval,
+    structured,
+)
 from .rubric_integration import evaluate_rubric
 
 CATALOG_REVISION = "p2.1"
@@ -21,6 +30,7 @@ _EVALUATORS = {
     "prototype4": prototype4.evaluate,
     "metrics": metrics.evaluate,
     "retrieval": retrieval.evaluate,
+    "operational": operational.evaluate,
 }
 
 
@@ -95,7 +105,7 @@ def evaluate_criterion(criterion_id: str, response: str, parameters: dict, conte
     if item["evaluator_type"] == "structured":
         result = evaluator(criterion_id, response, parameters, context)
         return result.passed, result.normalized_score, result.detail
-    if item["evaluator_type"] in {"metrics", "retrieval"}:
+    if item["evaluator_type"] in {"metrics", "retrieval", "operational"}:
         return evaluator(criterion_id, response, parameters, context)
     if item["evaluator_type"] == "rubric":
         return evaluator(criterion_id, response, parameters, context)
