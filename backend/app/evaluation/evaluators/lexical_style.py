@@ -26,6 +26,5 @@ def evaluate(criterion_id: str, response: str, parameters: dict):
     return (
         passed,
         score,
-        f"Lexical style score: {observed:.4f}; target: {target:.4f}; "
-        f"matched terms: {total}",
+        f"Lexical style score: {observed:.4f}; target: {target:.4f}; matched terms: {total}",
     )
