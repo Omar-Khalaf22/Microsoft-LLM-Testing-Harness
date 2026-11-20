@@ -10,6 +10,7 @@ from jsonschema import Draft202012Validator
 from .evaluators import (
     conciseness,
     content,
+    context_precision,
     context_recall,
     entity_extraction,
     format_compliance,
@@ -36,6 +37,7 @@ _CATALOG = Path(__file__).with_name("criteria_catalog.json")
 _EVALUATORS = {
     "conciseness": conciseness.evaluate,
     "content": content.evaluate,
+    "context_precision": context_precision.evaluate,
     "context_recall": context_recall.evaluate,
     "entity_extraction": entity_extraction.evaluate,
     "format_compliance": format_compliance.evaluate,
@@ -130,6 +132,7 @@ def evaluate_criterion(criterion_id: str, response: str, parameters: dict, conte
         result = evaluator(criterion_id, response, parameters, context)
         return result.passed, result.normalized_score, result.detail
     if item["evaluator_type"] in {
+        "context_precision",
         "context_recall",
         "metrics",
         "retrieval",
