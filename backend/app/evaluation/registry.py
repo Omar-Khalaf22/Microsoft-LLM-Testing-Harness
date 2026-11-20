@@ -12,6 +12,7 @@ from .evaluators import (
     content,
     context_precision,
     context_recall,
+    context_relevance,
     entity_extraction,
     format_compliance,
     html_safety,
@@ -39,6 +40,7 @@ _EVALUATORS = {
     "content": content.evaluate,
     "context_precision": context_precision.evaluate,
     "context_recall": context_recall.evaluate,
+    "context_relevance": context_relevance.evaluate,
     "entity_extraction": entity_extraction.evaluate,
     "format_compliance": format_compliance.evaluate,
     "html_safety": html_safety.evaluate,
@@ -134,6 +136,7 @@ def evaluate_criterion(criterion_id: str, response: str, parameters: dict, conte
     if item["evaluator_type"] in {
         "context_precision",
         "context_recall",
+        "context_relevance",
         "metrics",
         "retrieval",
         "operational",
