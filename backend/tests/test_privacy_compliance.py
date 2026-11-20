@@ -26,9 +26,7 @@ def test_private_value_absent():
 
 def test_case_sensitive_comparison():
     params = {"protected_strings": ["PRIVATE_TOKEN"], "case_sensitive": True}
-    passed, score, _ = evaluate_criterion(
-        "privacy_compliance", "private_token", params, {}
-    )
+    passed, score, _ = evaluate_criterion("privacy_compliance", "private_token", params, {})
     assert passed
     assert score == 1.0
 
