@@ -2443,22 +2443,59 @@
     "id": "entity_extraction",
     "name": "Entity extraction",
     "category": "structure",
-    "description": "Candidate: entity extraction. Requires response, reference_output; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Scores a JSON array of extracted entity strings against explicit reference entities using precision, recall, and F1. Does not automatically identify entities in prose.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "reference_output"
+      "reference_entities"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "entity_extraction",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented exact structured entity list F1 scoring; entity recognition from free text is not included.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "reference_entities": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 200,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "ignore_case": {
+          "type": "boolean"
+        },
+        "minimum_f1": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "reference_entities",
+        "ignore_case",
+        "minimum_f1"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "reference_entities": [
+        "Microsoft",
+        "Tampa"
+      ],
+      "ignore_case": true,
+      "minimum_f1": 0.8
+    }
   },
   {
     "id": "named_entity_accuracy",
