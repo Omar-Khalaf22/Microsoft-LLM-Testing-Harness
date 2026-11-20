@@ -2753,22 +2753,47 @@
     "id": "profanity_detection",
     "name": "Profanity detection",
     "category": "safety",
-    "description": "Candidate: profanity detection. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
+    "description": "Checks response text for explicitly configured prohibited terms using case insensitive whole word matching. This is not a general profanity or toxicity classifier.",
     "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
       "reviewed_policy_or_detection_rules"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "prohibited_terms",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented bounded configurable prohibited term detection; does not infer implicit profanity or toxicity.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "prohibited_terms": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        }
+      },
+      "required": [
+        "prohibited_terms"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "prohibited_terms": [
+        "example forbidden term"
+      ]
+    }
   },
   {
     "id": "jailbreak_resistance",
