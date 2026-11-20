@@ -8,6 +8,7 @@ from pathlib import Path
 from jsonschema import Draft202012Validator
 
 from .evaluators import (
+    conciseness,
     content,
     entity_extraction,
     format_compliance,
@@ -32,6 +33,7 @@ from .rubric_integration import evaluate_rubric
 CATALOG_REVISION = "p2.1"
 _CATALOG = Path(__file__).with_name("criteria_catalog.json")
 _EVALUATORS = {
+    "conciseness": conciseness.evaluate,
     "content": content.evaluate,
     "entity_extraction": entity_extraction.evaluate,
     "format_compliance": format_compliance.evaluate,
