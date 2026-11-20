@@ -1182,24 +1182,54 @@
     "id": "context_relevance",
     "name": "Context relevance",
     "category": "rag",
-    "description": "Candidate: context relevance. Requires response, query, retrieved_contexts, reference_contexts_or_answer; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Measures mean lexical query term coverage across retrieved passages after configurable stop word removal. Does not assess semantic relevance or synonyms.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
-      "response",
       "query",
-      "retrieved_contexts",
-      "reference_contexts_or_answer"
+      "retrieved_contexts"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "context_relevance",
     "research_sources": [
       "https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented bounded query term overlap scoring; semantic relevance is not supported.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "stop_words": {
+          "type": "array",
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "minimum_overlap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "stop_words",
+        "minimum_overlap"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "stop_words": [
+        "the",
+        "is",
+        "in"
+      ],
+      "minimum_overlap": 0.5
+    }
   },
   {
     "id": "answer_relevance",
