@@ -16,8 +16,7 @@ def evaluate(criterion_id: str, response: str, parameters: dict, context: dict):
     if parameters["ignore_case"]:
         text = text.casefold()
     found = sum(
-        (fact.casefold() if parameters["ignore_case"] else fact) in text
-        for fact in reference
+        (fact.casefold() if parameters["ignore_case"] else fact) in text for fact in reference
     )
     score = found / len(reference)
     return (
