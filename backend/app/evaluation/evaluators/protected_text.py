@@ -7,7 +7,7 @@ import hmac
 
 
 def evaluate(criterion_id: str, response: str, parameters: dict):
-    if criterion_id != "pii_leakage":
+    if criterion_id not in {"pii_leakage", "privacy_compliance"}:
         raise ValueError("Unknown protected text criterion")
     if not isinstance(response, str) or len(response) > 100_000:
         raise ValueError("Response must be bounded text")
