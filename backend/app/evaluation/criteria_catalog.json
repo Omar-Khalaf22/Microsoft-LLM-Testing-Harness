@@ -1813,23 +1813,59 @@
     "id": "completeness",
     "name": "Completeness",
     "category": "semantic",
-    "description": "Candidate: completeness. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Measures literal coverage of caller supplied required facts. Does not judge semantic completeness or paraphrases.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "objective",
-      "reference_or_rubric"
+      "required_facts"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "reference_rules",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented explicit phrase matching only; semantic inference is not supported.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "required_facts": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "ignore_case": {
+          "type": "boolean"
+        },
+        "minimum_coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "required_facts",
+        "ignore_case",
+        "minimum_coverage"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "required_facts": [
+        "Microsoft",
+        "Tampa"
+      ],
+      "ignore_case": true,
+      "minimum_coverage": 1
+    }
   },
   {
     "id": "conciseness",
@@ -2899,23 +2935,51 @@
     "id": "answerability",
     "name": "Answerability",
     "category": "semantic",
-    "description": "Candidate: answerability. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Checks whether response contains any caller supplied acceptable answer marker. Does not judge answer quality or whether a question is objectively answerable.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "objective",
-      "reference_or_rubric"
+      "answer_markers"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "reference_rules",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented explicit phrase matching only; semantic inference is not supported.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "answer_markers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "ignore_case": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "answer_markers",
+        "ignore_case"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "answer_markers": [
+        "42"
+      ],
+      "ignore_case": true
+    }
   },
   {
     "id": "uncertainty_calibration",
@@ -2965,23 +3029,51 @@
     "id": "contradiction_detection",
     "name": "Contradiction detection",
     "category": "semantic",
-    "description": "Candidate: contradiction detection. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Flags caller supplied contradictory phrases appearing in response. Does not infer logical contradictions.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "objective",
-      "reference_or_rubric"
+      "contradicting_phrases"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "reference_rules",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented explicit phrase matching only; semantic inference is not supported.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "contradicting_phrases": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "ignore_case": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "contradicting_phrases",
+        "ignore_case"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "contradicting_phrases": [
+        "The earth is flat"
+      ],
+      "ignore_case": true
+    }
   },
   {
     "id": "multi_turn_consistency",
