@@ -16,6 +16,7 @@ from .evaluators import (
     prototype4,
     retrieval,
     sql_syntax,
+    source_freshness,
     structured,
     tool_calls,
 )
@@ -35,6 +36,7 @@ _EVALUATORS = {
     "operational": operational.evaluate,
     "tool_calls": tool_calls.evaluate,
     "sql_syntax": sql_syntax.evaluate,
+    "source_freshness": source_freshness.evaluate,
 }
 
 
@@ -109,7 +111,7 @@ def evaluate_criterion(criterion_id: str, response: str, parameters: dict, conte
     if item["evaluator_type"] == "structured":
         result = evaluator(criterion_id, response, parameters, context)
         return result.passed, result.normalized_score, result.detail
-    if item["evaluator_type"] in {"metrics", "retrieval", "operational", "tool_calls"}:
+    if item["evaluator_type"] in {"metrics", "retrieval", "operational", "tool_calls", "source_freshness"}:
         return evaluator(criterion_id, response, parameters, context)
     if item["evaluator_type"] == "rubric":
         return evaluator(criterion_id, response, parameters, context)
