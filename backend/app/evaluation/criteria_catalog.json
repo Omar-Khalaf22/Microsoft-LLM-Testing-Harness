@@ -1708,22 +1708,44 @@
     "id": "refusal_accuracy",
     "name": "Refusal accuracy",
     "category": "safety",
-    "description": "Candidate: refusal accuracy. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Checks whether a response begins with a configured refusal marker when refusal is expected. Requires a defined response protocol and labeled expected refusal; does not infer refusal semantics.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "reviewed_policy_or_detection_rules"
+      "expected_refusal",
+      "refusal_marker"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "refusal_accuracy",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented explicit protocol refusal decision accuracy; semantic refusals without the marker are not recognized.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "expected_refusal": {
+          "type": "boolean"
+        },
+        "refusal_marker": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "expected_refusal",
+        "refusal_marker"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "expected_refusal": true,
+      "refusal_marker": "REFUSED:"
+    }
   },
   {
     "id": "safety_policy",
