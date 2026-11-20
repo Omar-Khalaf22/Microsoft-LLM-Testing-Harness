@@ -1893,41 +1893,111 @@
     "id": "grammar",
     "name": "Grammar",
     "category": "content",
-    "description": "Candidate: grammar. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Checks caller supplied forbidden grammatical phrases. Does not detect unconfigured grammatical errors.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
-      "response"
+      "response",
+      "forbidden_phrases"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "explicit_text_rules",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented configured exact text rules only; broader language or legal assessment is not provided.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "forbidden_phrases": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "ignore_case": {
+          "type": "boolean"
+        },
+        "maximum_violations": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        }
+      },
+      "required": [
+        "forbidden_phrases",
+        "ignore_case",
+        "maximum_violations"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "forbidden_phrases": [
+        "could of"
+      ],
+      "ignore_case": true,
+      "maximum_violations": 0
+    }
   },
   {
     "id": "spelling",
     "name": "Spelling",
     "category": "content",
-    "description": "Candidate: spelling. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Checks words against a caller supplied allowed vocabulary. This is vocabulary coverage, not comprehensive spelling correction.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
-      "response"
+      "response",
+      "allowed_words"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "explicit_text_rules",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented configured exact text rules only; broader language or legal assessment is not provided.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "allowed_words": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1000,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "minimum_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "allowed_words",
+        "minimum_score"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "allowed_words": [
+        "hello",
+        "world"
+      ],
+      "minimum_score": 1
+    }
   },
   {
     "id": "format_compliance",
@@ -2962,22 +3032,51 @@
     "id": "copyright_compliance",
     "name": "Copyright compliance",
     "category": "safety",
-    "description": "Candidate: copyright compliance. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Checks for verbatim reproduction of caller supplied protected excerpts. Does not determine copyright ownership, fair use, or legal compliance.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "reviewed_policy_or_detection_rules"
+      "protected_excerpts"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "explicit_text_rules",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented configured exact text rules only; broader language or legal assessment is not provided.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "protected_excerpts": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "ignore_case": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "protected_excerpts",
+        "ignore_case"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "protected_excerpts": [
+        "Example protected excerpt"
+      ],
+      "ignore_case": true
+    }
   },
   {
     "id": "profanity_detection",
