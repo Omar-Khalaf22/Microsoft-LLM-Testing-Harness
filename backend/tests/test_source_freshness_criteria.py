@@ -1,7 +1,6 @@
 """Regression tests for evidence based source freshness."""
 
 import pytest
-
 from app.evaluation.registry import evaluate_criterion, validate_criterion
 
 
