@@ -3,7 +3,6 @@
 from html.parser import HTMLParser
 from urllib.parse import unquote, urlsplit
 
-
 BLOCKED_TAGS = frozenset({
     "script", "iframe", "object", "embed", "base", "form", "input",
     "button", "textarea", "select", "meta", "link", "svg", "math",
