@@ -12,10 +12,10 @@ def evaluate(criterion_id: str, response: str, parameters: dict):
     text = response.casefold() if parameters["ignore_case"] else response
     if criterion_id == "completeness":
         required = parameters["required_facts"]
-        found = sum(
-            (fact.casefold() if parameters["ignore_case"] else fact) in text
-            for fact in required
-        )
+        found = 0
+        for fact in required:
+            candidate = fact.casefold() if parameters["ignore_case"] else fact
+            found += candidate in text
         score = found / len(required)
         return (
             score >= parameters["minimum_coverage"],
@@ -24,16 +24,16 @@ def evaluate(criterion_id: str, response: str, parameters: dict):
         )
     if criterion_id == "contradiction_detection":
         forbidden = parameters["contradicting_phrases"]
-        found = sum(
-            (phrase.casefold() if parameters["ignore_case"] else phrase) in text
-            for phrase in forbidden
-        )
+        found = 0
+        for phrase in forbidden:
+            candidate = phrase.casefold() if parameters["ignore_case"] else phrase
+            found += candidate in text
         passed = found == 0
         return passed, float(passed), f"Configured contradictory phrases found: {found}"
     markers = parameters["answer_markers"]
-    found = sum(
-        (marker.casefold() if parameters["ignore_case"] else marker) in text
-        for marker in markers
-    )
+    found = 0
+    for marker in markers:
+        candidate = marker.casefold() if parameters["ignore_case"] else marker
+        found += candidate in text
     passed = found > 0
     return passed, float(passed), f"Answer markers present: {found}/{len(markers)}"
