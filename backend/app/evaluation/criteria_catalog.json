@@ -2859,22 +2859,51 @@
     "id": "source_freshness",
     "name": "Source freshness",
     "category": "content",
-    "description": "Candidate: source freshness. Requires response, source_evidence; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Fraction of recorded source publication dates no older than a configured number of days relative to an explicit reference date.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
       "source_evidence"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "source_freshness",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented using explicit dated source evidence; does not verify source authenticity or relevance.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "reference_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "maximum_age_days": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 36500
+        },
+        "minimum_fresh_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "reference_date",
+        "maximum_age_days",
+        "minimum_fresh_fraction"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "reference_date": "2026-11-20",
+      "maximum_age_days": 365,
+      "minimum_fresh_fraction": 1
+    }
   },
   {
     "id": "citation_presence",
