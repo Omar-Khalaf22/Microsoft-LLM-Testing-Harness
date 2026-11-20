@@ -47,5 +47,8 @@ def evaluate(criterion_id: str, response: str, parameters: dict):
     return (
         score >= parameters["minimum_f1"],
         score,
-        f"Typed named entity matches: {matched}; precision: {precision:.4f}; recall: {recall:.4f}; F1: {score:.4f}",
+        (
+            f"Typed named entity matches: {matched}; precision: {precision:.4f}; "
+            f"recall: {recall:.4f}; F1: {score:.4f}"
+        ),
     )
