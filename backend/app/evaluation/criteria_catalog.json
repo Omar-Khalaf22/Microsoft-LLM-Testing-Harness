@@ -2255,9 +2255,8 @@
     "name": "SQL syntax",
     "category": "structure",
     "description": "Validate a read only SQLite query by preparing it with SQLite EXPLAIN without executing it. Requires resolvable schema objects for referenced tables.",
-    "parameters": {},
     "status": "supported",
-    "priority": "prototype2",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
@@ -2273,7 +2272,8 @@
       "type": "object",
       "properties": {},
       "additionalProperties": false
-    }
+    },
+    "example_parameters": {}
   },
   {
     "id": "translation_accuracy",
