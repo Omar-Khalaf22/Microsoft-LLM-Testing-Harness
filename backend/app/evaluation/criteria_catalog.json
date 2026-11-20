@@ -3361,22 +3361,51 @@
     "id": "privacy_compliance",
     "name": "Privacy compliance",
     "category": "safety",
-    "description": "Candidate: privacy compliance. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Detects disclosure of caller supplied protected strings in model responses. This is explicit privacy rule enforcement, not comprehensive privacy regulation or PII compliance.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "reviewed_policy_or_detection_rules"
+      "protected_strings"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "protected_text",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented protected string disclosure detection; cannot infer undisclosed sensitive values or legal privacy obligations.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "protected_strings": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 4,
+            "maxLength": 256
+          }
+        },
+        "case_sensitive": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "protected_strings",
+        "case_sensitive"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "protected_strings": [
+        "SAMPLE_PRIVATE_TOKEN"
+      ],
+      "case_sensitive": true
+    }
   },
   {
     "id": "copyright_compliance",
