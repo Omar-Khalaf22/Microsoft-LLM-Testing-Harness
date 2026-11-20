@@ -41,9 +41,7 @@ def test_batch_uncertainty():
 )
 def test_invalid_batch_rejected(response):
     with pytest.raises(ValueError):
-        evaluate_criterion(
-            "uncertainty_calibration", response, {"maximum_brier_score": 1}, {}
-        )
+        evaluate_criterion("uncertainty_calibration", response, {"maximum_brier_score": 1}, {})
 
 
 def test_invalid_threshold():
