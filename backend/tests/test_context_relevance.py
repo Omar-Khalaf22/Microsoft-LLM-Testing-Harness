@@ -44,6 +44,4 @@ def test_invalid_or_filtered_query(query):
 
 def test_invalid_threshold_rejected():
     with pytest.raises(ValueError):
-        validate_criterion(
-            "context_relevance", {"stop_words": [], "minimum_overlap": 1.5}
-        )
+        validate_criterion("context_relevance", {"stop_words": [], "minimum_overlap": 1.5})
