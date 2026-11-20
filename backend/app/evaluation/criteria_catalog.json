@@ -2501,24 +2501,74 @@
     "id": "named_entity_accuracy",
     "name": "Named entity accuracy",
     "category": "semantic",
-    "description": "Candidate: named entity accuracy. Requires response, objective, reference_or_rubric, reference_output; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Scores typed named entity JSON predictions against explicit labeled references using exact text and label matches and F1. Does not extract entities from prose.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "objective",
-      "reference_or_rubric",
-      "reference_output"
+      "reference_entities"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "named_entity_accuracy",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented typed reference entity F1 scoring; no automatic free text recognition.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "reference_entities": {
+          "type": "array",
+          "maxItems": 200,
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              }
+            },
+            "required": [
+              "text",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "ignore_case": {
+          "type": "boolean"
+        },
+        "minimum_f1": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "reference_entities",
+        "ignore_case",
+        "minimum_f1"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "reference_entities": [
+        {
+          "text": "Microsoft",
+          "label": "ORG"
+        }
+      ],
+      "ignore_case": true,
+      "minimum_f1": 0.8
+    }
   },
   {
     "id": "keyword_density",
