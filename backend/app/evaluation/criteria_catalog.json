@@ -1790,21 +1790,43 @@
     "id": "format_compliance",
     "name": "Format compliance",
     "category": "instruction_following",
-    "description": "Candidate: format compliance. Requires response; implementation and scoring validation are pending.",
+    "description": "Validates an explicit response format: JSON object or array, JSON object, Markdown heading, fenced code block, or plain text without common Markdown markers.",
     "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "format_compliance",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented bounded syntax checks for five explicit formats; does not evaluate semantic correctness.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": [
+            "json",
+            "json_object",
+            "markdown_heading",
+            "fenced_code",
+            "plain_text"
+          ]
+        }
+      },
+      "required": [
+        "format"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "format": "json_object"
+    }
   },
   {
     "id": "list_length",
