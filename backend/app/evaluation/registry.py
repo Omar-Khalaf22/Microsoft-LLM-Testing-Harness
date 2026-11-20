@@ -15,8 +15,8 @@ from .evaluators import (
     patterns,
     prototype4,
     retrieval,
-    sql_syntax,
     source_freshness,
+    sql_syntax,
     structured,
     tool_calls,
 )
@@ -111,7 +111,13 @@ def evaluate_criterion(criterion_id: str, response: str, parameters: dict, conte
     if item["evaluator_type"] == "structured":
         result = evaluator(criterion_id, response, parameters, context)
         return result.passed, result.normalized_score, result.detail
-    if item["evaluator_type"] in {"metrics", "retrieval", "operational", "tool_calls", "source_freshness"}:
+    if item["evaluator_type"] in {
+        "metrics",
+        "retrieval",
+        "operational",
+        "tool_calls",
+        "source_freshness",
+    }:
         return evaluator(criterion_id, response, parameters, context)
     if item["evaluator_type"] == "rubric":
         return evaluator(criterion_id, response, parameters, context)
