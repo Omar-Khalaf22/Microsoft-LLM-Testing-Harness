@@ -16,25 +16,19 @@ def params():
 
 @pytest.mark.parametrize("criterion_id", ["sentiment_alignment", "tone_consistency"])
 def test_positive_alignment(criterion_id):
-    passed, score, _ = evaluate_criterion(
-        criterion_id, "Great excellent work", params(), {}
-    )
+    passed, score, _ = evaluate_criterion(criterion_id, "Great excellent work", params(), {})
     assert passed
     assert score == 1.0
 
 
 def test_negative_style_fails():
-    passed, score, _ = evaluate_criterion(
-        "sentiment_alignment", "Bad awful", params(), {}
-    )
+    passed, score, _ = evaluate_criterion("sentiment_alignment", "Bad awful", params(), {})
     assert not passed
     assert score == 0.0
 
 
 def test_no_matching_terms():
-    passed, score, _ = evaluate_criterion(
-        "tone_consistency", "Neutral response", params(), {}
-    )
+    passed, score, _ = evaluate_criterion("tone_consistency", "Neutral response", params(), {})
     assert not passed
     assert score == 0.5
 
