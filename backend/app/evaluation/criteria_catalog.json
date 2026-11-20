@@ -1713,23 +1713,37 @@
     "id": "conciseness",
     "name": "Conciseness",
     "category": "semantic",
-    "description": "Candidate: conciseness. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Checks whether a response stays within a configured whitespace delimited word limit. Measures length only, not semantic conciseness.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
-      "response",
-      "objective",
-      "reference_or_rubric"
+      "response"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "conciseness",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented bounded word budget scoring; does not assess redundancy or information density.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "maximum_words": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        }
+      },
+      "required": [
+        "maximum_words"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "maximum_words": 100
+    }
   },
   {
     "id": "clarity",
