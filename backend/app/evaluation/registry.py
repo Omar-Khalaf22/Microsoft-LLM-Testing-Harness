@@ -15,6 +15,7 @@ from .evaluators import (
     patterns,
     prototype4,
     retrieval,
+    sql_syntax,
     structured,
     tool_calls,
 )
@@ -33,6 +34,7 @@ _EVALUATORS = {
     "retrieval": retrieval.evaluate,
     "operational": operational.evaluate,
     "tool_calls": tool_calls.evaluate,
+    "sql_syntax": sql_syntax.evaluate,
 }
 
 
