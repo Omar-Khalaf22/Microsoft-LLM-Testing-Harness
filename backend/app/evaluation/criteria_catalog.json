@@ -3023,22 +3023,29 @@
     "id": "html_safety",
     "name": "Html safety",
     "category": "safety",
-    "description": "Candidate: html safety. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
+    "description": "Conservative static HTML fragment scan for blocked active elements, event handlers, inline styles, and unsafe URL schemes. This is not a sanitizer or proof of browser safety.",
     "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
       "reviewed_policy_or_detection_rules"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "html_safety",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented conservative static policy scanner; browser execution and HTML sanitization are out of scope.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "example_parameters": {}
   },
   {
     "id": "response_language",
