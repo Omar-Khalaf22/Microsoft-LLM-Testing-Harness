@@ -1385,24 +1385,59 @@
     "id": "faithfulness",
     "name": "Faithfulness",
     "category": "rag",
-    "description": "Candidate: faithfulness. Requires response, query, retrieved_contexts, reference_contexts_or_answer; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Measures literal support for configured answer claims against supplied retrieved contexts. Does not infer semantic entailment, paraphrases, or unsupported unlisted claims.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "query",
       "retrieved_contexts",
-      "reference_contexts_or_answer"
+      "claims"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "faithfulness",
     "research_sources": [
       "https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented explicit claim coverage in both response and retrieved contexts, not semantic faithfulness.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "claims": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "ignore_case": {
+          "type": "boolean"
+        },
+        "minimum_support": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "claims",
+        "ignore_case",
+        "minimum_support"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "claims": [
+        "The contract expires in December"
+      ],
+      "ignore_case": true,
+      "minimum_support": 1
+    }
   },
   {
     "id": "context_precision",
