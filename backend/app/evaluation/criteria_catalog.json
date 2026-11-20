@@ -3285,21 +3285,45 @@
     "id": "mathematical_correctness",
     "name": "Mathematical correctness",
     "category": "numerical",
-    "description": "Candidate: mathematical correctness. Requires response; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Validates a single numeric answer against a finite decimal reference with absolute tolerance. Does not verify mathematical reasoning or multi step solutions.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
-      "response"
+      "response",
+      "expected_value"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "numeric_answer",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented exact decimal answer comparison with configurable tolerance; mathematical derivations are not evaluated.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "expected_value": {
+          "type": "string",
+          "pattern": "^[+-]?(?:[0-9]+(?:\\\\.[0-9]*)?|\\\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "maxLength": 80
+        },
+        "absolute_tolerance": {
+          "type": "string",
+          "pattern": "^(?:[0-9]+(?:\\\\.[0-9]*)?|\\\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "maxLength": 80
+        }
+      },
+      "required": [
+        "expected_value",
+        "absolute_tolerance"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "expected_value": "3.14159",
+      "absolute_tolerance": "0.00001"
+    }
   },
   {
     "id": "numeric_range",
