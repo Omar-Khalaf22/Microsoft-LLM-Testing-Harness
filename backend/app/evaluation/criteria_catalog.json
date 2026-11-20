@@ -2985,45 +2985,73 @@
     "id": "uncertainty_calibration",
     "name": "Uncertainty calibration",
     "category": "semantic",
-    "description": "Candidate: uncertainty calibration. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Scores a batch of declared correctness probabilities and observed binary outcomes using mean Brier score. This is a proper scoring rule, not a full reliability diagram or bin calibration test.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
-      "response",
-      "objective",
-      "reference_or_rubric"
+      "response"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "confidence_scores",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented structured probability outcome Brier scoring; ground truth must be supplied in JSON.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "maximum_brier_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "maximum_brier_score"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "maximum_brier_score": 0.25
+    }
   },
   {
     "id": "confidence_alignment",
     "name": "Confidence alignment",
     "category": "semantic",
-    "description": "Candidate: confidence alignment. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Scores one declared probability of correctness against a known binary outcome using the Brier score. Requires structured JSON.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
-      "response",
-      "objective",
-      "reference_or_rubric"
+      "response"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "confidence_scores",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented structured probability outcome Brier scoring; ground truth must be supplied in JSON.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "maximum_brier_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "maximum_brier_score"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "maximum_brier_score": 0.25
+    }
   },
   {
     "id": "contradiction_detection",
