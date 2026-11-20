@@ -2254,21 +2254,26 @@
     "id": "sql_syntax",
     "name": "SQL syntax",
     "category": "structure",
-    "description": "Candidate: sql syntax. Requires response; implementation and scoring validation are pending.",
+    "description": "Validate a read only SQLite query by preparing it with SQLite EXPLAIN without executing it. Requires resolvable schema objects for referenced tables.",
     "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "status": "supported",
+    "priority": "prototype2",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
     "evaluation_method": "deterministic",
-    "evaluator_type": null,
+    "evaluator_type": "sql_syntax",
     "research_sources": [
       "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented with SQLite preparation; only read only SQLite queries with available schema are supported.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    }
   },
   {
     "id": "translation_accuracy",
