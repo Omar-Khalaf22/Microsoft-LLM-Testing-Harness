@@ -3,11 +3,26 @@
 from html.parser import HTMLParser
 from urllib.parse import unquote, urlsplit
 
-BLOCKED_TAGS = frozenset({
-    "script", "iframe", "object", "embed", "base", "form", "input",
-    "button", "textarea", "select", "meta", "link", "svg", "math",
-    "style", "template",
-})
+BLOCKED_TAGS = frozenset(
+    {
+        "script",
+        "iframe",
+        "object",
+        "embed",
+        "base",
+        "form",
+        "input",
+        "button",
+        "textarea",
+        "select",
+        "meta",
+        "link",
+        "svg",
+        "math",
+        "style",
+        "template",
+    }
+)
 URL_ATTRIBUTES = frozenset({"href", "src", "action", "formaction", "poster", "xlink:href"})
 SAFE_SCHEMES = frozenset({"http", "https", "mailto", "tel"})
 
