@@ -9,6 +9,7 @@ from jsonschema import Draft202012Validator
 
 from .evaluators import (
     conciseness,
+    confidence_scores,
     content,
     context_precision,
     context_recall,
@@ -41,6 +42,7 @@ CATALOG_REVISION = "p2.1"
 _CATALOG = Path(__file__).with_name("criteria_catalog.json")
 _EVALUATORS = {
     "conciseness": conciseness.evaluate,
+    "confidence_scores": confidence_scores.evaluate,
     "content": content.evaluate,
     "context_precision": context_precision.evaluate,
     "context_recall": context_recall.evaluate,
