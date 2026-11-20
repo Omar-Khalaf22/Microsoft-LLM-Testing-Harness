@@ -974,21 +974,54 @@
     "id": "language_detection",
     "name": "Language detection",
     "category": "content",
-    "description": "Candidate: language detection. Requires response; implementation and scoring validation are pending.",
+    "description": "Checks whether the response contains the expected Unicode writing script at the configured fraction. This is script evidence, not full language identification; languages sharing scripts cannot be distinguished.",
     "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "language_scripts",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented bounded Unicode script fraction check. Does not identify languages sharing a writing system.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "expected_language": {
+          "type": "string",
+          "enum": [
+            "en",
+            "ar",
+            "ru",
+            "el",
+            "he",
+            "hi",
+            "ko",
+            "ja",
+            "zh"
+          ]
+        },
+        "minimum_script_fraction": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "expected_language",
+        "minimum_script_fraction"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "expected_language": "ar",
+      "minimum_script_fraction": 0.8
+    }
   },
   {
     "id": "sentiment_alignment",
@@ -3051,21 +3084,54 @@
     "id": "response_language",
     "name": "Response language",
     "category": "instruction_following",
-    "description": "Candidate: response language. Requires response; implementation and scoring validation are pending.",
+    "description": "Checks whether the response contains the expected Unicode writing script at the configured fraction. This is script evidence, not full language identification; languages sharing scripts cannot be distinguished.",
     "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "language_scripts",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented bounded Unicode script fraction check. Does not identify languages sharing a writing system.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "expected_language": {
+          "type": "string",
+          "enum": [
+            "en",
+            "ar",
+            "ru",
+            "el",
+            "he",
+            "hi",
+            "ko",
+            "ja",
+            "zh"
+          ]
+        },
+        "minimum_script_fraction": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "expected_language",
+        "minimum_script_fraction"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "expected_language": "ar",
+      "minimum_script_fraction": 0.8
+    }
   },
   {
     "id": "response_time",
