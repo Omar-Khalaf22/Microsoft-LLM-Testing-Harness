@@ -9,6 +9,7 @@ from jsonschema import Draft202012Validator
 
 from .evaluators import (
     content,
+    format_compliance,
     html_safety,
     language_scripts,
     legacy,
@@ -28,6 +29,7 @@ CATALOG_REVISION = "p2.1"
 _CATALOG = Path(__file__).with_name("criteria_catalog.json")
 _EVALUATORS = {
     "content": content.evaluate,
+    "format_compliance": format_compliance.evaluate,
     "html_safety": html_safety.evaluate,
     "language_scripts": language_scripts.evaluate,
     "patterns": patterns.evaluate,
