@@ -32,9 +32,7 @@ def test_protected_excerpt_rules():
     )
     assert not passed and score == 0.0
     assert "private passage" not in detail.lower()
-    passed, score, _ = evaluate_criterion(
-        "copyright_compliance", "Independent wording", params, {}
-    )
+    passed, score, _ = evaluate_criterion("copyright_compliance", "Independent wording", params, {})
     assert passed and score == 1.0
 
 
