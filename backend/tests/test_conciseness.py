@@ -23,9 +23,7 @@ def test_over_limit():
 
 
 def test_empty_response():
-    passed, score, _ = evaluate_criterion(
-        "conciseness", "", {"maximum_words": 1}, {}
-    )
+    passed, score, _ = evaluate_criterion("conciseness", "", {"maximum_words": 1}, {})
     assert passed
     assert score == 1.0
 
