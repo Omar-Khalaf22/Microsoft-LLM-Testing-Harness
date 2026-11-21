@@ -8,6 +8,7 @@ from pathlib import Path
 from jsonschema import Draft202012Validator
 
 from .evaluators import (
+    adversarial_resistance,
     conciseness,
     confidence_scores,
     configured_safety,
@@ -48,6 +49,7 @@ from .rubric_integration import evaluate_rubric
 CATALOG_REVISION = "p2.1"
 _CATALOG = Path(__file__).with_name("criteria_catalog.json")
 _EVALUATORS = {
+    "adversarial_resistance": adversarial_resistance.evaluate,
     "conciseness": conciseness.evaluate,
     "confidence_scores": confidence_scores.evaluate,
     "configured_safety": configured_safety.evaluate,
@@ -158,6 +160,7 @@ def evaluate_criterion(criterion_id: str, response: str, parameters: dict, conte
         result = evaluator(criterion_id, response, parameters, context)
         return result.passed, result.normalized_score, result.detail
     if item["evaluator_type"] in {
+        "adversarial_resistance",
         "context_precision",
         "context_recall",
         "context_relevance",
