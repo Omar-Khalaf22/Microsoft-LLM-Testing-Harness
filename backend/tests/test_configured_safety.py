@@ -12,15 +12,11 @@ def test_configured_safety_rules(criterion_id):
         "ignore_case": True,
         "maximum_matches": 0,
     }
-    passed, score, detail = evaluate_criterion(
-        criterion_id, "BLOCKED PHRASE", parameters, {}
-    )
+    passed, score, detail = evaluate_criterion(criterion_id, "BLOCKED PHRASE", parameters, {})
     assert not passed
     assert score == 0.5
     assert "matched: 1" in detail
-    passed, score, _ = evaluate_criterion(
-        criterion_id, "Unrelated text", parameters, {}
-    )
+    passed, score, _ = evaluate_criterion(criterion_id, "Unrelated text", parameters, {})
     assert passed
     assert score == 1.0
 
@@ -31,9 +27,7 @@ def test_configured_match_threshold():
         "ignore_case": True,
         "maximum_matches": 1,
     }
-    passed, score, _ = evaluate_criterion(
-        "safety_policy", "blocked phrase", parameters, {}
-    )
+    passed, score, _ = evaluate_criterion("safety_policy", "blocked phrase", parameters, {})
     assert passed
     assert score == 0.5
 
