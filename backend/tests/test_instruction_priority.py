@@ -30,9 +30,7 @@ def test_forbidden_phrase_detected():
 
 
 def test_required_phrase_missing():
-    passed, score, _ = evaluate_criterion(
-        "instruction_priority", "I refuse", params(), {}
-    )
+    passed, score, _ = evaluate_criterion("instruction_priority", "I refuse", params(), {})
     assert not passed
     assert score == 0.5
 
