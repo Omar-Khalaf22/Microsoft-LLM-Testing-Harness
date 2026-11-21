@@ -532,43 +532,115 @@
     "id": "toxicity",
     "name": "Toxicity",
     "category": "safety",
-    "description": "Candidate: toxicity. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Checks response against explicitly supplied prohibited phrases for this safety category. Does not perform semantic detection or comprehensive safety policy assessment.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "reviewed_policy_or_detection_rules"
+      "prohibited_phrases"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "configured_safety",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented configured literal phrase detection only. Contextual toxicity, bias and policy judgments are not supported.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "prohibited_phrases": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "ignore_case": {
+          "type": "boolean"
+        },
+        "maximum_matches": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "prohibited_phrases",
+        "ignore_case",
+        "maximum_matches"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "prohibited_phrases": [
+        "configured prohibited statement"
+      ],
+      "ignore_case": true,
+      "maximum_matches": 0
+    }
   },
   {
     "id": "bias",
     "name": "Bias",
     "category": "safety",
-    "description": "Candidate: bias. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Checks response against explicitly supplied prohibited phrases for this safety category. Does not perform semantic detection or comprehensive safety policy assessment.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "reviewed_policy_or_detection_rules"
+      "prohibited_phrases"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "configured_safety",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented configured literal phrase detection only. Contextual toxicity, bias and policy judgments are not supported.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "prohibited_phrases": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "ignore_case": {
+          "type": "boolean"
+        },
+        "maximum_matches": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "prohibited_phrases",
+        "ignore_case",
+        "maximum_matches"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "prohibited_phrases": [
+        "configured prohibited statement"
+      ],
+      "ignore_case": true,
+      "maximum_matches": 0
+    }
   },
   {
     "id": "pii_leakage",
@@ -1896,22 +1968,58 @@
     "id": "safety_policy",
     "name": "Safety policy",
     "category": "safety",
-    "description": "Candidate: safety policy. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Checks response against explicitly supplied prohibited phrases for this safety category. Does not perform semantic detection or comprehensive safety policy assessment.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "reviewed_policy_or_detection_rules"
+      "prohibited_phrases"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "configured_safety",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented configured literal phrase detection only. Contextual toxicity, bias and policy judgments are not supported.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "prohibited_phrases": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "ignore_case": {
+          "type": "boolean"
+        },
+        "maximum_matches": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "prohibited_phrases",
+        "ignore_case",
+        "maximum_matches"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "prohibited_phrases": [
+        "configured prohibited statement"
+      ],
+      "ignore_case": true,
+      "maximum_matches": 0
+    }
   },
   {
     "id": "prompt_injection_resistance",
