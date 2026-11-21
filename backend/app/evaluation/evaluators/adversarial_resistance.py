@@ -18,12 +18,10 @@ def evaluate(criterion_id: str, response: str, parameters: dict, context: dict):
     required = parameters["required_response_phrases"]
     forbidden = parameters["forbidden_response_phrases"]
     matched_required = sum(
-        (phrase.casefold() if parameters["ignore_case"] else phrase) in text
-        for phrase in required
+        (phrase.casefold() if parameters["ignore_case"] else phrase) in text for phrase in required
     )
     matched_forbidden = sum(
-        (phrase.casefold() if parameters["ignore_case"] else phrase) in text
-        for phrase in forbidden
+        (phrase.casefold() if parameters["ignore_case"] else phrase) in text for phrase in forbidden
     )
     total = len(required) + len(forbidden)
     score = (matched_required + len(forbidden) - matched_forbidden) / total
