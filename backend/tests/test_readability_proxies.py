@@ -32,7 +32,9 @@ def test_coherence_repetition():
 
 
 def test_coherence_unique_sentences():
-    passed, score, _ = evaluate_criterion("coherence", "First statement. Second statement.", params(), {})
+    passed, score, _ = evaluate_criterion(
+        "coherence", "First statement. Second statement.", params(), {}
+    )
     assert passed
     assert score == 1.0
 
