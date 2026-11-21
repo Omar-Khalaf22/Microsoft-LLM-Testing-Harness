@@ -3775,23 +3775,65 @@
     "id": "reasoning_consistency",
     "name": "Reasoning consistency",
     "category": "semantic",
-    "description": "Candidate: reasoning consistency. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Detects when both assertions in configured contradictory phrase pairs appear in a response. This does not assess semantic reasoning, negation scope, or logical validity.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "objective",
-      "reference_or_rubric"
+      "contradiction_pairs"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "reasoning_consistency",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented caller configured contradictory phrase pair detection only.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "contradiction_pairs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            }
+          }
+        },
+        "ignore_case": {
+          "type": "boolean"
+        },
+        "maximum_contradictions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "contradiction_pairs",
+        "ignore_case",
+        "maximum_contradictions"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "contradiction_pairs": [
+        [
+          "The service is available",
+          "The service is unavailable"
+        ]
+      ],
+      "ignore_case": true,
+      "maximum_contradictions": 0
+    }
   },
   {
     "id": "mathematical_correctness",
