@@ -2206,45 +2206,103 @@
     "id": "clarity",
     "name": "Clarity",
     "category": "semantic",
-    "description": "Candidate: clarity. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Measures proportion of sentences within configured word length bounds. This is a readability proxy, not semantic clarity.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "objective",
-      "reference_or_rubric"
+      "minimum_ratio"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "readability_proxies",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented sentence length compliance only.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "minimum_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "minimum_words": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "maximum_words": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        }
+      },
+      "required": [
+        "minimum_ratio",
+        "minimum_words",
+        "maximum_words"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "minimum_ratio": 1,
+      "minimum_words": 2,
+      "maximum_words": 30
+    }
   },
   {
     "id": "coherence",
     "name": "Coherence",
     "category": "semantic",
-    "description": "Candidate: coherence. Requires response, objective, reference_or_rubric; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Measures proportion of distinct normalized sentences as a repetition proxy. This is not logical or discourse coherence.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "objective",
-      "reference_or_rubric"
+      "minimum_ratio"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "readability_proxies",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented exact normalized sentence uniqueness only.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "minimum_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "minimum_words": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "maximum_words": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        }
+      },
+      "required": [
+        "minimum_ratio",
+        "minimum_words",
+        "maximum_words"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "minimum_ratio": 1,
+      "minimum_words": 0,
+      "maximum_words": 1000
+    }
   },
   {
     "id": "grammar",
