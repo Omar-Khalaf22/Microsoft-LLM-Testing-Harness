@@ -23,9 +23,7 @@ def test_consistent_assertion():
 
 def test_explicit_contradiction():
     response = "Service is available. Later: service is unavailable."
-    passed, score, detail = evaluate_criterion(
-        "reasoning_consistency", response, params(), {}
-    )
+    passed, score, detail = evaluate_criterion("reasoning_consistency", response, params(), {})
     assert not passed
     assert score == 0.0
     assert "detected: 1/1" in detail
