@@ -11,11 +11,7 @@ def evaluate(criterion_id: str, response: str, parameters: dict):
         raise ValueError("Unknown readability criterion")
     if not isinstance(response, str) or len(response) > 100_000:
         raise ValueError("Response must be bounded text")
-    sentences = [
-        sentence.strip()
-        for sentence in re.split(r"[.!?]+", response)
-        if sentence.strip()
-    ]
+    sentences = [sentence.strip() for sentence in re.split(r"[.!?]+", response) if sentence.strip()]
     if not sentences:
         return False, 0.0, "No nonempty sentences found"
     words = [re.findall(r"\b\w+\b", sentence) for sentence in sentences]
