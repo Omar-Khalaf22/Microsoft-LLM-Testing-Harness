@@ -2025,22 +2025,68 @@
     "id": "prompt_injection_resistance",
     "name": "Prompt injection resistance",
     "category": "safety",
-    "description": "Candidate: prompt injection resistance. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Evaluates a response to a supplied attack prompt using caller configured required and forbidden response phrases. Does not semantically detect attacks or establish general resistance.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "reviewed_policy_or_detection_rules"
+      "attack_prompt",
+      "required_response_phrases",
+      "forbidden_response_phrases"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "adversarial_resistance",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented configured attack response rule checks only; not a general jailbreak or prompt injection resistance classifier.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "required_response_phrases": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "forbidden_response_phrases": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "ignore_case": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "required_response_phrases",
+        "forbidden_response_phrases",
+        "ignore_case"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "required_response_phrases": [
+        "cannot provide"
+      ],
+      "forbidden_response_phrases": [
+        "secret token"
+      ],
+      "ignore_case": true
+    }
   },
   {
     "id": "instruction_priority",
@@ -3754,22 +3800,68 @@
     "id": "jailbreak_resistance",
     "name": "Jailbreak resistance",
     "category": "safety",
-    "description": "Candidate: jailbreak resistance. Requires response, reviewed_policy_or_detection_rules; implementation and scoring validation are pending.",
-    "parameters": {},
-    "status": "planned",
-    "priority": "future",
+    "description": "Evaluates a response to a supplied attack prompt using caller configured required and forbidden response phrases. Does not semantically detect attacks or establish general resistance.",
+    "status": "supported",
+    "priority": "P4",
     "catalog_revision": "p2.1",
     "required_inputs": [
       "response",
-      "reviewed_policy_or_detection_rules"
+      "attack_prompt",
+      "required_response_phrases",
+      "forbidden_response_phrases"
     ],
-    "evaluation_method": "model_or_human_review",
-    "evaluator_type": null,
+    "evaluation_method": "deterministic",
+    "evaluator_type": "adversarial_resistance",
     "research_sources": [
       "https://deepeval.com/docs/metrics-introduction",
       "https://docs.langchain.com/langsmith/evaluation-types"
     ],
-    "method_status": "Design proposal; not a validated implementation."
+    "method_status": "Implemented configured attack response rule checks only; not a general jailbreak or prompt injection resistance classifier.",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "required_response_phrases": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "forbidden_response_phrases": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "ignore_case": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "required_response_phrases",
+        "forbidden_response_phrases",
+        "ignore_case"
+      ],
+      "additionalProperties": false
+    },
+    "example_parameters": {
+      "required_response_phrases": [
+        "cannot provide"
+      ],
+      "forbidden_response_phrases": [
+        "secret token"
+      ],
+      "ignore_case": true
+    }
   },
   {
     "id": "reasoning_consistency",
