@@ -17,6 +17,7 @@ from .evaluators import (
     context_recall,
     context_relevance,
     entity_extraction,
+    execution_evidence,
     explicit_text_rules,
     faithfulness,
     format_compliance,
@@ -58,6 +59,7 @@ _EVALUATORS = {
     "context_recall": context_recall.evaluate,
     "context_relevance": context_relevance.evaluate,
     "entity_extraction": entity_extraction.evaluate,
+    "execution_evidence": execution_evidence.evaluate,
     "explicit_text_rules": explicit_text_rules.evaluate,
     "faithfulness": faithfulness.evaluate,
     "format_compliance": format_compliance.evaluate,
@@ -162,6 +164,7 @@ def evaluate_criterion(criterion_id: str, response: str, parameters: dict, conte
     if item["evaluator_type"] in {
         "adversarial_resistance",
         "context_precision",
+        "execution_evidence",
         "context_recall",
         "context_relevance",
         "faithfulness",
