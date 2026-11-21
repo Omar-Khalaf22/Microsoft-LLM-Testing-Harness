@@ -26,17 +26,13 @@ def test_clarity_long_sentence():
 
 
 def test_coherence_repetition():
-    passed, score, _ = evaluate_criterion(
-        "coherence", "Repeat this. Repeat this.", params(), {}
-    )
+    passed, score, _ = evaluate_criterion("coherence", "Repeat this. Repeat this.", params(), {})
     assert not passed
     assert score == 0.5
 
 
 def test_coherence_unique_sentences():
-    passed, score, _ = evaluate_criterion(
-        "coherence", "First statement. Second statement.", params(), {}
-    )
+    passed, score, _ = evaluate_criterion("coherence", "First statement. Second statement.", params(), {})
     assert passed
     assert score == 1.0
 
