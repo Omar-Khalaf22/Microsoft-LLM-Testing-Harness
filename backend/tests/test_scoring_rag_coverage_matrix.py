@@ -81,6 +81,9 @@ def test_retrieval_evidence_required(criterion_id):
     if criterion_id == "faithfulness":
         parameters = {"claims": ["Microsoft"], "ignore_case": True, "minimum_support": 1}
     else:
-        parameters.pop("minimum_recall" if criterion_id == "context_precision" else "minimum_precision")
+        if criterion_id == "context_precision":
+            parameters.pop("minimum_recall")
+        else:
+            parameters.pop("minimum_precision")
     with pytest.raises(ValueError):
         evaluate_criterion(criterion_id, "Microsoft", parameters, {})
