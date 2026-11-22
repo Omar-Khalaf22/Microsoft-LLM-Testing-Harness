@@ -36,9 +36,7 @@ def test_instruction_priority_rules(response, expected_pass, expected_score):
         ("sample_private_token", False, False),
     ],
 )
-def test_protected_string_disclosure(
-    criterion_id, response, case_sensitive, expected_pass
-):
+def test_protected_string_disclosure(criterion_id, response, case_sensitive, expected_pass):
     parameters = {
         "protected_strings": ["SAMPLE_PRIVATE_TOKEN"],
         "case_sensitive": case_sensitive,
