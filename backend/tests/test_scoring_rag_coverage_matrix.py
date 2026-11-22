@@ -20,9 +20,7 @@ def test_context_precision(passages, expected_pass, expected_score):
         "minimum_precision": 1,
     }
     context = {"retrieved_contexts": passages}
-    passed, score, detail = evaluate_criterion(
-        "context_precision", "response", parameters, context
-    )
+    passed, score, detail = evaluate_criterion("context_precision", "response", parameters, context)
     assert passed is expected_pass
     assert score == pytest.approx(expected_score)
     assert detail
@@ -43,9 +41,7 @@ def test_context_recall(passages, expected_pass, expected_score):
         "minimum_recall": 1,
     }
     context = {"retrieved_contexts": passages}
-    passed, score, detail = evaluate_criterion(
-        "context_recall", "response", parameters, context
-    )
+    passed, score, detail = evaluate_criterion("context_recall", "response", parameters, context)
     assert passed is expected_pass
     assert score == pytest.approx(expected_score)
     assert detail
