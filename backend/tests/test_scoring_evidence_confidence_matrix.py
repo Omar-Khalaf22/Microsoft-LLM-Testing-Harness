@@ -103,6 +103,7 @@ CASES = [
     ),
 ]
 
+
 @pytest.mark.parametrize(
     ("criterion_id", "response", "parameters", "context", "expected_pass", "expected_score"),
     CASES,
