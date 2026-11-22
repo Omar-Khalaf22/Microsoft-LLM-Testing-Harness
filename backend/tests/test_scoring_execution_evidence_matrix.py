@@ -45,9 +45,7 @@ def test_execution_evidence_mismatch_rejected(criterion_id, field, invalid):
     result = evidence()
     result[field] = invalid
     with pytest.raises(ValueError):
-        evaluate_criterion(
-            criterion_id, "print(1)", parameters(), {"execution_result": result}
-        )
+        evaluate_criterion(criterion_id, "print(1)", parameters(), {"execution_result": result})
 
 
 @pytest.mark.parametrize("criterion_id", ["code_execution", "unit_test_pass"])
@@ -67,9 +65,7 @@ def test_execution_exit_code_type_rejected(invalid):
     result = evidence()
     result["exit_code"] = invalid
     with pytest.raises(ValueError):
-        evaluate_criterion(
-            "code_execution", "print(1)", parameters(), {"execution_result": result}
-        )
+        evaluate_criterion("code_execution", "print(1)", parameters(), {"execution_result": result})
 
 
 @pytest.mark.parametrize("invalid", [None, 1, "true"])
@@ -77,9 +73,7 @@ def test_unit_test_result_requires_boolean(invalid):
     result = evidence()
     result["test_results"][0]["passed"] = invalid
     with pytest.raises(ValueError):
-        evaluate_criterion(
-            "unit_test_pass", "print(1)", parameters(), {"execution_result": result}
-        )
+        evaluate_criterion("unit_test_pass", "print(1)", parameters(), {"execution_result": result})
 
 
 def test_unit_test_results_can_arrive_out_of_order():
