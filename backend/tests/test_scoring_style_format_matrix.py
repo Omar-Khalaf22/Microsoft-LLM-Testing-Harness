@@ -36,24 +36,37 @@ def test_lexical_style_scores(criterion_id, response, expected_pass, expected_sc
     ("criterion_id", "response", "parameters", "expected_pass", "expected_score"),
     [
         (
-            "clarity", "One two. Three four.",
-            {"minimum_ratio": 1, "minimum_words": 2, "maximum_words": 2}, True, 1.0,
+            "clarity",
+            "One two. Three four.",
+            {"minimum_ratio": 1, "minimum_words": 2, "maximum_words": 2},
+            True,
+            1.0,
         ),
         (
-            "clarity", "One two. Three.",
-            {"minimum_ratio": 1, "minimum_words": 2, "maximum_words": 2}, False, 0.5,
+            "clarity",
+            "One two. Three.",
+            {"minimum_ratio": 1, "minimum_words": 2, "maximum_words": 2},
+            False,
+            0.5,
         ),
         (
-            "coherence", "One two. Three four.",
-            {"minimum_ratio": 1, "minimum_words": 0, "maximum_words": 1000}, True, 1.0,
+            "coherence",
+            "One two. Three four.",
+            {"minimum_ratio": 1, "minimum_words": 0, "maximum_words": 1000},
+            True,
+            1.0,
         ),
         (
-            "coherence", "One two. One two.",
-            {"minimum_ratio": 1, "minimum_words": 0, "maximum_words": 1000}, False, 0.5,
+            "coherence",
+            "One two. One two.",
+            {"minimum_ratio": 1, "minimum_words": 0, "maximum_words": 1000},
+            False,
+            0.5,
         ),
     ],
     ids=["clarity_all", "clarity_partial", "coherence_unique", "coherence_repeated"],
 )
+
 def test_readability_proxy_scores(
     criterion_id, response, parameters, expected_pass, expected_score
 ):
