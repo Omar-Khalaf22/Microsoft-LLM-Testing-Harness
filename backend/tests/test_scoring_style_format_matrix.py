@@ -66,7 +66,6 @@ def test_lexical_style_scores(criterion_id, response, expected_pass, expected_sc
     ],
     ids=["clarity_all", "clarity_partial", "coherence_unique", "coherence_repeated"],
 )
-
 def test_readability_proxy_scores(
     criterion_id, response, parameters, expected_pass, expected_score
 ):
