@@ -40,9 +40,7 @@ def test_configured_safety_scores(criterion_id, response, passed_expected, score
         ("The secret token is here.", False, 0.0),
     ],
 )
-def test_configured_attack_response_scores(
-    criterion_id, response, passed_expected, score_expected
-):
+def test_configured_attack_response_scores(criterion_id, response, passed_expected, score_expected):
     parameters = {
         "required_response_phrases": ["cannot provide"],
         "forbidden_response_phrases": ["secret token"],
@@ -68,9 +66,7 @@ def test_configured_reasoning_contradictions(response, passed_expected, score_ex
         "ignore_case": True,
         "maximum_contradictions": 0,
     }
-    passed, score, detail = evaluate_criterion(
-        "reasoning_consistency", response, parameters, {}
-    )
+    passed, score, detail = evaluate_criterion("reasoning_consistency", response, parameters, {})
     assert passed is passed_expected
     assert score == pytest.approx(score_expected)
     assert detail
