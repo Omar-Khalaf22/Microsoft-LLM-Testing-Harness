@@ -13,7 +13,11 @@ from app.evaluation.registry import evaluate_criterion
         ('{"count": 2}', {"type": "object", "required": ["count"]}, True),
         ('{"other": 2}', {"type": "object", "required": ["count"]}, False),
         ('{"count": 2}', {"type": "object", "properties": {"count": {"type": "integer"}}}, True),
-        ('{"count": true}', {"type": "object", "properties": {"count": {"type": "integer"}}}, False),
+        (
+            '{"count": true}',
+            {"type": "object", "properties": {"count": {"type": "integer"}}},
+            False,
+        ),
         ("[1, 2]", {"type": "array", "minItems": 2}, True),
         ("[1]", {"type": "array", "minItems": 2}, False),
         ("3", {"type": "integer", "minimum": 2}, True),
