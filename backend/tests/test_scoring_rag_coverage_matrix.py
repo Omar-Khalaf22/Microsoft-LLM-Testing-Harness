@@ -68,9 +68,7 @@ def test_faithfulness_claim_coverage(response, evidence, expected_pass, expected
     assert detail
 
 
-@pytest.mark.parametrize(
-    "criterion_id", ["context_precision", "context_recall", "faithfulness"]
-)
+@pytest.mark.parametrize("criterion_id", ["context_precision", "context_recall", "faithfulness"])
 def test_retrieval_evidence_required(criterion_id):
     parameters = {
         "reference_facts": ["Microsoft"],
