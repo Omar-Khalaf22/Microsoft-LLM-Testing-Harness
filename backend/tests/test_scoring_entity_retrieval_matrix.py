@@ -39,9 +39,7 @@ def test_named_entity_accuracy_f1(response, expected_pass, expected_score):
         "ignore_case": True,
         "minimum_f1": 0.8,
     }
-    passed, score, detail = evaluate_criterion(
-        "named_entity_accuracy", response, parameters, {}
-    )
+    passed, score, detail = evaluate_criterion("named_entity_accuracy", response, parameters, {})
     assert passed is expected_pass
     assert score == pytest.approx(expected_score)
     assert detail
@@ -58,9 +56,7 @@ def test_named_entity_accuracy_f1(response, expected_pass, expected_score):
 def test_context_relevance_overlap(passages, expected_pass, expected_score):
     parameters = {"stop_words": [], "minimum_overlap": 0.5}
     context = {"query": "Microsoft Tampa", "retrieved_contexts": passages}
-    passed, score, detail = evaluate_criterion(
-        "context_relevance", "response", parameters, context
-    )
+    passed, score, detail = evaluate_criterion("context_relevance", "response", parameters, context)
     assert passed is expected_pass
     assert score == pytest.approx(expected_score)
     assert detail
