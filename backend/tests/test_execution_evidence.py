@@ -121,9 +121,7 @@ def test_untrusted_execution_evidence_rejected(criterion_id):
     result = evidence(source)
     result["trusted"] = False
     with pytest.raises(ValueError):
-        evaluate_criterion(
-            criterion_id, source, parameters(), {"execution_result": result}
-        )
+        evaluate_criterion(criterion_id, source, parameters(), {"execution_result": result})
 
 
 def test_duplicate_test_results_rejected():
@@ -131,9 +129,7 @@ def test_duplicate_test_results_rejected():
     result = evidence(source)
     result["test_results"][1]["id"] = "one"
     with pytest.raises(ValueError):
-        evaluate_criterion(
-            "unit_test_pass", source, parameters(), {"execution_result": result}
-        )
+        evaluate_criterion("unit_test_pass", source, parameters(), {"execution_result": result})
 
 
 def test_missing_test_result_rejected():
@@ -141,6 +137,4 @@ def test_missing_test_result_rejected():
     result = evidence(source)
     result["test_results"].pop()
     with pytest.raises(ValueError):
-        evaluate_criterion(
-            "unit_test_pass", source, parameters(), {"execution_result": result}
-        )
+        evaluate_criterion("unit_test_pass", source, parameters(), {"execution_result": result})
