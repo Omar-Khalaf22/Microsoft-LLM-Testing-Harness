@@ -19,9 +19,7 @@ def test_refusal_protocol(expected_refusal, response, expected_pass):
         "expected_refusal": expected_refusal,
         "refusal_marker": "REFUSED:",
     }
-    passed, score, detail = evaluate_criterion(
-        "refusal_accuracy", response, parameters, {}
-    )
+    passed, score, detail = evaluate_criterion("refusal_accuracy", response, parameters, {})
     assert passed is expected_pass
     assert score == float(expected_pass)
     assert detail
@@ -46,9 +44,7 @@ def test_history_fact_retention(criterion_id, response, expected_pass, expected_
     context = {
         "conversation_history": ["My name is Lina.", "I live in Tampa."],
     }
-    passed, score, detail = evaluate_criterion(
-        criterion_id, response, parameters, context
-    )
+    passed, score, detail = evaluate_criterion(criterion_id, response, parameters, context)
     assert passed is expected_pass
     assert score == pytest.approx(expected_score)
     assert detail
