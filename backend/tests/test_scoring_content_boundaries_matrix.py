@@ -25,9 +25,7 @@ from app.evaluation.registry import evaluate_criterion
         ("forbidden_keywords", "ALPHA", {"keywords": ["alpha"]}, False, 0.0),
     ],
 )
-def test_content_boundary_scores(
-    criterion_id, response, parameters, expected_pass, expected_score
-):
+def test_content_boundary_scores(criterion_id, response, parameters, expected_pass, expected_score):
     passed, score, detail = evaluate_criterion(criterion_id, response, parameters, {})
     assert passed is expected_pass
     assert score == pytest.approx(expected_score)
